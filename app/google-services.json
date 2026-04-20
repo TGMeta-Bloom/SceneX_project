@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "987826703702",
+    "project_id": "scenex-66e0a",
+    "storage_bucket": "scenex-66e0a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:987826703702:android:1a4d69b099422df79b9af7",
+        "android_client_info": {
+          "package_name": "com.example.scenex"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9yeT-NASDL_hNmjua0k93TGrOFi92vtE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

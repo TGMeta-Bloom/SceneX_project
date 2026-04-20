@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand Colors -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="yellow">#FFEDA509</color>
+    <color name="gray">#FFC6C6C6</color>
+    
+    <!-- Calendar Status Colors -->
+    <color name="calendar_green">#FF00D60E</color>
+    <color name="calendar_blue">#FF0040FF</color>
+    <color name="calendar_orange">#FFFF5900</color>
+
+    <!-- UI/Gradient Colors -->
+    <color name="primary_magenta">#B0006D</color>
+    <color name="primary_dark">#4A0038</color>
+    <color name="input_outline">#E1BEE7</color>
+    <color name="magenta_stroke">#D81B60</color>
+</resources>

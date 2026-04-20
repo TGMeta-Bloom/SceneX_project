@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:padding="24dp">
+
+    <!-- Logo Section - Enlarged for better brand presence -->
+    <ImageView
+        android:id="@+id/logoImage"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:layout_marginTop="40dp"
+        android:src="@drawable/ic_launcher"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Question Section -->
+    <TextView
+        android:id="@+id/titleText"
+        style="@style/AppTextStyle_H1_Hero"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:gravity="center"
+        android:text="How will you use SceneX?"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/logoImage" />
+
+    <TextView
+        android:id="@+id/subTitleText"
+        style="@style/AppTextStyle_BodySmall"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:paddingHorizontal="40dp"
+        android:text="Choose your primary role to customize your experience"
+        android:textColor="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/titleText" />
+
+    <!-- Role Options Section - Balanced & Modern -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/subTitleText"
+        app:layout_constraintVertical_bias="0.45">
+
+        <TextView
+            style="@style/AppTextStyle_BodyLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Showcase your skills"
+            android:textColor="@color/black" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/talentButton"
+            android:layout_width="240dp"
+            android:layout_height="56dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/button_secondary_outline"
+            android:drawableStart="@drawable/ic_talent_star"
+            android:drawablePadding="16dp"
+            android:paddingStart="40dp"
+            android:paddingEnd="40dp"
+            android:text="Talent"
+            android:textAllCaps="false"
+            android:textColor="@color/primary_magenta"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            style="@style/AppTextStyle_BodyLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:text="Find the perfect talent"
+            android:textColor="@color/black" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/recruiterButton"
+            android:layout_width="240dp"
+            android:layout_height="56dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/button_secondary_outline"
+            android:drawableStart="@drawable/ic_recruiter_search"
+            android:drawablePadding="16dp"
+            android:paddingStart="40dp"
+            android:paddingEnd="40dp"
+            android:text="Recruiter"
+            android:textAllCaps="false"
+            android:textColor="@color/primary_magenta"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
