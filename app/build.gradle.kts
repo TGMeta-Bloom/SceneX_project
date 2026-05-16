@@ -38,7 +38,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.fragment.ktx) // Added this for activityViewModels
+    implementation(libs.androidx.fragment.ktx)
 
     // Firebase
     implementation(platform(libs.firebase.bom))
@@ -49,6 +49,12 @@ dependencies {
     // Lifecycle
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.lifecycle.livedata)
+
+    // Networking & Image Loading
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(libs.okhttp.logging)
+    implementation(libs.glide)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
