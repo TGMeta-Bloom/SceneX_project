@@ -3,7 +3,6 @@ package com.example.scenex.views
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.scenex.R
-import com.example.scenex.fragments.SignupStep1Fragment
 
 class SignupActivity : AppCompatActivity() {
 

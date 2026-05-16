@@ -44,6 +44,15 @@ class UserRepository {
                     "email" to profile.email,
                     "stageName" to profile.stageName,
                     "role" to profile.role,
+                    "profileImage" to profile.profileImage,
+                    "phoneNumber" to profile.phoneNumber,
+                    "age" to profile.age,
+                    "gender" to profile.gender,
+                    "province" to profile.province,
+                    "city" to profile.city,
+                    "relationshipStatus" to profile.relationshipStatus,
+                    "hobbies" to profile.hobbies,
+                    "bio" to profile.bio,
                     "createdAt" to System.currentTimeMillis()
                 )
 
@@ -62,5 +71,21 @@ class UserRepository {
                 Log.e("FirebaseDebug", "Auth Error: ${e.message}")
                 onComplete(false, e.message)
             }
+    }
+
+    fun updateUserField(field: String, value: Any, onComplete: (Boolean) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onComplete(false)
+        db.collection("users").document(userId)
+            .update(field, value)
+            .addOnSuccessListener { onComplete(true) }
+            .addOnFailureListener { onComplete(false) }
+    }
+
+    fun updateUserFields(updates: Map<String, Any>, onComplete: (Boolean) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onComplete(false)
+        db.collection("users").document(userId)
+            .update(updates)
+            .addOnSuccessListener { onComplete(true) }
+            .addOnFailureListener { onComplete(false) }
     }
 }

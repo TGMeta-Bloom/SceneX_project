@@ -8,7 +8,7 @@
                 android:endColor="#4A0038"
                 android:angle="0"
                 android:type="linear" />
-            <corners android:radius="24dp" />
+            <corners android:radius="28dp" />
         </shape>
     </item>
 </ripple>

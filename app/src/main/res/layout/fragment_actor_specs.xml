@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF9FC"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="40dp">
+
+        <!-- Progress Stepper (4/5 active) -->
+        <LinearLayout
+            android:id="@+id/stepperContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="32dp"
+            app:layout_constraintTop_toTopOf="parent">
+            <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/primary_dark" android:layout_marginEnd="4dp" />
+            <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/primary_dark" android:layout_marginEnd="4dp" />
+            <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/primary_dark" android:layout_marginEnd="4dp" />
+            <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/primary_magenta" android:layout_marginEnd="4dp" />
+            <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/gray" android:alpha="0.2" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:fontFamily="serif"
+            android:text="Perfect Your Spotlight"
+            android:textColor="@color/primary_magenta"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/stepperContainer" />
+
+        <!-- Physical Specs Section -->
+        <TextView
+            android:id="@+id/labelPhysicalSpecs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="24dp"
+            android:text="Physical Specs"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardPhysicalSpecs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="2dp"
+            app:layout_constraintTop_toBottomOf="@id/labelPhysicalSpecs">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="20dp">
+
+                <TextView android:id="@+id/labelHeight" android:layout_width="0dp" android:layout_height="wrap_content" android:text="Height(cm) :" android:textColor="@color/black" android:textStyle="bold" app:layout_constraintEnd_toStartOf="@+id/labelBuild" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" />
+                <Spinner android:id="@+id/spinnerHeight" android:layout_width="0dp" android:layout_height="48dp" android:layout_marginTop="8dp" android:layout_marginEnd="8dp" android:background="@drawable/edittext_outline" app:layout_constraintEnd_toStartOf="@+id/spinnerBuild" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/labelHeight" />
+
+                <TextView android:id="@+id/labelBuild" android:layout_width="0dp" android:layout_height="wrap_content" android:text="Build :" android:textColor="@color/black" android:textStyle="bold" app:layout_constraintEnd_toEndOf="parent" android:layout_marginStart="8dp" app:layout_constraintStart_toEndOf="@id/labelHeight" app:layout_constraintTop_toTopOf="parent" />
+                <Spinner android:id="@+id/spinnerBuild" android:layout_width="0dp" android:layout_height="48dp" android:layout_marginTop="8dp" android:background="@drawable/edittext_outline" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toEndOf="@id/spinnerHeight" app:layout_constraintTop_toBottomOf="@id/labelBuild" />
+
+                <TextView android:id="@+id/labelHair" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="Hair Color :" android:textColor="@color/black" android:textStyle="bold" app:layout_constraintEnd_toStartOf="@+id/labelEye" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/spinnerHeight" />
+                <Spinner android:id="@+id/spinnerHair" android:layout_width="0dp" android:layout_height="48dp" android:layout_marginTop="8dp" android:layout_marginEnd="8dp" android:background="@drawable/edittext_outline" app:layout_constraintEnd_toStartOf="@+id/spinnerEye" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/labelHair" />
+
+                <TextView android:id="@+id/labelEye" android:layout_width="0dp" android:layout_height="wrap_content" android:text="Eye Color :" android:textColor="@color/black" android:textStyle="bold" app:layout_constraintEnd_toEndOf="parent" android:layout_marginStart="8dp" app:layout_constraintStart_toEndOf="@id/labelHair" app:layout_constraintTop_toTopOf="@+id/labelHair" />
+                <Spinner android:id="@+id/spinnerEye" android:layout_width="0dp" android:layout_height="48dp" android:layout_marginTop="8dp" android:background="@drawable/edittext_outline" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toEndOf="@id/spinnerHair" app:layout_constraintTop_toBottomOf="@id/labelEye" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Skills Section -->
+        <TextView
+            android:id="@+id/labelSkills"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="24dp"
+            android:text="Skills"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardPhysicalSpecs" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardSkills"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="2dp"
+            app:layout_constraintTop_toBottomOf="@id/labelSkills">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="• Accents" android:textColor="@color/black" android:textStyle="bold" />
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupAccents"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Southern" android:checkable="true" />
+                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle_Light" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Up-country" android:checkable="true" />
+                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle_Light" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Batticaloa Tamil" android:checkable="true" />
+                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Jaffna Tamil" android:checkable="true" />
+                </com.google.android.material.chip.ChipGroup>
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="• Other Skills" android:textColor="@color/black" android:textStyle="bold" />
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupOtherSkills"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Dubbing" android:checkable="true" />
+                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle_Light" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Traditional Dancing" android:checkable="true" />
+                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle_Light" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Martial Arts" android:checkable="true" />
+                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Musical Instruments" android:checkable="true" />
+                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Singing" android:checkable="true" />
+                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle_Light" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Stunts" android:checkable="true" />
+                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle_Light" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Swimming" android:checkable="true" />
+                    <ImageView
+                        android:id="@+id/btnAddSkill"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="@drawable/button_rounded_magenta"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_plus"
+                        app:tint="@color/white" />
+                </com.google.android.material.chip.ChipGroup>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Media Upload Section -->
+        <TextView
+            android:id="@+id/labelMedia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="24dp"
+            android:text="Media Upload"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:drawableStartCompat="@drawable/ic_camera_white"
+            android:drawablePadding="10dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardSkills" />
+
+        <LinearLayout
+            android:id="@+id/layoutPhotoUpload"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/labelMedia">
+
+            <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="0dp" android:layout_height="140dp" android:layout_weight="1" android:layout_marginEnd="8dp" android:background="@drawable/dashed_border">
+                <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_camera_white" app:tint="@color/primary_magenta" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toTopOf="@id/btnHeadshot" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" />
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnHeadshot" android:layout_width="wrap_content" android:layout_height="36dp" android:text="Head-shot" android:textAllCaps="false" android:textColor="@color/white" android:background="@drawable/button_rounded_magenta" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_marginBottom="12dp" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="0dp" android:layout_height="140dp" android:layout_weight="1" android:layout_marginStart="8dp" android:background="@drawable/dashed_border">
+                <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_camera_white" app:tint="@color/primary_magenta" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toTopOf="@id/btnFullBody" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" />
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnFullBody" android:layout_width="wrap_content" android:layout_height="36dp" android:text="Full Body" android:textAllCaps="false" android:textColor="@color/white" android:background="@drawable/button_rounded_magenta" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_marginBottom="12dp" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+
+        <!-- Video Upload Section -->
+        <TextView android:id="@+id/labelVideo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="24dp" android:layout_marginTop="24dp" android:text="Video Sample Upload:" android:textColor="@color/black" android:textStyle="bold" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/layoutPhotoUpload" />
+        <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/layoutVideoUpload" android:layout_width="match_parent" android:layout_height="110dp" android:layout_marginHorizontal="24dp" android:layout_marginTop="8dp" android:background="@drawable/dashed_border" app:layout_constraintTop_toBottomOf="@id/labelVideo">
+            <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/ic_play_stars" app:tint="@color/primary_magenta" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toTopOf="@id/btnUploadVideo" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" />
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnUploadVideo" android:layout_width="wrap_content" android:layout_height="36dp" android:text="Upload video" android:textAllCaps="false" android:textColor="@color/white" android:background="@drawable/button_rounded_magenta" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_marginBottom="12dp" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Audio Upload Section -->
+        <TextView android:id="@+id/labelAudio" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="24dp" android:layout_marginTop="24dp" android:text="Audio Sample Upload:\n(Optional)" android:textColor="@color/black" android:textStyle="bold" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/layoutVideoUpload" />
+        <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/layoutAudioUpload" android:layout_width="match_parent" android:layout_height="140dp" android:layout_marginHorizontal="24dp" android:layout_marginTop="8dp" android:background="@drawable/dashed_border" app:layout_constraintTop_toBottomOf="@id/labelAudio">
+            <ImageView android:layout_width="48dp" android:layout_height="48dp" android:src="@drawable/ic_header_play_stars" app:tint="@color/primary_magenta" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toTopOf="@id/btnUploadAudio" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" />
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnUploadAudio" android:layout_width="wrap_content" android:layout_height="36dp" android:text="Upload audio" android:textAllCaps="false" android:textColor="@color/white" android:background="@drawable/button_rounded_magenta" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_marginBottom="28dp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Accepted formats : mp3 / mp4" android:textColor="@color/gray" android:textSize="11sp" app:layout_constraintTop_toBottomOf="@id/btnUploadAudio" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Final Button -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnGeneratePortfolio"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginHorizontal="48dp"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/button_rounded_magenta"
+            android:text="Generate Portfolio"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/layoutAudioUpload" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
