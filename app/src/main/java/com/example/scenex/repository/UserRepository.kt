@@ -1,5 +1,6 @@
 package com.example.scenex.repository
 
+import android.util.Log
 import com.example.scenex.models.UserProfile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -86,6 +87,34 @@ class UserRepository {
             .set(assets + ("userId" to userId), SetOptions.merge())
             .addOnSuccessListener { onComplete(true) }
             .addOnFailureListener { onComplete(false) }
+    }
+
+    /**
+     * Synchronizes talent profile data with the Web Admin Dashboard.
+     * Utilizes precise web-synchronized field names to trigger real-time listeners.
+     */
+    fun submitTalentProfileToAdmin(userId: String, fullName: String, userEmail: String, heightAndBuild: String, youtubeLink: String) {
+        // 1. Structure the explicit data map for the Web Admin Dashboard
+        val profilePayload = hashMapOf(
+            "status" to "pending_review",                  // First Field: lowercase query rule flag
+            "name" to fullName,                            // Second Field: Profile Name
+            "email" to userEmail,                          // Third Field: User Email
+            "physicalSpecs" to heightAndBuild,             // Fourth Field: Physical specs mapper string
+            "showreelUrl" to youtubeLink                   // Fifth Field: Embedded video streaming showcase string
+        )
+
+        Log.d("SceneX_Firestore", "Initializing transaction write for User: $userId")
+
+        // 2. Apply the payload parameters atomically into our shared backend single source of truth
+        db.collection("profiles")
+            .document(userId)
+            .set(profilePayload, SetOptions.merge())       // Using merge to keep existing metadata safe
+            .addOnSuccessListener {
+                Log.d("SceneX_Firestore", "✅ Profile data synchronized successfully. Status: pending_review")
+            }
+            .addOnFailureListener { exception ->
+                Log.e("SceneX_Firestore", "❌ Cross-platform pipeline dispatch failed: ${exception.message}")
+            }
     }
 
     fun updateFirestoreField(collection: String, field: String, value: Any, onComplete: (Boolean) -> Unit = {}) {

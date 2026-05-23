@@ -18,6 +18,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.example.scenex.R
 import com.example.scenex.viewmodels.SignupViewModel
@@ -82,8 +83,8 @@ class SignupStep1Fragment : Fragment() {
         btnUploadImage.setOnClickListener { showImagePickerDialog() }
 
         viewModel.isUploading.observe(viewLifecycleOwner) { isUploading ->
-            pbImageUpload.visibility = if (isUploading) View.VISIBLE else View.GONE
-            btnUploadImage.isEnabled = !isUploading
+            pbImageUpload.visibility = if (isUploading == true) View.VISIBLE else View.GONE
+            btnUploadImage.isEnabled = isUploading != true
         }
 
         viewModel.profileImageUrl.observe(viewLifecycleOwner) { url ->
@@ -189,19 +190,23 @@ class SignupStep1Fragment : Fragment() {
     }
 
     private fun setupLocationSpinners(provinceSpinner: Spinner, citySpinner: Spinner) {
-        val provinceAdapter = ArrayAdapter(requireContext(), R.layout.custom_spinner_item, viewModel.provinces)
+        // Explicitly define type to prevent compilation inference errors
+        val provincesList: List<String> = viewModel.provinces
+        val provinceAdapter = ArrayAdapter<String>(requireContext(), R.layout.custom_spinner_item, provincesList)
         provinceAdapter.setDropDownViewResource(R.layout.custom_spinner_dropdown_item)
         provinceSpinner.adapter = provinceAdapter
 
-        viewModel.availableCities.observe(viewLifecycleOwner) { cities ->
-            val cityAdapter = ArrayAdapter(requireContext(), R.layout.custom_spinner_item, cities)
+        viewModel.availableCities.observe(viewLifecycleOwner, Observer { cities ->
+            val cityAdapter = ArrayAdapter<String>(requireContext(), R.layout.custom_spinner_item, cities ?: emptyList())
             cityAdapter.setDropDownViewResource(R.layout.custom_spinner_dropdown_item)
             citySpinner.adapter = cityAdapter
-        }
+        })
 
         provinceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                viewModel.onProvinceSelected(viewModel.provinces[position])
+                if (position in provincesList.indices) {
+                    viewModel.onProvinceSelected(provincesList[position])
+                }
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
