@@ -223,10 +223,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp">
-                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Southern" android:checkable="true" />
-                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle_Light" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Up-country" android:checkable="true" />
-                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle_Light" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Batticaloa Tamil" android:checkable="true" />
-                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Jaffna Tamil" android:checkable="true" />
+                    <!-- Senior Fix: Unified Selectable Style -->
+                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle_Selectable" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Southern" android:checkable="true" />
+                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle_Selectable" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Up-country" android:checkable="true" />
+                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle_Selectable" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Batticaloa Tamil" android:checkable="true" />
+                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle_Selectable" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Jaffna Tamil" android:checkable="true" />
                 </com.google.android.material.chip.ChipGroup>
 
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="• Other Skills" android:textColor="@color/black" android:textStyle="bold" />
@@ -342,7 +343,7 @@
             android:layout_marginHorizontal="32dp"
             android:layout_marginTop="4dp"
             android:text="YouTube: Use 'Unlisted', NOT Private. Google Drive: Set sharing to 'Anyone with the link can view'."
-            android:textColor="@color/gray"
+            android:textColor="@color/text_secondary"
             android:textSize="11sp"
             app:layout_constraintTop_toBottomOf="@id/tilVideoLink"
             app:layout_constraintStart_toStartOf="parent"
@@ -391,7 +392,7 @@
             android:layout_marginHorizontal="32dp"
             android:layout_marginTop="4dp"
             android:text="Drive/Cloud: Ensure 'Anyone with the link can view/listen'."
-            android:textColor="@color/gray"
+            android:textColor="@color/text_secondary"
             android:textSize="11sp"
             app:layout_constraintTop_toBottomOf="@id/tilAudioLink"
             app:layout_constraintStart_toStartOf="parent"

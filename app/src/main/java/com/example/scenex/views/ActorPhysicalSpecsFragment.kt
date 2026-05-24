@@ -2,6 +2,8 @@ package com.example.scenex.views
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.LinearGradient
+import android.graphics.Shader
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -68,6 +70,10 @@ class ActorPhysicalSpecsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Senior Fix: Apply Cinematic Brand Gradient to Title Text
+        val tvTitle = view.findViewById<TextView>(R.id.tvTitle)
+        applyTextGradient(tvTitle)
+
         // 1. Setup Standardized Dropdowns with Auto-Save
         setupDropdowns(view)
 
@@ -129,6 +135,28 @@ class ActorPhysicalSpecsFragment : Fragment() {
                     .addToBackStack(null)
                     .commit()
                 viewModel.clearNavigation()
+            }
+        }
+    }
+
+    /**
+     * Senior Fix: Programmatically applies the SceneX Brand Gradient to the text.
+     */
+    private fun applyTextGradient(textView: TextView) {
+        textView.post {
+            val paint = textView.paint
+            val width = paint.measureText(textView.text.toString())
+            if (width > 0) {
+                val textShader: Shader = LinearGradient(
+                    0f, 0f, width, 0f,
+                    intArrayOf(
+                        ContextCompat.getColor(requireContext(), R.color.primary_magenta),
+                        ContextCompat.getColor(requireContext(), R.color.primary_dark)
+                    ),
+                    null, Shader.TileMode.CLAMP
+                )
+                textView.paint.shader = textShader
+                textView.invalidate()
             }
         }
     }
