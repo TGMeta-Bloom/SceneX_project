@@ -36,7 +36,10 @@ class RecruiterSignupStep3Fragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Header Handshake
         ivProfileImage = view.findViewById(R.id.ivProfileImage)
+        
+        // Form Components
         val etCompanyName = view.findViewById<EditText>(R.id.etCompanyName)
         val etExperience = view.findViewById<EditText>(R.id.etExperience)
         val etProofLink = view.findViewById<EditText>(R.id.etProofLink)
@@ -71,6 +74,7 @@ class RecruiterSignupStep3Fragment : Fragment() {
             etProofLink.requestFocus()
         }
 
+        // Default Selection
         selectIcon("YouTube")
 
         btnFB.setOnClickListener { selectIcon("Facebook") }
@@ -86,18 +90,18 @@ class RecruiterSignupStep3Fragment : Fragment() {
                 return@setOnClickListener
             }
 
-            // STRICT VALIDATION: Only accept YouTube, Vimeo, Facebook, Instagram, or production links
+            // Logic: Accept major platforms or verified production domains
             val isValid = when {
                 link.contains("youtube.com") || link.contains("youtu.be") -> true
                 link.contains("vimeo.com") -> true
                 link.contains("facebook.com") || link.contains("fb.watch") -> true
                 link.contains("instagram.com") -> true
-                link.contains(".lk") || link.contains(".com") -> true // Accepted for production house sites
+                link.contains(".lk") || link.contains(".com") || link.contains(".tv") -> true 
                 else -> false
             }
 
             if (!isValid) {
-                etProofLink.error = "Only YouTube, Vimeo, Facebook or Instagram links are accepted"
+                etProofLink.error = "Please enter a valid industry proof link"
                 return@setOnClickListener
             }
 
@@ -108,6 +112,8 @@ class RecruiterSignupStep3Fragment : Fragment() {
             }
 
             proofLinksList.add(finalEntry)
+            
+            // Premium Chip Generation
             val chip = Chip(requireContext()).apply {
                 text = finalEntry
                 isCloseIconVisible = true
@@ -126,23 +132,31 @@ class RecruiterSignupStep3Fragment : Fragment() {
         btnNext.setOnClickListener {
             val company = etCompanyName.text.toString().trim()
             val exp = etExperience.text.toString().trim()
+            
             if (company.isEmpty()) {
-                etCompanyName.error = "Required"
+                etCompanyName.error = "Production name required"
                 return@setOnClickListener
             }
             if (proofLinksList.isEmpty()) {
-                Toast.makeText(context, "Add at least one industry proof link", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Add at least one production proof link", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+            
             viewModel.saveRecruiterExperienceAndNavigate(company, proofLinksList, exp)
         }
 
+        // Profile Sync
         viewModel.profileImageUrl.observe(viewLifecycleOwner) { url ->
             if (!url.isNullOrEmpty()) {
-                Glide.with(this).load(url).placeholder(R.drawable.ic_profile_placeholder).circleCrop().into(ivProfileImage)
+                Glide.with(this)
+                    .load(url)
+                    .placeholder(R.drawable.ic_profile_placeholder)
+                    .circleCrop()
+                    .into(ivProfileImage)
             }
         }
 
+        // Navigation Switchboard
         viewModel.navigateToNextStep.observe(viewLifecycleOwner) { destination ->
             if (destination == "RECRUITER_VERIFICATION") {
                 parentFragmentManager.beginTransaction()

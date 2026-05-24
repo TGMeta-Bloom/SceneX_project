@@ -12,7 +12,7 @@
         android:layout_height="wrap_content">
 
         <!-- 1. Header Section with Brand Patterns -->
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <FrameLayout
             android:id="@+id/headerContainer"
             android:layout_width="match_parent"
             android:layout_height="320dp"
@@ -27,24 +27,44 @@
             <ImageView
                 android:layout_width="85dp"
                 android:layout_height="85dp"
+                android:layout_gravity="top|start"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="20dp"
                 android:alpha="0.12"
                 android:src="@drawable/ic_header_film_reel"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
                 app:tint="@color/white" />
 
             <ImageView
                 android:layout_width="90dp"
                 android:layout_height="90dp"
+                android:layout_gravity="top|end"
                 android:layout_marginEnd="15dp"
                 android:layout_marginTop="15dp"
                 android:alpha="0.12"
                 android:rotation="15"
                 android:src="@drawable/ic_figma_film_strip"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/white" />
+
+            <ImageView
+                android:layout_width="110dp"
+                android:layout_height="110dp"
+                android:layout_gravity="center_vertical|start"
+                android:layout_marginStart="-15dp"
+                android:layout_marginTop="30dp"
+                android:alpha="0.12"
+                android:rotation="-12"
+                android:src="@drawable/ic_header_play_stars"
+                app:tint="@color/white" />
+
+            <ImageView
+                android:layout_width="85dp"
+                android:layout_height="85dp"
+                android:layout_gravity="center_vertical|end"
+                android:layout_marginEnd="-5dp"
+                android:layout_marginTop="50dp"
+                android:alpha="0.12"
+                android:rotation="20"
+                android:src="@drawable/ic_header_movie_camera"
                 app:tint="@color/white" />
 
             <!-- Profile Image Area - Centered in Header -->
@@ -52,11 +72,8 @@
                 android:id="@+id/profileImageContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginBottom="40dp">
+                android:layout_gravity="center"
+                android:layout_marginBottom="20dp">
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/ivProfileImage"
@@ -102,7 +119,7 @@
                 </androidx.cardview.widget.CardView>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </FrameLayout>
 
         <!-- 2. Form Input Section -->
         <androidx.constraintlayout.widget.ConstraintLayout
