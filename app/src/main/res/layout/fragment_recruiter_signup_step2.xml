@@ -7,6 +7,12 @@
     android:background="@color/white">
 
     <!-- 1. Header Section (Synced with Talent Flow architecture) -->
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=":wq" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/headerContainer"
         android:layout_width="match_parent"
