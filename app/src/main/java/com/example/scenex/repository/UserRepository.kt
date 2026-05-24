@@ -73,13 +73,22 @@ class UserRepository {
             .addOnFailureListener { e -> Log.e("SceneX_Sync", "❌ Submission failed: ${e.message}") }
     }
 
+    /**
+     * Senior Fix: Dynamically assigns the role from the profile object.
+     * Prevents Recruiter accounts from being labeled as 'TALENT' in the users collection.
+     */
     fun signupUser(profile: UserProfile, password: String, onComplete: (Boolean, String?) -> Unit) {
         auth.createUserWithEmailAndPassword(profile.email, password)
             .addOnSuccessListener { result ->
                 val userId = result.user?.uid ?: ""
-                val userMap = hashMapOf("userId" to userId, "role" to "TALENT", "email" to profile.email)
                 
-                // FIXED: Now including profileImage in the primary profile map
+                // FIXED: Use profile.role instead of hardcoded "TALENT"
+                val userMap = hashMapOf(
+                    "userId" to userId, 
+                    "role" to profile.role, 
+                    "email" to profile.email
+                )
+                
                 val profileMap = hashMapOf(
                     "userId" to userId, 
                     "fullName" to profile.fullName, 

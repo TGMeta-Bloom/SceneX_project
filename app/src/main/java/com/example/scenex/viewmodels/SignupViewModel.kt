@@ -88,7 +88,7 @@ class SignupViewModel : ViewModel() {
     var phoneNumber: String = ""
     var userName: String = ""
     var password: String = ""
-    var age: String = ""
+    var age: Int = 0 
     var gender: String = ""
     var province: String = ""
     var city: String = ""
@@ -123,8 +123,8 @@ class SignupViewModel : ViewModel() {
     val portfolioImages: LiveData<MutableList<String>> get() = _portfolioImages
 
     /**
-     * Executes the Profile Lifecycle logic and Calculates the Intelligence Score.
-     * Perfected Recruiter Scoring: Basics(20) + Spotlight(20) + Company(20) + Proof(20) + NIC(20) = 100%
+     * Senior Fix: Updated Payload mapping to include 'age', 'gender', and all Step 1 fields
+     * in every lifecycle sync to ensure they appear and update in the Firebase console.
      */
     private fun syncProfileLifecycle(isFinalSubmit: Boolean = false) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
@@ -138,7 +138,6 @@ class SignupViewModel : ViewModel() {
             if (headshotUrl.isNotBlank() && fullBodyUrl.isNotBlank()) score += 20
             if (videoUrl.isNotBlank()) score += 20
         } else {
-            // Recruiter Scoring - Perfect 100% recalibration
             if (spotlightCategory.isNotBlank()) score += 20
             if (companyName.isNotBlank()) score += 20
             if (industryProofLinks.isNotEmpty()) score += 20
@@ -155,7 +154,16 @@ class SignupViewModel : ViewModel() {
             "status" to currentStatus,
             "completenessScore" to score,
             "name" to fullName,
+            "fullName" to fullName,
             "email" to email,
+            "phoneNumber" to phoneNumber,
+            "age" to age, // PERSISTENCE FIX: Added age to sync
+            "gender" to gender,
+            "province" to province,
+            "city" to city,
+            "relationshipStatus" to relationshipStatus,
+            "hobbies" to hobbies,
+            "bio" to shortBio,
             "userRole" to userRole,
             "updatedAt" to Timestamp.now()
         )
@@ -212,7 +220,7 @@ class SignupViewModel : ViewModel() {
                 if (response.isSuccessful && response.body()?.success == true) {
                     nicImageUrl = response.body()?.data?.url ?: ""
                     verificationDocStatus.value = "Uploaded ✅"
-                    syncProfileLifecycle(false) // Trigger Real-time Sync
+                    syncProfileLifecycle(false) 
                 } else {
                     verificationDocStatus.value = "Failed ❌"
                 }
@@ -233,7 +241,7 @@ class SignupViewModel : ViewModel() {
         )
         repository.signupUser(profile, password) { success, error ->
             if (success) {
-                syncProfileLifecycle(false) // Sync Step 1 Score
+                syncProfileLifecycle(false) 
                 _navigateToNextStep.value = if (userRole == "RECRUITER") "RECRUITER_STEP2" else "STEP2"
             } else {
                 _errorMessage.value = error
@@ -248,7 +256,7 @@ class SignupViewModel : ViewModel() {
         }
         repository.saveProfessionalProfile(mapOf("spotlightCategory" to spotlightCategory)) { success ->
             if (success) {
-                syncProfileLifecycle(false) // Sync Step 2 Score
+                syncProfileLifecycle(false) 
                 _navigateToNextStep.value = if (userRole == "RECRUITER") "RECRUITER_STEP3" else "STEP3"
             } else {
                 _errorMessage.value = "Update failed"
@@ -274,7 +282,7 @@ class SignupViewModel : ViewModel() {
         
         repository.saveProfessionalProfile(updates) { success ->
             if (success) {
-                syncProfileLifecycle(false) // Sync Step 3 Score
+                syncProfileLifecycle(false) 
                 _navigateToNextStep.value = "RECRUITER_VERIFICATION"
             } else {
                 _errorMessage.value = "Save failed"
