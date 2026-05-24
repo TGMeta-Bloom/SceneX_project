@@ -18,3 +18,11 @@
     <color name="input_outline">#E1BEE7</color>
     <color name="magenta_stroke">#D81B60</color>
 </resources>
+
+    <!-- Gothami's Styles -->
+    <color name="scenex_primary">#720056</color>
+    <color name="scenex_primary_light">#A3007C</color>
+    <color name="scenex_background">#F8F9FA</color>
+    <color name="scenex_text_primary">#212121</color>
+    <color name="scenex_text_secondary">#757575</color>
+</resources>
