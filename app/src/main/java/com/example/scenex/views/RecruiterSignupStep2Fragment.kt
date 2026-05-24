@@ -72,7 +72,7 @@ class RecruiterSignupStep2Fragment : Fragment() {
         val btnNext = view.findViewById<Button>(R.id.btnNext)
         val tvLogin = view.findViewById<TextView>(R.id.tvLogin)
 
-        btnUploadImage.setOnClickListener { showImagePickerDialog() }
+        btnUploadImage?.setOnClickListener { showImagePickerDialog() }
 
         viewModel.isUploading.observe(viewLifecycleOwner) { isUploading ->
             pbImageUpload.visibility = if (isUploading) View.VISIBLE else View.GONE
@@ -109,7 +109,8 @@ class RecruiterSignupStep2Fragment : Fragment() {
             viewModel.updateSpotlightAndNavigate()
         }
 
-        tvLogin.setOnClickListener {
+        // Senior Fix: Null-safe click listener
+        tvLogin?.setOnClickListener {
             activity?.finish()
         }
     }
