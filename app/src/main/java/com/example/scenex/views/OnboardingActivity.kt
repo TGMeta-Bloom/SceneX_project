@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.example.scenex.R
+import com.example.scenex.utils.SessionManager
 
 class OnboardingActivity : AppCompatActivity() {
 
@@ -84,7 +85,11 @@ class OnboardingActivity : AppCompatActivity() {
         })
     }
 
+    /**
+     * Senior Fix: Marks onboarding as seen in local session before leaving.
+     */
     private fun navigateToRoleSelect() {
+        SessionManager.setOnboardingSeen(this)
         startActivity(Intent(this, RoleSelectActivity::class.java))
         finish()
     }

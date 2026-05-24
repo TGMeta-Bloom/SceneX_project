@@ -43,6 +43,7 @@ class SignupViewModel : ViewModel() {
     // Media Upload Statuses
     val headshotStatus = MutableLiveData<String>("Head-shot")
     val fullBodyStatus = MutableLiveData<String>("Full Body")
+    val verificationDocStatus = MutableLiveData<String>("Upload Box")
 
     private val IMGBB_API_KEY = "3555cbd369113d3b670cec87ddc281a3"
 
@@ -81,6 +82,7 @@ class SignupViewModel : ViewModel() {
     }
 
     // Form Data Variables
+    var userRole: String = "TALENT" 
     var fullName: String = ""
     var email: String = ""
     var phoneNumber: String = ""
@@ -101,6 +103,11 @@ class SignupViewModel : ViewModel() {
     var portfolioLink: String = ""
     var socialMediaLinks: String = ""
 
+    // Recruiter Specific
+    var companyName: String = ""
+    var industryProofLinks: List<String> = emptyList()
+    var nicImageUrl: String = ""
+
     var height: String = ""
     var hairColor: String = ""
     var eyeColor: String = ""
@@ -117,38 +124,52 @@ class SignupViewModel : ViewModel() {
 
     /**
      * Executes the Profile Lifecycle logic and Calculates the Intelligence Score.
-     * Triggers real-time snapshot listeners for the Web Admin Dashboard.
+     * Perfected Recruiter Scoring: Basics(20) + Spotlight(20) + Company(20) + Proof(20) + NIC(20) = 100%
      */
     private fun syncProfileLifecycle(isFinalSubmit: Boolean = false) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        // 1. Rule-Based Completeness Scoring System
         var score = 0
         if (fullName.isNotBlank() && email.isNotBlank() && phoneNumber.isNotBlank()) score += 20
-        if (height.isNotBlank() && bodyType.isNotBlank() && gender.isNotBlank()) score += 20
-        if (spotlightCategory.isNotBlank() && (accents.size + otherSkills.size) >= 3) score += 20
-        if (headshotUrl.isNotBlank() && fullBodyUrl.isNotBlank()) score += 20
-        if (videoUrl.isNotBlank()) score += 20
+        
+        if (userRole == "TALENT") {
+            if (height.isNotBlank() && bodyType.isNotBlank() && gender.isNotBlank()) score += 20
+            if (spotlightCategory.isNotBlank() && (accents.size + otherSkills.size) >= 3) score += 20
+            if (headshotUrl.isNotBlank() && fullBodyUrl.isNotBlank()) score += 20
+            if (videoUrl.isNotBlank()) score += 20
+        } else {
+            // Recruiter Scoring - Perfect 100% recalibration
+            if (spotlightCategory.isNotBlank()) score += 20
+            if (companyName.isNotBlank()) score += 20
+            if (industryProofLinks.isNotEmpty()) score += 20
+            if (nicImageUrl.isNotBlank()) score += 20
+        }
 
-        // 2. Profile Approval Workflow States
         val currentStatus = when {
             isFinalSubmit -> "pending_review" 
             score >= 40 -> "active"           
             else -> "draft"                   
         }
 
-        // 3. Structured Firebase Map Payload (Synchronized with Admin Dashboard)
-        val profilePayload = hashMapOf(
+        val profilePayload = mutableMapOf<String, Any>(
             "status" to currentStatus,
             "completenessScore" to score,
             "name" to fullName,
             "email" to email,
-            "physicalSpecs" to "Height: $height | Build: $bodyType | Gender: $gender",
-            "showreelUrl" to videoUrl,
+            "userRole" to userRole,
             "updatedAt" to Timestamp.now()
         )
+        
+        if (userRole == "RECRUITER") {
+            profilePayload["companyName"] = companyName
+            profilePayload["industryProofLinks"] = industryProofLinks
+            profilePayload["nicImageUrl"] = nicImageUrl
+            profilePayload["verificationStatus"] = currentStatus
+        } else {
+            profilePayload["physicalSpecs"] = "Height: $height | Build: $bodyType | Gender: $gender"
+            profilePayload["showreelUrl"] = videoUrl
+        }
 
-        // 4. Asynchronous Firestore Atomic Update
         FirebaseFirestore.getInstance().collection("profiles").document(userId)
             .set(profilePayload, SetOptions.merge())
             .addOnSuccessListener {
@@ -179,31 +200,9 @@ class SignupViewModel : ViewModel() {
         })
     }
 
-    fun uploadMedia(file: File, type: String) {
-        val statusLiveData = if (type == "HEADSHOT") headshotStatus else fullBodyStatus
-        statusLiveData.value = "Uploading..."
-        
-        val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-        val body = MultipartBody.Part.createFormData("image", file.name, requestFile)
-
-        imgBBService.uploadImage(IMGBB_API_KEY, body).enqueue(object : Callback<ImgBBResponse> {
-            override fun onResponse(call: Call<ImgBBResponse>, response: Response<ImgBBResponse>) {
-                if (response.isSuccessful && response.body()?.success == true) {
-                    val url = response.body()?.data?.url ?: ""
-                    if (type == "HEADSHOT") { headshotUrl = url; headshotStatus.value = "Head-shot ✅" }
-                    else { fullBodyUrl = url; fullBodyStatus.value = "Full Body ✅" }
-                } else {
-                    statusLiveData.value = "Failed ❌"
-                }
-            }
-            override fun onFailure(call: Call<ImgBBResponse>, t: Throwable) {
-                statusLiveData.value = "Error ❌"
-            }
-        })
-    }
-
-    fun addPortfolioImage(file: File) {
+    fun uploadVerificationDoc(file: File) {
         _isUploading.value = true
+        verificationDocStatus.value = "Uploading..."
         val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
         val body = MultipartBody.Part.createFormData("image", file.name, requestFile)
 
@@ -211,29 +210,34 @@ class SignupViewModel : ViewModel() {
             override fun onResponse(call: Call<ImgBBResponse>, response: Response<ImgBBResponse>) {
                 _isUploading.value = false
                 if (response.isSuccessful && response.body()?.success == true) {
-                    val url = response.body()?.data?.url
-                    url?.let {
-                        val currentList = _portfolioImages.value ?: mutableListOf()
-                        currentList.add(it)
-                        _portfolioImages.value = currentList
-                    }
+                    nicImageUrl = response.body()?.data?.url ?: ""
+                    verificationDocStatus.value = "Uploaded ✅"
+                    syncProfileLifecycle(false) // Trigger Real-time Sync
+                } else {
+                    verificationDocStatus.value = "Failed ❌"
                 }
             }
             override fun onFailure(call: Call<ImgBBResponse>, t: Throwable) {
                 _isUploading.value = false
+                verificationDocStatus.value = "Error ❌"
             }
         })
     }
 
     fun createAccount() {
         val profile = UserProfile(
-            fullName = fullName, email = email, stageName = userName, role = "TALENT",
+            fullName = fullName, email = email, stageName = userName, role = userRole,
             profileImage = _profileImageUrl.value ?: "", phoneNumber = phoneNumber,
             age = age, gender = gender, province = province, city = city,
             relationshipStatus = relationshipStatus, hobbies = hobbies, bio = shortBio
         )
         repository.signupUser(profile, password) { success, error ->
-            if (success) _navigateToNextStep.value = "STEP2" else _errorMessage.value = error
+            if (success) {
+                syncProfileLifecycle(false) // Sync Step 1 Score
+                _navigateToNextStep.value = if (userRole == "RECRUITER") "RECRUITER_STEP2" else "STEP2"
+            } else {
+                _errorMessage.value = error
+            }
         }
     }
     
@@ -243,63 +247,81 @@ class SignupViewModel : ViewModel() {
             return
         }
         repository.saveProfessionalProfile(mapOf("spotlightCategory" to spotlightCategory)) { success ->
-            if (success) _navigateToNextStep.value = "STEP3" else _errorMessage.value = "Update failed"
+            if (success) {
+                syncProfileLifecycle(false) // Sync Step 2 Score
+                _navigateToNextStep.value = if (userRole == "RECRUITER") "RECRUITER_STEP3" else "STEP3"
+            } else {
+                _errorMessage.value = "Update failed"
+            }
         }
     }
 
-    fun saveFoundationAndNavigate() {
+    fun saveRecruiterExperienceAndNavigate(company: String, proofLinks: List<String>, exp: String) {
+        companyName = company
+        industryProofLinks = proofLinks
+        experience = exp
+        
+        if (proofLinks.isEmpty()) {
+            _errorMessage.value = "Please provide at least one industry proof link"
+            return
+        }
+
         val updates = hashMapOf<String, Any>(
-            "highest_qualification" to qualification,
-            "languages" to languages,
-            "experience_level" to experience,
-            "portfolioLink" to portfolioLink,
-            "socialMediaLinks" to socialMediaLinks
+            "companyName" to company,
+            "industryProofLinks" to proofLinks,
+            "experience" to exp
         )
+        
         repository.saveProfessionalProfile(updates) { success ->
             if (success) {
-                _navigateToNextStep.value = if (spotlightCategory == "Actor" || spotlightCategory == "Model") "ACTOR_SPECS" else "STEP5"
+                syncProfileLifecycle(false) // Sync Step 3 Score
+                _navigateToNextStep.value = "RECRUITER_VERIFICATION"
             } else {
-                _errorMessage.value = "Failed to save foundation data"
+                _errorMessage.value = "Save failed"
             }
         }
+    }
+
+    fun finalizeRecruiterSignup() {
+        if (industryProofLinks.isEmpty()) {
+            _errorMessage.value = "Please provide at least one industry proof link"
+            return
+        }
+        syncProfileLifecycle(isFinalSubmit = true)
+        _navigateToNextStep.value = "FINISH"
+    }
+
+    // --- TALENT METHODS (PRESERVED) ---
+
+    fun saveFoundationAndNavigate() {
+        val updates = hashMapOf<String, Any>("highest_qualification" to qualification, "languages" to languages, "experience_level" to experience, "portfolioLink" to portfolioLink, "socialMediaLinks" to socialMediaLinks)
+        repository.saveProfessionalProfile(updates) { if (it) _navigateToNextStep.value = if (spotlightCategory == "Actor" || spotlightCategory == "Model") "ACTOR_SPECS" else "STEP5" }
     }
 
     fun saveActorSpecsAndNavigate() {
-        val heightInt = height.replace(Regex("[^0-9]"), "").toIntOrNull() ?: 0
-        val specs = hashMapOf<String, Any>(
-            "height_cm" to heightInt,
-            "hairColor" to hairColor,
-            "eye_color" to eyeColor,
-            "build_enum" to bodyType,
-            "accents" to accents,
-            "otherSkills" to otherSkills
-        )
-        val assets = hashMapOf<String, Any>(
-            "headshotUrl" to headshotUrl,
-            "fullBodyUrl" to fullBodyUrl,
-            "videoUrl" to videoUrl
-        )
-
-        repository.saveTalentSpecs(specs) { specsSuccess ->
-            if (specsSuccess) {
-                repository.saveMediaAssets(assets) { assetsSuccess ->
-                    if (assetsSuccess) {
-                        syncProfileLifecycle(isFinalSubmit = false) 
-                        _navigateToNextStep.value = "STEP5"
-                    }
-                }
-            }
-        }
+        val h = height.replace(Regex("[^0-9]"), "").toIntOrNull() ?: 0
+        repository.saveTalentSpecs(mapOf("height_cm" to h, "hairColor" to hairColor, "eye_color" to eyeColor, "build_enum" to bodyType, "accents" to accents, "otherSkills" to otherSkills)) { if (it) repository.saveMediaAssets(mapOf("headshotUrl" to headshotUrl, "fullBodyUrl" to fullBodyUrl, "videoUrl" to videoUrl)) { syncProfileLifecycle(false); _navigateToNextStep.value = "STEP5" } }
     }
 
-    fun finalizeRegistration() {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-        val portfolioData = mapOf("portfolioImages" to (_portfolioImages.value ?: emptyList<String>()))
-        
-        repository.saveMediaAssets(portfolioData) {
-            syncProfileLifecycle(isFinalSubmit = true) 
-            _navigateToNextStep.value = "FINISH"
-        }
+    fun finalizeRegistration() { repository.saveMediaAssets(mapOf("portfolioImages" to (_portfolioImages.value ?: emptyList<String>()))) { syncProfileLifecycle(true); _navigateToNextStep.value = "FINISH" } }
+
+    fun addPortfolioImage(file: File) {
+        _isUploading.value = true
+        val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+        imgBBService.uploadImage(IMGBB_API_KEY, MultipartBody.Part.createFormData("image", file.name, requestFile)).enqueue(object : Callback<ImgBBResponse> {
+            override fun onResponse(call: Call<ImgBBResponse>, r: Response<ImgBBResponse>) { _isUploading.value = false; if (r.isSuccessful && r.body()?.success == true) { r.body()?.data?.url?.let { val list = _portfolioImages.value ?: mutableListOf(); list.add(it); _portfolioImages.value = list } } }
+            override fun onFailure(call: Call<ImgBBResponse>, t: Throwable) { _isUploading.value = false }
+        })
+    }
+
+    fun uploadMedia(file: File, type: String) {
+        val status = if (type == "HEADSHOT") headshotStatus else fullBodyStatus
+        status.value = "Uploading..."
+        val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+        imgBBService.uploadImage(IMGBB_API_KEY, MultipartBody.Part.createFormData("image", file.name, requestFile)).enqueue(object : Callback<ImgBBResponse> {
+            override fun onResponse(call: Call<ImgBBResponse>, r: Response<ImgBBResponse>) { if (r.isSuccessful && r.body()?.success == true) { val url = r.body()?.data?.url ?: ""; if (type == "HEADSHOT") { headshotUrl = url; headshotStatus.value = "Head-shot ✅" } else { fullBodyUrl = url; fullBodyStatus.value = "Full Body ✅" } } else { status.value = "Failed ❌" } }
+            override fun onFailure(call: Call<ImgBBResponse>, t: Throwable) { status.value = "Error ❌" }
+        })
     }
 
     fun clearNavigation() { _navigateToNextStep.value = null }

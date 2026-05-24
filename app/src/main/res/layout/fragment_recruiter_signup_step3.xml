@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <!-- 1. Header Section (Synced with Talent Flow) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/headerContainer"
+        android:layout_width="match_parent"
+        android:layout_height="320dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/signup_header_bg" />
+
+        <!-- 4-Step Progress Stepper -->
+        <LinearLayout
+            android:id="@+id/stepperContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="32dp"
+            app:layout_constraintTop_toTopOf="parent">
+            <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/primary_dark" android:layout_marginEnd="4dp" />
+            <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/primary_dark" android:layout_marginEnd="4dp" />
+            <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/primary_dark" android:layout_marginEnd="4dp" />
+            <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/white" android:alpha="0.4" />
+        </LinearLayout>
+
+        <!-- Centered Profile Picture -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivProfileImage"
+            android:layout_width="110dp"
+            android:layout_height="110dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_profile_placeholder"
+            app:shapeAppearanceOverlay="@style/CircleImageView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/stepperContainer"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="85dp" />
+            
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- 2. Sliding Sheet Form Card -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/slidingSheet"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="-60dp"
+        android:background="@drawable/white_card_top_rounded"
+        android:paddingTop="24dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:elevation="12dp"
+        app:layout_constraintTop_toBottomOf="@id/headerContainer"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Professional Details"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:fontFamily="serif"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvSubtitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="Provide localized proof of your industry experience."
+            android:textColor="#808080"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+
+        <!-- Scrollable Form Content -->
+        <ScrollView
+            android:id="@+id/formScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="16dp"
+            android:scrollbars="none"
+            app:layout_constraintTop_toBottomOf="@id/tvSubtitle"
+            app:layout_constraintBottom_toTopOf="@id/btnNext">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="20dp">
+
+                <!-- Company Name -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Production / Company Name :"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/etCompanyName"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/edittext_outline"
+                    android:hint="Enter your company name here"
+                    android:paddingHorizontal="20dp"
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
+
+                <!-- Years of Experience -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Years of Experience :"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/etExperience"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/edittext_outline"
+                    android:hint="e.g. 5"
+                    android:inputType="number"
+                    android:paddingHorizontal="20dp"
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
+
+                <!-- Previous Production Work Header (UPDATED LABEL) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Previous Production Work :"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAddProof"
+                        style="@style/Widget.MaterialComponents.Button.Icon"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:backgroundTint="@color/primary_magenta"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        app:icon="@drawable/ic_plus"
+                        app:iconPadding="0dp"
+                        app:iconTint="@color/white"
+                        app:shapeAppearanceOverlay="@style/CircleImageView" />
+                </LinearLayout>
+
+                <!-- Platform Icons Row -->
+                <LinearLayout
+                    android:id="@+id/rowSocialIcons"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageButton android:id="@+id/btnFacebook" android:layout_width="54dp" android:layout_height="54dp" android:layout_marginEnd="10dp" android:padding="12dp" android:scaleType="fitCenter" android:background="@drawable/edittext_outline" android:src="@drawable/ic_facebook" />
+                    <ImageButton android:id="@+id/btnInstagram" android:layout_width="54dp" android:layout_height="54dp" android:layout_marginEnd="10dp" android:padding="12dp" android:scaleType="fitCenter" android:background="@drawable/edittext_outline" android:src="@drawable/ic_instagram" />
+                    <ImageButton android:id="@+id/btnYouTube" android:layout_width="54dp" android:layout_height="54dp" android:layout_marginEnd="10dp" android:padding="12dp" android:scaleType="fitCenter" android:background="@drawable/edittext_outline" android:src="@drawable/ic_youtube_brand" />
+                    <ImageButton android:id="@+id/btnVimeo" android:layout_width="54dp" android:layout_height="54dp" android:padding="12dp" android:scaleType="fitCenter" android:background="@drawable/edittext_outline" android:src="@drawable/ic_vimeo_brand" />
+                </LinearLayout>
+
+                <!-- URL Input (UPDATED HINT) -->
+                <EditText
+                    android:id="@+id/etProofLink"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/edittext_outline"
+                    android:hint="Paste URL ONLY (YouTube, Vimeo, etc.)"
+                    android:inputType="textUri"
+                    android:paddingHorizontal="20dp"
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
+
+                <!-- Dynamic Proof Tags -->
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupProofs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="8dp"
+                    app:chipSpacingVertical="4dp" />
+
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Pinned Next Button -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnNext"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/button_rounded_magenta"
+            android:text="Next"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
