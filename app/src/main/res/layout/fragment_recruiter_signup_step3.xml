@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white">
 
-    <!-- Header Section (Synced with Step 2) -->
+    <!-- 1. Header Section (Synced with Talent Flow) -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/headerContainer"
         android:layout_width="match_parent"
@@ -17,7 +18,7 @@
             android:layout_height="match_parent"
             android:background="@drawable/signup_header_bg" />
 
-        <!-- 5-Step Progress Stepper -->
+        <!-- 4-Step Progress Stepper -->
         <LinearLayout
             android:id="@+id/stepperContainer"
             android:layout_width="match_parent"
@@ -29,7 +30,6 @@
             <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/primary_dark" android:layout_marginEnd="4dp" />
             <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/primary_dark" android:layout_marginEnd="4dp" />
             <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/primary_dark" android:layout_marginEnd="4dp" />
-            <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/white" android:alpha="0.4" android:layout_marginEnd="4dp" />
             <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/white" android:alpha="0.4" />
         </LinearLayout>
 
@@ -49,7 +49,7 @@
             
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Professional Foundation Card (Sliding Sheet Design) -->
+    <!-- 2. Sliding Sheet Form Card -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/slidingSheet"
         android:layout_width="match_parent"
@@ -68,7 +68,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Professional Foundation"
+            android:text="Professional Details"
             android:textColor="@color/black"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -83,7 +83,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="center"
-            android:text="Select your background and links to stand out."
+            android:text="Provide localized proof of your industry experience."
             android:textColor="#808080"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -99,7 +99,7 @@
             android:layout_marginBottom="16dp"
             android:scrollbars="none"
             app:layout_constraintTop_toBottomOf="@id/tvSubtitle"
-            app:layout_constraintBottom_toTopOf="@id/btnContinue">
+            app:layout_constraintBottom_toTopOf="@id/btnNext">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -107,144 +107,49 @@
                 android:orientation="vertical"
                 android:paddingBottom="20dp">
 
-                <!-- Highest Qualification -->
+                <!-- Company Name -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Highest Qualification :"
-                    android:textColor="@color/black"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    app:boxCornerRadiusTopStart="30dp"
-                    app:boxCornerRadiusTopEnd="30dp"
-                    app:boxCornerRadiusBottomStart="30dp"
-                    app:boxCornerRadiusBottomEnd="30dp"
-                    app:boxStrokeColor="#B0006D"
-                    app:endIconTint="#B0006D"
-                    app:endIconMode="dropdown_menu"
-                    app:hintEnabled="false">
-
-                    <AutoCompleteTextView
-                        android:id="@+id/etQualification"
-                        android:layout_width="match_parent"
-                        android:layout_height="54dp"
-                        android:hint="Select qualification"
-                        android:paddingHorizontal="20dp"
-                        android:inputType="none"
-                        android:textColor="@color/black"
-                        android:textSize="14sp"
-                        android:background="@null" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Languages -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="Languages :"
-                    android:textColor="@color/black"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chipGroupLanguages"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="4dp"
-                    app:chipSpacingVertical="4dp" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    app:boxCornerRadiusTopStart="30dp"
-                    app:boxCornerRadiusTopEnd="30dp"
-                    app:boxCornerRadiusBottomStart="30dp"
-                    app:boxCornerRadiusBottomEnd="30dp"
-                    app:boxStrokeColor="#B0006D"
-                    app:endIconTint="#B0006D"
-                    app:endIconMode="dropdown_menu"
-                    app:hintEnabled="false">
-
-                    <AutoCompleteTextView
-                        android:id="@+id/etLanguages"
-                        android:layout_width="match_parent"
-                        android:layout_height="54dp"
-                        android:hint="Pick languages"
-                        android:paddingHorizontal="20dp"
-                        android:inputType="none"
-                        android:textColor="@color/black"
-                        android:textSize="14sp"
-                        android:background="@null" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Experience Level -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="Experience Level :"
-                    android:textColor="@color/black"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    app:boxCornerRadiusTopStart="30dp"
-                    app:boxCornerRadiusTopEnd="30dp"
-                    app:boxCornerRadiusBottomStart="30dp"
-                    app:boxCornerRadiusBottomEnd="30dp"
-                    app:boxStrokeColor="#B0006D"
-                    app:endIconTint="#B0006D"
-                    app:endIconMode="dropdown_menu"
-                    app:hintEnabled="false">
-
-                    <AutoCompleteTextView
-                        android:id="@+id/etExperience"
-                        android:layout_width="match_parent"
-                        android:layout_height="54dp"
-                        android:hint="Years of experience"
-                        android:paddingHorizontal="20dp"
-                        android:inputType="none"
-                        android:textColor="@color/black"
-                        android:textSize="14sp"
-                        android:background="@null" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Portfolio Link -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="Portfolio Link :"
+                    android:text="Production / Company Name :"
                     android:textColor="@color/black"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
                 <EditText
-                    android:id="@+id/etPortfolio"
+                    android:id="@+id/etCompanyName"
                     android:layout_width="match_parent"
                     android:layout_height="54dp"
                     android:layout_marginTop="8dp"
                     android:background="@drawable/edittext_outline"
-                    android:hint="e.g. behance.net/yourname"
-                    android:inputType="textUri"
+                    android:hint="Enter your company name here"
                     android:paddingHorizontal="20dp"
                     android:textColor="@color/black"
                     android:textSize="14sp" />
 
-                <!-- Social Media Header -->
+                <!-- Years of Experience -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Years of Experience :"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/etExperience"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/edittext_outline"
+                    android:hint="e.g. 5"
+                    android:inputType="number"
+                    android:paddingHorizontal="20dp"
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
+
+                <!-- Previous Production Work Header (UPDATED LABEL) -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -256,13 +161,13 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Connect Social Accounts :"
+                        android:text="Previous Production Work :"
                         android:textColor="@color/black"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnAddSocial"
+                        android:id="@+id/btnAddProof"
                         style="@style/Widget.MaterialComponents.Button.Icon"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
@@ -288,25 +193,26 @@
 
                     <ImageButton android:id="@+id/btnFacebook" android:layout_width="54dp" android:layout_height="54dp" android:layout_marginEnd="10dp" android:padding="12dp" android:scaleType="fitCenter" android:background="@drawable/edittext_outline" android:src="@drawable/ic_facebook" />
                     <ImageButton android:id="@+id/btnInstagram" android:layout_width="54dp" android:layout_height="54dp" android:layout_marginEnd="10dp" android:padding="12dp" android:scaleType="fitCenter" android:background="@drawable/edittext_outline" android:src="@drawable/ic_instagram" />
-                    <ImageButton android:id="@+id/btnTikTok" android:layout_width="54dp" android:layout_height="54dp" android:layout_marginEnd="10dp" android:padding="12dp" android:scaleType="fitCenter" android:background="@drawable/edittext_outline" android:src="@drawable/ic_tiktok" />
-                    <ImageButton android:id="@+id/btnTwitter" android:layout_width="54dp" android:layout_height="54dp" android:layout_marginEnd="10dp" android:padding="12dp" android:scaleType="fitCenter" android:background="@drawable/edittext_outline" android:src="@drawable/ic_twitter" />
-                    <ImageButton android:id="@+id/btnLinkedIn" android:layout_width="54dp" android:layout_height="54dp" android:padding="12dp" android:scaleType="fitCenter" android:background="@drawable/edittext_outline" android:src="@drawable/ic_linkedin" />
+                    <ImageButton android:id="@+id/btnYouTube" android:layout_width="54dp" android:layout_height="54dp" android:layout_marginEnd="10dp" android:padding="12dp" android:scaleType="fitCenter" android:background="@drawable/edittext_outline" android:src="@drawable/ic_youtube_brand" />
+                    <ImageButton android:id="@+id/btnVimeo" android:layout_width="54dp" android:layout_height="54dp" android:padding="12dp" android:scaleType="fitCenter" android:background="@drawable/edittext_outline" android:src="@drawable/ic_vimeo_brand" />
                 </LinearLayout>
 
+                <!-- URL Input (UPDATED HINT) -->
                 <EditText
-                    android:id="@+id/etSocial"
+                    android:id="@+id/etProofLink"
                     android:layout_width="match_parent"
                     android:layout_height="54dp"
                     android:layout_marginTop="16dp"
                     android:background="@drawable/edittext_outline"
-                    android:hint="Paste profile link here"
+                    android:hint="Paste URL ONLY (YouTube, Vimeo, etc.)"
+                    android:inputType="textUri"
                     android:paddingHorizontal="20dp"
                     android:textColor="@color/black"
                     android:textSize="14sp" />
 
-                <!-- Dynamic stack of added socials -->
+                <!-- Dynamic Proof Tags -->
                 <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chipGroupAddedSocials"
+                    android:id="@+id/chipGroupProofs"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
@@ -316,15 +222,15 @@
             </LinearLayout>
         </ScrollView>
 
-        <!-- Continue Button -->
+        <!-- Pinned Next Button -->
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnContinue"
+            android:id="@+id/btnNext"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginHorizontal="20dp"
             android:layout_marginBottom="12dp"
             android:background="@drawable/button_rounded_magenta"
-            android:text="Continue"
+            android:text="Next"
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="18sp"

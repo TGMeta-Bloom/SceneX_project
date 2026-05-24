@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Highlight selected item in Brand Magenta -->
+    <item android:color="@color/primary_magenta" android:state_checked="true" />
+    <!-- Keep unselected items in Solid Black -->
+    <item android:color="@color/black" android:state_checked="false" />
+</selector>

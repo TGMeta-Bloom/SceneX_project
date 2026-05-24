@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">SceneX</string>
+    <string name="notifications">Notifications</string>
+    <string name="profile_picture">Profile Picture</string>
+    <string name="hello_label">Hello </string>
+    <string name="search_icon">Search Icon</string>
+    <string name="search_hint">Search</string>
+    <string name="profile_strength_label">Profile Strength</string>
+    <string name="add_voice_clip_action">Add voice clip for 100%</string>
+    <string name="casting_opportunities_feed_title">Casting opportunities feed</string>
 </resources>

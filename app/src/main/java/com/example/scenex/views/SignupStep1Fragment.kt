@@ -18,7 +18,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.scenex.R
 import com.example.scenex.viewmodels.SignupViewModel
 import com.google.android.material.imageview.ShapeableImageView
@@ -42,13 +44,29 @@ class SignupStep1Fragment : Fragment() {
 
     private val galleryLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            result.data?.data?.let { uri -> viewModel.uploadProfilePicture(uriToFile(uri)) }
+            result.data?.data?.let { uri -> 
+                // STEP 1: Instant Local Preview
+                Glide.with(this)
+                    .load(uri)
+                    .placeholder(R.drawable.ic_profile_placeholder)
+                    .centerCrop()
+                    .into(ivProfileImage)
+                
+                // STEP 2: Background Upload
+                viewModel.uploadProfilePicture(uriToFile(uri)) 
+            }
         }
     }
 
     private val cameraLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            (result.data?.extras?.get("data") as? Bitmap)?.let { viewModel.uploadProfilePicture(bitmapToFile(it)) }
+            (result.data?.extras?.get("data") as? Bitmap)?.let { bitmap ->
+                // STEP 1: Instant Local Preview
+                ivProfileImage.setImageBitmap(bitmap)
+                
+                // STEP 2: Background Upload
+                viewModel.uploadProfilePicture(bitmapToFile(bitmap)) 
+            }
         }
     }
 
@@ -78,16 +96,24 @@ class SignupStep1Fragment : Fragment() {
         val rgRelationship = view.findViewById<RadioGroup>(R.id.rgRelationship)
         val etHobbies = view.findViewById<EditText>(R.id.etHobbies)
         val etBio = view.findViewById<EditText>(R.id.etBio)
+        val tvLogin = view.findViewById<TextView>(R.id.tvLogin)
 
         btnUploadImage.setOnClickListener { showImagePickerDialog() }
 
         viewModel.isUploading.observe(viewLifecycleOwner) { isUploading ->
-            pbImageUpload.visibility = if (isUploading) View.VISIBLE else View.GONE
-            btnUploadImage.isEnabled = !isUploading
+            pbImageUpload.visibility = if (isUploading == true) View.VISIBLE else View.GONE
         }
 
+        // Robust Remote Image Observer
         viewModel.profileImageUrl.observe(viewLifecycleOwner) { url ->
-            url?.let { Glide.with(this).load(it).into(ivProfileImage) }
+            if (!url.isNullOrEmpty()) {
+                Glide.with(this)
+                    .load(url)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .placeholder(R.drawable.ic_profile_placeholder)
+                    .centerCrop()
+                    .into(ivProfileImage)
+            }
         }
 
         ivTogglePassword.setOnClickListener {
@@ -104,7 +130,11 @@ class SignupStep1Fragment : Fragment() {
 
         setupLocationSpinners(spinnerProvince, spinnerCity)
 
-        // Observe navigation to Step 2
+        tvLogin.setOnClickListener {
+            startActivity(Intent(requireContext(), LoginActivity::class.java))
+            requireActivity().finish()
+        }
+
         viewModel.navigateToNextStep.observe(viewLifecycleOwner) { destination ->
             if (destination == "STEP2") {
                 parentFragmentManager.beginTransaction()
@@ -137,7 +167,9 @@ class SignupStep1Fragment : Fragment() {
             viewModel.userName = userName
             viewModel.password = password
             viewModel.phoneNumber = etPhone.text.toString()
-            viewModel.age = etAge.text.toString()
+            
+            // Fixed: Safely parse age as Int to match ViewModel and UserProfile
+            viewModel.age = etAge.text.toString().toIntOrNull() ?: 0
             
             val selectedGenderId = rgGender.checkedRadioButtonId
             viewModel.gender = if (selectedGenderId != -1) view.findViewById<RadioButton>(selectedGenderId).text.toString() else ""
@@ -177,31 +209,34 @@ class SignupStep1Fragment : Fragment() {
 
     private fun uriToFile(uri: Uri): File {
         val inputStream = requireContext().contentResolver.openInputStream(uri)
-        val tempFile = File(requireContext().cacheDir, "temp_profile_image.jpg")
+        val tempFile = File(requireContext().cacheDir, "temp_profile_image_${System.currentTimeMillis()}.jpg")
         inputStream?.use { input -> tempFile.outputStream().use { output -> input.copyTo(output) } }
         return tempFile
     }
 
     private fun bitmapToFile(bitmap: Bitmap): File {
-        val tempFile = File(requireContext().cacheDir, "temp_camera_image.jpg")
+        val tempFile = File(requireContext().cacheDir, "temp_camera_image_${System.currentTimeMillis()}.jpg")
         tempFile.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it) }
         return tempFile
     }
 
     private fun setupLocationSpinners(provinceSpinner: Spinner, citySpinner: Spinner) {
-        val provinceAdapter = ArrayAdapter(requireContext(), R.layout.custom_spinner_item, viewModel.provinces)
+        val provincesList: List<String> = viewModel.provinces
+        val provinceAdapter = ArrayAdapter<String>(requireContext(), R.layout.custom_spinner_item, provincesList)
         provinceAdapter.setDropDownViewResource(R.layout.custom_spinner_dropdown_item)
         provinceSpinner.adapter = provinceAdapter
 
-        viewModel.availableCities.observe(viewLifecycleOwner) { cities ->
-            val cityAdapter = ArrayAdapter(requireContext(), R.layout.custom_spinner_item, cities)
+        viewModel.availableCities.observe(viewLifecycleOwner, Observer { cities ->
+            val cityAdapter = ArrayAdapter<String>(requireContext(), R.layout.custom_spinner_item, cities ?: emptyList())
             cityAdapter.setDropDownViewResource(R.layout.custom_spinner_dropdown_item)
             citySpinner.adapter = cityAdapter
-        }
+        })
 
         provinceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                viewModel.onProvinceSelected(viewModel.provinces[position])
+                if (position in provincesList.indices) {
+                    viewModel.onProvinceSelected(provincesList[position])
+                }
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
