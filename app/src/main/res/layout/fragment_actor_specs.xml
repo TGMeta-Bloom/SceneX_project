@@ -71,16 +71,118 @@
                 android:padding="20dp">
 
                 <TextView android:id="@+id/labelHeight" android:layout_width="0dp" android:layout_height="wrap_content" android:text="Height(cm) :" android:textColor="@color/black" android:textStyle="bold" app:layout_constraintEnd_toStartOf="@+id/labelBuild" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" />
-                <Spinner android:id="@+id/spinnerHeight" android:layout_width="0dp" android:layout_height="48dp" android:layout_marginTop="8dp" android:layout_marginEnd="8dp" android:background="@drawable/edittext_outline" app:layout_constraintEnd_toStartOf="@+id/spinnerBuild" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/labelHeight" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilHeight"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    app:boxCornerRadiusTopStart="30dp"
+                    app:boxCornerRadiusTopEnd="30dp"
+                    app:boxCornerRadiusBottomStart="30dp"
+                    app:boxCornerRadiusBottomEnd="30dp"
+                    app:boxStrokeColor="@color/primary_magenta"
+                    app:layout_constraintEnd_toStartOf="@+id/tilBuild"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/labelHeight"
+                    app:hintEnabled="false">
+                    <AutoCompleteTextView
+                        android:id="@+id/etHeight"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:hint="Select"
+                        android:textSize="14sp"
+                        android:paddingHorizontal="20dp"
+                        android:background="@null" />
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView android:id="@+id/labelBuild" android:layout_width="0dp" android:layout_height="wrap_content" android:text="Build :" android:textColor="@color/black" android:textStyle="bold" app:layout_constraintEnd_toEndOf="parent" android:layout_marginStart="8dp" app:layout_constraintStart_toEndOf="@id/labelHeight" app:layout_constraintTop_toTopOf="parent" />
-                <Spinner android:id="@+id/spinnerBuild" android:layout_width="0dp" android:layout_height="48dp" android:layout_marginTop="8dp" android:background="@drawable/edittext_outline" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toEndOf="@id/spinnerHeight" app:layout_constraintTop_toBottomOf="@id/labelBuild" />
 
-                <TextView android:id="@+id/labelHair" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="Hair Color :" android:textColor="@color/black" android:textStyle="bold" app:layout_constraintEnd_toStartOf="@+id/labelEye" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/spinnerHeight" />
-                <Spinner android:id="@+id/spinnerHair" android:layout_width="0dp" android:layout_height="48dp" android:layout_marginTop="8dp" android:layout_marginEnd="8dp" android:background="@drawable/edittext_outline" app:layout_constraintEnd_toStartOf="@+id/spinnerEye" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/labelHair" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilBuild"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:boxCornerRadiusTopStart="30dp"
+                    app:boxCornerRadiusTopEnd="30dp"
+                    app:boxCornerRadiusBottomStart="30dp"
+                    app:boxCornerRadiusBottomEnd="30dp"
+                    app:boxStrokeColor="@color/primary_magenta"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/tilHeight"
+                    app:layout_constraintTop_toBottomOf="@id/labelBuild"
+                    app:hintEnabled="false">
+                    <AutoCompleteTextView
+                        android:id="@+id/etBuild"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:hint="Select"
+                        android:textSize="14sp"
+                        android:paddingHorizontal="20dp"
+                        android:background="@null" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView android:id="@+id/labelHair" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="Hair Color :" android:textColor="@color/black" android:textStyle="bold" app:layout_constraintEnd_toStartOf="@+id/labelEye" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/tilHeight" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilHair"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    app:boxCornerRadiusTopStart="30dp"
+                    app:boxCornerRadiusTopEnd="30dp"
+                    app:boxCornerRadiusBottomStart="30dp"
+                    app:boxCornerRadiusBottomEnd="30dp"
+                    app:boxStrokeColor="@color/primary_magenta"
+                    app:layout_constraintEnd_toStartOf="@+id/tilEye"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/labelHair"
+                    app:hintEnabled="false">
+                    <AutoCompleteTextView
+                        android:id="@+id/etHair"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:hint="Select"
+                        android:textSize="14sp"
+                        android:paddingHorizontal="20dp"
+                        android:background="@null" />
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView android:id="@+id/labelEye" android:layout_width="0dp" android:layout_height="wrap_content" android:text="Eye Color :" android:textColor="@color/black" android:textStyle="bold" app:layout_constraintEnd_toEndOf="parent" android:layout_marginStart="8dp" app:layout_constraintStart_toEndOf="@id/labelHair" app:layout_constraintTop_toTopOf="@+id/labelHair" />
-                <Spinner android:id="@+id/spinnerEye" android:layout_width="0dp" android:layout_height="48dp" android:layout_marginTop="8dp" android:background="@drawable/edittext_outline" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toEndOf="@id/spinnerHair" app:layout_constraintTop_toBottomOf="@id/labelEye" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilEye"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:boxCornerRadiusTopStart="30dp"
+                    app:boxCornerRadiusTopEnd="30dp"
+                    app:boxCornerRadiusBottomStart="30dp"
+                    app:boxCornerRadiusBottomEnd="30dp"
+                    app:boxStrokeColor="@color/primary_magenta"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/tilHair"
+                    app:layout_constraintTop_toBottomOf="@id/labelEye"
+                    app:hintEnabled="false">
+                    <AutoCompleteTextView
+                        android:id="@+id/etEye"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:hint="Select"
+                        android:textSize="14sp"
+                        android:paddingHorizontal="20dp"
+                        android:background="@null" />
+                </com.google.android.material.textfield.TextInputLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
@@ -133,23 +235,31 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp">
-                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Dubbing" android:checkable="true" />
-                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle_Light" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Traditional Dancing" android:checkable="true" />
-                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle_Light" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Martial Arts" android:checkable="true" />
-                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Musical Instruments" android:checkable="true" />
-                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Singing" android:checkable="true" />
-                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle_Light" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Stunts" android:checkable="true" />
-                    <com.google.android.material.chip.Chip style="@style/SpotlightChipStyle_Light" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Swimming" android:checkable="true" />
-                    <ImageView
-                        android:id="@+id/btnAddSkill"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:layout_gravity="center_vertical"
-                        android:background="@drawable/button_rounded_magenta"
-                        android:padding="8dp"
-                        android:src="@drawable/ic_plus"
-                        app:tint="@color/white" />
                 </com.google.android.material.chip.ChipGroup>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilAddSkill"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    app:boxCornerRadiusTopStart="30dp"
+                    app:boxCornerRadiusTopEnd="30dp"
+                    app:boxCornerRadiusBottomStart="30dp"
+                    app:boxCornerRadiusBottomEnd="30dp"
+                    app:boxStrokeColor="@color/primary_magenta"
+                    app:endIconTint="@color/primary_magenta"
+                    app:hintEnabled="false">
+                    <AutoCompleteTextView
+                        android:id="@+id/etAddSkill"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:hint="Search and add skills..."
+                        android:textSize="14sp"
+                        android:paddingHorizontal="20dp"
+                        android:background="@null" />
+                </com.google.android.material.textfield.TextInputLayout>
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -160,12 +270,10 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginTop="24dp"
-            android:text="Media Upload"
+            android:text="Spotlight Evidence"
             android:textColor="@color/black"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:drawableStartCompat="@drawable/ic_camera_white"
-            android:drawablePadding="10dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/cardSkills" />
 
@@ -179,30 +287,115 @@
             app:layout_constraintTop_toBottomOf="@id/labelMedia">
 
             <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="0dp" android:layout_height="140dp" android:layout_weight="1" android:layout_marginEnd="8dp" android:background="@drawable/dashed_border">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="(Required)" android:textColor="@color/primary_magenta" android:textSize="10sp" android:textStyle="bold" app:layout_constraintTop_toTopOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_margin="8dp" />
                 <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_camera_white" app:tint="@color/primary_magenta" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toTopOf="@id/btnHeadshot" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" />
                 <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnHeadshot" android:layout_width="wrap_content" android:layout_height="36dp" android:text="Head-shot" android:textAllCaps="false" android:textColor="@color/white" android:background="@drawable/button_rounded_magenta" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_marginBottom="12dp" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="0dp" android:layout_height="140dp" android:layout_weight="1" android:layout_marginStart="8dp" android:background="@drawable/dashed_border">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="(Required)" android:textColor="@color/primary_magenta" android:textSize="10sp" android:textStyle="bold" app:layout_constraintTop_toTopOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_margin="8dp" />
                 <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_camera_white" app:tint="@color/primary_magenta" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toTopOf="@id/btnFullBody" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" />
                 <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnFullBody" android:layout_width="wrap_content" android:layout_height="36dp" android:text="Full Body" android:textAllCaps="false" android:textColor="@color/white" android:background="@drawable/button_rounded_magenta" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_marginBottom="12dp" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
 
-        <!-- Video Upload Section -->
-        <TextView android:id="@+id/labelVideo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="24dp" android:layout_marginTop="24dp" android:text="Video Sample Upload:" android:textColor="@color/black" android:textStyle="bold" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/layoutPhotoUpload" />
-        <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/layoutVideoUpload" android:layout_width="match_parent" android:layout_height="110dp" android:layout_marginHorizontal="24dp" android:layout_marginTop="8dp" android:background="@drawable/dashed_border" app:layout_constraintTop_toBottomOf="@id/labelVideo">
-            <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/ic_play_stars" app:tint="@color/primary_magenta" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toTopOf="@id/btnUploadVideo" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" />
-            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnUploadVideo" android:layout_width="wrap_content" android:layout_height="36dp" android:text="Upload video" android:textAllCaps="false" android:textColor="@color/white" android:background="@drawable/button_rounded_magenta" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_marginBottom="12dp" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Video Reel Link Section -->
+        <TextView android:id="@+id/labelVideoLink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="24dp"
+            android:text="Video Reel Link (YouTube/Drive):"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layoutPhotoUpload" />
 
-        <!-- Audio Upload Section -->
-        <TextView android:id="@+id/labelAudio" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="24dp" android:layout_marginTop="24dp" android:text="Audio Sample Upload:\n(Optional)" android:textColor="@color/black" android:textStyle="bold" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/layoutVideoUpload" />
-        <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/layoutAudioUpload" android:layout_width="match_parent" android:layout_height="140dp" android:layout_marginHorizontal="24dp" android:layout_marginTop="8dp" android:background="@drawable/dashed_border" app:layout_constraintTop_toBottomOf="@id/labelAudio">
-            <ImageView android:layout_width="48dp" android:layout_height="48dp" android:src="@drawable/ic_header_play_stars" app:tint="@color/primary_magenta" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toTopOf="@id/btnUploadAudio" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" />
-            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnUploadAudio" android:layout_width="wrap_content" android:layout_height="36dp" android:text="Upload audio" android:textAllCaps="false" android:textColor="@color/white" android:background="@drawable/button_rounded_magenta" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_marginBottom="28dp" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Accepted formats : mp3 / mp4" android:textColor="@color/gray" android:textSize="11sp" app:layout_constraintTop_toBottomOf="@id/btnUploadAudio" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilVideoLink"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="8dp"
+            app:boxCornerRadiusTopStart="30dp"
+            app:boxCornerRadiusTopEnd="30dp"
+            app:boxCornerRadiusBottomStart="30dp"
+            app:boxCornerRadiusBottomEnd="30dp"
+            app:boxStrokeColor="@color/primary_magenta"
+            app:hintEnabled="false"
+            app:layout_constraintTop_toBottomOf="@id/labelVideoLink">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etVideoLink"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Paste YouTube/Drive link"
+                android:inputType="textUri"
+                android:paddingHorizontal="20dp"
+                android:textSize="14sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/tvVideoHint"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="32dp"
+            android:layout_marginTop="4dp"
+            android:text="YouTube: Use 'Unlisted', NOT Private. Google Drive: Set sharing to 'Anyone with the link can view'."
+            android:textColor="@color/gray"
+            android:textSize="11sp"
+            app:layout_constraintTop_toBottomOf="@id/tilVideoLink"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Audio Reel Link Section -->
+        <TextView android:id="@+id/labelAudioLink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="20dp"
+            android:text="Audio Reel Link (Optional):"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvVideoHint" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilAudioLink"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="8dp"
+            app:boxCornerRadiusTopStart="30dp"
+            app:boxCornerRadiusTopEnd="30dp"
+            app:boxCornerRadiusBottomStart="30dp"
+            app:boxCornerRadiusBottomEnd="30dp"
+            app:boxStrokeColor="@color/primary_magenta"
+            app:hintEnabled="false"
+            app:layout_constraintTop_toBottomOf="@id/labelAudioLink">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etAudioLink"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Paste link here"
+                android:inputType="textUri"
+                android:paddingHorizontal="20dp"
+                android:textSize="14sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/tvAudioHint"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="32dp"
+            android:layout_marginTop="4dp"
+            android:text="Drive/Cloud: Ensure 'Anyone with the link can view/listen'."
+            android:textColor="@color/gray"
+            android:textSize="11sp"
+            app:layout_constraintTop_toBottomOf="@id/tilAudioLink"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <!-- Final Button -->
         <androidx.appcompat.widget.AppCompatButton
@@ -217,7 +410,7 @@
             android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:layout_constraintTop_toBottomOf="@id/layoutAudioUpload" />
+            app:layout_constraintTop_toBottomOf="@id/tvAudioHint" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

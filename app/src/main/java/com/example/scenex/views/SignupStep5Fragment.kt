@@ -46,12 +46,10 @@ class SignupStep5Fragment : Fragment() {
         val uploadPlaceholder = view.findViewById<CardView>(R.id.uploadPlaceholder)
         val btnFinish = view.findViewById<Button>(R.id.btnFinish)
 
-        // Load profile picture from Step 1
         viewModel.profileImageUrl.observe(viewLifecycleOwner) { url ->
             Glide.with(this)
                 .load(url)
                 .placeholder(R.drawable.ic_profile_placeholder)
-                .error(R.drawable.ic_profile_placeholder)
                 .into(ivProfileImage)
         }
 
@@ -59,25 +57,21 @@ class SignupStep5Fragment : Fragment() {
             pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
 
-        viewModel.portfolioImages.observe(viewLifecycleOwner) { images ->
-            if (images.isNotEmpty()) {
-                Toast.makeText(requireContext(), "${images.size} images uploaded to portfolio", Toast.LENGTH_SHORT).show()
+        // Navigation Observer - Smart Routing Implementation
+        viewModel.navigateToNextStep.observe(viewLifecycleOwner) { destination ->
+            if (destination == "FINISH") {
+                Toast.makeText(requireContext(), "Portfolio Submitted for Review!", Toast.LENGTH_LONG).show()
+                
+                // Smart Router: Route to Waiting Room as status is now 'pending_review'
+                val intent = Intent(requireContext(), WaitingRoomActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                requireActivity().finish()
             }
         }
 
         btnFinish.setOnClickListener {
             viewModel.finalizeRegistration()
-        }
-
-        // Navigation Observer
-        viewModel.navigateToNextStep.observe(viewLifecycleOwner) { destination ->
-            if (destination == "FINISH") {
-                Toast.makeText(requireContext(), "Welcome to SceneX!", Toast.LENGTH_LONG).show()
-                val intent = Intent(requireContext(), MainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-                requireActivity().finish()
-            }
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { error ->

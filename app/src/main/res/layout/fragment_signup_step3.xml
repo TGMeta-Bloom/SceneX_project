@@ -1,272 +1,336 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
     android:background="@color/white">
 
+    <!-- Header Section (Synced with Step 2) -->
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/headerContainer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="320dp"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Header Section - Consistently centered profile picture -->
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/headerContainer"
+        <View
             android:layout_width="match_parent"
-            android:layout_height="320dp"
-            app:layout_constraintTop_toTopOf="parent">
+            android:layout_height="match_parent"
+            android:background="@drawable/signup_header_bg" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/signup_header_bg" />
-
-            <!-- Progress Stepper (Step 3 active) -->
-            <LinearLayout
-                android:id="@+id/stepperContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="48dp"
-                android:orientation="horizontal"
-                android:paddingHorizontal="32dp"
-                app:layout_constraintTop_toTopOf="parent">
-                <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/primary_dark" android:layout_marginEnd="4dp" />
-                <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/primary_dark" android:layout_marginEnd="4dp" />
-                <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/primary_dark" android:layout_marginEnd="4dp" />
-                <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/white" android:alpha="0.4" android:layout_marginEnd="4dp" />
-                <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/white" android:alpha="0.4" />
-            </LinearLayout>
-
-            <!-- Centered Profile Image - 85dp bottom margin, no border -->
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/ivProfileImage"
-                android:layout_width="110dp"
-                android:layout_height="110dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_profile_placeholder"
-                app:shapeAppearanceOverlay="@style/CircleImageView"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/stepperContainer"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_marginBottom="85dp" />
-                
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <!-- Form "Sheet" Container -->
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <!-- 5-Step Progress Stepper -->
+        <LinearLayout
+            android:id="@+id/stepperContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-60dp"
-            android:background="@drawable/white_card_top_rounded"
-            android:padding="24dp"
-            android:elevation="12dp"
-            app:layout_constraintTop_toBottomOf="@id/headerContainer">
+            android:layout_marginTop="48dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="32dp"
+            app:layout_constraintTop_toTopOf="parent">
+            <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/primary_dark" android:layout_marginEnd="4dp" />
+            <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/primary_dark" android:layout_marginEnd="4dp" />
+            <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/primary_dark" android:layout_marginEnd="4dp" />
+            <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/white" android:alpha="0.4" android:layout_marginEnd="4dp" />
+            <View android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1" android:background="@color/white" android:alpha="0.4" />
+        </LinearLayout>
 
-            <TextView
-                android:id="@+id/formTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Your Professional\nFoundation"
-                android:textColor="@color/black"
-                android:textSize="26sp"
-                android:textStyle="bold"
-                android:fontFamily="serif"
-                android:gravity="center"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <!-- Centered Profile Picture -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivProfileImage"
+            android:layout_width="110dp"
+            android:layout_height="110dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_profile_placeholder"
+            app:shapeAppearanceOverlay="@style/CircleImageView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/stepperContainer"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="85dp" />
+            
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <TextView
-                android:id="@+id/tvSubtitle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:gravity="center"
-                android:text="Add your core qualifications to boost your visibility."
-                android:textColor="#666666"
-                android:textSize="14sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/formTitle" />
+    <!-- Professional Foundation Card (Sliding Sheet Design) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/slidingSheet"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="-60dp"
+        android:background="@drawable/white_card_top_rounded"
+        android:paddingTop="24dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:elevation="12dp"
+        app:layout_constraintTop_toBottomOf="@id/headerContainer"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-            <!-- Highest Qualification (Full-Width) -->
-            <TextView
-                android:id="@+id/labelQual"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
-                android:text="Highest Qualification/Certification :"
-                android:textColor="@color/black"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvSubtitle" />
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Professional Foundation"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:fontFamily="serif"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <EditText
-                android:id="@+id/etQualification"
-                android:layout_width="match_parent"
-                android:layout_height="54dp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/edittext_outline"
-                android:hint="e.g. B.A. in Theatre Arts"
-                android:paddingHorizontal="20dp"
-                android:textColor="@color/black"
-                android:textSize="14sp"
-                app:layout_constraintTop_toBottomOf="@id/labelQual" />
+        <TextView
+            android:id="@+id/tvSubtitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="Select your background and links to stand out."
+            android:textColor="#808080"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
-            <!-- Row for Languages & Experience (Side-by-Side) -->
+        <!-- Scrollable Form Content -->
+        <ScrollView
+            android:id="@+id/formScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="16dp"
+            android:scrollbars="none"
+            app:layout_constraintTop_toBottomOf="@id/tvSubtitle"
+            app:layout_constraintBottom_toTopOf="@id/btnContinue">
+
             <LinearLayout
-                android:id="@+id/rowLangExp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:orientation="horizontal"
-                app:layout_constraintTop_toBottomOf="@id/etQualification">
+                android:orientation="vertical"
+                android:paddingBottom="20dp">
 
-                <LinearLayout
-                    android:layout_width="0dp"
+                <!-- Highest Qualification -->
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginEnd="8dp">
+                    android:text="Highest Qualification :"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Languages :"
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:boxCornerRadiusTopStart="30dp"
+                    app:boxCornerRadiusTopEnd="30dp"
+                    app:boxCornerRadiusBottomStart="30dp"
+                    app:boxCornerRadiusBottomEnd="30dp"
+                    app:boxStrokeColor="#B0006D"
+                    app:endIconTint="#B0006D"
+                    app:endIconMode="dropdown_menu"
+                    app:hintEnabled="false">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/etQualification"
+                        android:layout_width="match_parent"
+                        android:layout_height="54dp"
+                        android:hint="Select qualification"
+                        android:paddingHorizontal="20dp"
+                        android:inputType="none"
                         android:textColor="@color/black"
                         android:textSize="14sp"
-                        android:textStyle="bold" />
+                        android:background="@null" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-                    <EditText
+                <!-- Languages -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Languages :"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupLanguages"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="4dp"
+                    app:chipSpacingVertical="4dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    app:boxCornerRadiusTopStart="30dp"
+                    app:boxCornerRadiusTopEnd="30dp"
+                    app:boxCornerRadiusBottomStart="30dp"
+                    app:boxCornerRadiusBottomEnd="30dp"
+                    app:boxStrokeColor="#B0006D"
+                    app:endIconTint="#B0006D"
+                    app:endIconMode="dropdown_menu"
+                    app:hintEnabled="false">
+
+                    <AutoCompleteTextView
                         android:id="@+id/etLanguages"
                         android:layout_width="match_parent"
                         android:layout_height="54dp"
-                        android:layout_marginTop="8dp"
-                        android:background="@drawable/edittext_outline"
-                        android:hint="English, Sinhala"
+                        android:hint="Pick languages"
                         android:paddingHorizontal="20dp"
+                        android:inputType="none"
                         android:textColor="@color/black"
-                        android:textSize="14sp" />
-                </LinearLayout>
+                        android:textSize="14sp"
+                        android:background="@null" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <LinearLayout
-                    android:layout_width="0dp"
+                <!-- Experience Level -->
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="8dp">
+                    android:layout_marginTop="16dp"
+                    android:text="Experience Level :"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:boxCornerRadiusTopStart="30dp"
+                    app:boxCornerRadiusTopEnd="30dp"
+                    app:boxCornerRadiusBottomStart="30dp"
+                    app:boxCornerRadiusBottomEnd="30dp"
+                    app:boxStrokeColor="#B0006D"
+                    app:endIconTint="#B0006D"
+                    app:endIconMode="dropdown_menu"
+                    app:hintEnabled="false">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/etExperience"
+                        android:layout_width="match_parent"
+                        android:layout_height="54dp"
+                        android:hint="Years of experience"
+                        android:paddingHorizontal="20dp"
+                        android:inputType="none"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        android:background="@null" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Portfolio Link -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Portfolio Link :"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/etPortfolio"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/edittext_outline"
+                    android:hint="e.g. behance.net/yourname"
+                    android:inputType="textUri"
+                    android:paddingHorizontal="20dp"
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
+
+                <!-- Social Media Header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Experience :"
+                        android:layout_weight="1"
+                        android:text="Connect Social Accounts :"
                         android:textColor="@color/black"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
-                    <EditText
-                        android:id="@+id/etExperience"
-                        android:layout_width="match_parent"
-                        android:layout_height="54dp"
-                        android:layout_marginTop="8dp"
-                        android:background="@drawable/edittext_outline"
-                        android:hint="e.g. 5 Years"
-                        android:paddingHorizontal="20dp"
-                        android:textColor="@color/black"
-                        android:textSize="14sp" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAddSocial"
+                        style="@style/Widget.MaterialComponents.Button.Icon"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:backgroundTint="@color/primary_magenta"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        app:icon="@drawable/ic_plus"
+                        app:iconPadding="0dp"
+                        app:iconTint="@color/white"
+                        app:shapeAppearanceOverlay="@style/CircleImageView" />
                 </LinearLayout>
-            </LinearLayout>
 
-            <!-- Portfolio Link -->
-            <TextView
-                android:id="@+id/labelPortfolio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Portfolio Link :"
-                android:textColor="@color/black"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/rowLangExp" />
-
-            <EditText
-                android:id="@+id/etPortfolio"
-                android:layout_width="match_parent"
-                android:layout_height="54dp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/edittext_outline"
-                android:hint="https://behance.net/username"
-                android:paddingHorizontal="20dp"
-                android:textColor="@color/black"
-                android:textSize="14sp"
-                app:layout_constraintTop_toBottomOf="@id/labelPortfolio" />
-
-            <!-- Social Media Header with "+" icon -->
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/socialHeaderContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:layout_constraintTop_toBottomOf="@id/etPortfolio">
-
-                <TextView
-                    android:id="@+id/labelSocial"
-                    android:layout_width="wrap_content"
+                <!-- Platform Icons Row -->
+                <LinearLayout
+                    android:id="@+id/rowSocialIcons"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Social Media Links :"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageButton android:id="@+id/btnFacebook" android:layout_width="54dp" android:layout_height="54dp" android:layout_marginEnd="10dp" android:padding="12dp" android:scaleType="fitCenter" android:background="@drawable/edittext_outline" android:src="@drawable/ic_facebook" />
+                    <ImageButton android:id="@+id/btnInstagram" android:layout_width="54dp" android:layout_height="54dp" android:layout_marginEnd="10dp" android:padding="12dp" android:scaleType="fitCenter" android:background="@drawable/edittext_outline" android:src="@drawable/ic_instagram" />
+                    <ImageButton android:id="@+id/btnTikTok" android:layout_width="54dp" android:layout_height="54dp" android:layout_marginEnd="10dp" android:padding="12dp" android:scaleType="fitCenter" android:background="@drawable/edittext_outline" android:src="@drawable/ic_tiktok" />
+                    <ImageButton android:id="@+id/btnTwitter" android:layout_width="54dp" android:layout_height="54dp" android:layout_marginEnd="10dp" android:padding="12dp" android:scaleType="fitCenter" android:background="@drawable/edittext_outline" android:src="@drawable/ic_twitter" />
+                    <ImageButton android:id="@+id/btnLinkedIn" android:layout_width="54dp" android:layout_height="54dp" android:padding="12dp" android:scaleType="fitCenter" android:background="@drawable/edittext_outline" android:src="@drawable/ic_linkedin" />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/etSocial"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/edittext_outline"
+                    android:hint="Paste profile link here"
+                    android:paddingHorizontal="20dp"
                     android:textColor="@color/black"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    android:textSize="14sp" />
 
-                <ImageView
-                    android:id="@+id/btnAddSocial"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_plus"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:tint="@color/black" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                <!-- Dynamic stack of added socials -->
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupAddedSocials"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="8dp"
+                    app:chipSpacingVertical="4dp" />
 
-            <EditText
-                android:id="@+id/etSocial"
-                android:layout_width="match_parent"
-                android:layout_height="54dp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/edittext_outline"
-                android:hint="Enter LinkedIn or Instagram link"
-                android:paddingHorizontal="20dp"
-                android:textColor="@color/black"
-                android:textSize="14sp"
-                app:layout_constraintTop_toBottomOf="@id/socialHeaderContainer" />
+            </LinearLayout>
+        </ScrollView>
 
-            <!-- Primary Call to Action -->
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btnContinue"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="40dp"
-                android:layout_marginHorizontal="32dp"
-                android:layout_marginBottom="40dp"
-                android:background="@drawable/button_rounded_magenta"
-                android:text="Continue"
-                android:textAllCaps="false"
-                android:textColor="@color/white"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                app:layout_constraintTop_toBottomOf="@id/etSocial"
-                app:layout_constraintBottom_toBottomOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Continue Button -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnContinue"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/button_rounded_magenta"
+            android:text="Continue"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

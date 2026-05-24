@@ -7,6 +7,11 @@ import com.example.scenex.models.ImgBBResponse
 import com.example.scenex.models.UserProfile
 import com.example.scenex.network.ImgBBService
 import com.example.scenex.repository.UserRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.Timestamp
+import android.util.Log
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -35,13 +40,10 @@ class SignupViewModel : ViewModel() {
     private val _navigateToNextStep = MutableLiveData<String?>()
     val navigateToNextStep: LiveData<String?> get() = _navigateToNextStep
 
-    // Media Upload Statuses for Step 4 Progress feedback
+    // Media Upload Statuses
     val headshotStatus = MutableLiveData<String>("Head-shot")
     val fullBodyStatus = MutableLiveData<String>("Full Body")
-    val videoStatus = MutableLiveData<String>("Upload video")
-    val audioStatus = MutableLiveData<String>("Upload audio")
 
-    // ImgBB API Key
     private val IMGBB_API_KEY = "3555cbd369113d3b670cec87ddc281a3"
 
     private val retrofit = Retrofit.Builder()
@@ -51,7 +53,7 @@ class SignupViewModel : ViewModel() {
 
     private val imgBBService = retrofit.create(ImgBBService::class.java)
 
-    // Location Data Map
+    // --- LOCATION DATA ---
     val provinces = listOf(
         "Western Province", "Central Province", "Southern Province", 
         "Northern Province", "Eastern Province", "North Western Province", 
@@ -73,12 +75,17 @@ class SignupViewModel : ViewModel() {
     private val _availableCities = MutableLiveData<List<String>>()
     val availableCities: LiveData<List<String>> get() = _availableCities
 
-    // Form Data
+    fun onProvinceSelected(provinceName: String) {
+        province = provinceName
+        _availableCities.value = citiesMap[provinceName] ?: emptyList()
+    }
+
+    // Form Data Variables
     var fullName: String = ""
     var email: String = ""
+    var phoneNumber: String = ""
     var userName: String = ""
     var password: String = ""
-    var phoneNumber: String = ""
     var age: String = ""
     var gender: String = ""
     var province: String = ""
@@ -87,17 +94,13 @@ class SignupViewModel : ViewModel() {
     var hobbies: String = ""
     var shortBio: String = ""
     
-    // Step 2 Data
     var spotlightCategory: String = ""
-
-    // Step 3 Data
     var qualification: String = ""
     var languages: String = ""
     var experience: String = ""
     var portfolioLink: String = ""
     var socialMediaLinks: String = ""
 
-    // Step 4 Data (Actor Physical Specs + Specialized Media)
     var height: String = ""
     var hairColor: String = ""
     var eyeColor: String = ""
@@ -109,13 +112,51 @@ class SignupViewModel : ViewModel() {
     var videoUrl: String = ""
     var audioUrl: String = ""
 
-    // Step 5 Data
     private val _portfolioImages = MutableLiveData<MutableList<String>>(mutableListOf())
     val portfolioImages: LiveData<MutableList<String>> get() = _portfolioImages
 
-    fun onProvinceSelected(provinceName: String) {
-        province = provinceName
-        _availableCities.value = citiesMap[provinceName] ?: emptyList()
+    /**
+     * Executes the Profile Lifecycle logic and Calculates the Intelligence Score.
+     * Triggers real-time snapshot listeners for the Web Admin Dashboard.
+     */
+    private fun syncProfileLifecycle(isFinalSubmit: Boolean = false) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        // 1. Rule-Based Completeness Scoring System
+        var score = 0
+        if (fullName.isNotBlank() && email.isNotBlank() && phoneNumber.isNotBlank()) score += 20
+        if (height.isNotBlank() && bodyType.isNotBlank() && gender.isNotBlank()) score += 20
+        if (spotlightCategory.isNotBlank() && (accents.size + otherSkills.size) >= 3) score += 20
+        if (headshotUrl.isNotBlank() && fullBodyUrl.isNotBlank()) score += 20
+        if (videoUrl.isNotBlank()) score += 20
+
+        // 2. Profile Approval Workflow States
+        val currentStatus = when {
+            isFinalSubmit -> "pending_review" 
+            score >= 40 -> "active"           
+            else -> "draft"                   
+        }
+
+        // 3. Structured Firebase Map Payload (Synchronized with Admin Dashboard)
+        val profilePayload = hashMapOf(
+            "status" to currentStatus,
+            "completenessScore" to score,
+            "name" to fullName,
+            "email" to email,
+            "physicalSpecs" to "Height: $height | Build: $bodyType | Gender: $gender",
+            "showreelUrl" to videoUrl,
+            "updatedAt" to Timestamp.now()
+        )
+
+        // 4. Asynchronous Firestore Atomic Update
+        FirebaseFirestore.getInstance().collection("profiles").document(userId)
+            .set(profilePayload, SetOptions.merge())
+            .addOnSuccessListener {
+                Log.d("SceneX_Lifecycle", "✅ Sync Success: $currentStatus | Score: $score")
+            }
+            .addOnFailureListener { e ->
+                Log.e("SceneX_Lifecycle", "❌ Sync Failed: ${e.message}")
+            }
     }
 
     fun uploadProfilePicture(file: File) {
@@ -127,30 +168,20 @@ class SignupViewModel : ViewModel() {
             override fun onResponse(call: Call<ImgBBResponse>, response: Response<ImgBBResponse>) {
                 _isUploading.value = false
                 if (response.isSuccessful && response.body()?.success == true) {
-                    _profileImageUrl.value = response.body()?.data?.url
-                } else {
-                    _errorMessage.value = "Image upload failed: ${response.message()}"
+                    val url = response.body()?.data?.url
+                    _profileImageUrl.value = url
+                    url?.let { repository.saveMediaAssets(mapOf("profileImageUrl" to it)) { } }
                 }
             }
-
             override fun onFailure(call: Call<ImgBBResponse>, t: Throwable) {
                 _isUploading.value = false
-                _errorMessage.value = "Network error: ${t.message}"
             }
         })
     }
 
-    // Specialized Media Uploads for Step 4
     fun uploadMedia(file: File, type: String) {
-        val statusLiveData = when(type) {
-            "HEADSHOT" -> headshotStatus
-            "FULLBODY" -> fullBodyStatus
-            "VIDEO" -> videoStatus
-            "AUDIO" -> audioStatus
-            else -> null
-        }
-        
-        statusLiveData?.value = "Uploading..."
+        val statusLiveData = if (type == "HEADSHOT") headshotStatus else fullBodyStatus
+        statusLiveData.value = "Uploading..."
         
         val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
         val body = MultipartBody.Part.createFormData("image", file.name, requestFile)
@@ -159,20 +190,14 @@ class SignupViewModel : ViewModel() {
             override fun onResponse(call: Call<ImgBBResponse>, response: Response<ImgBBResponse>) {
                 if (response.isSuccessful && response.body()?.success == true) {
                     val url = response.body()?.data?.url ?: ""
-                    when(type) {
-                        "HEADSHOT" -> { headshotUrl = url; headshotStatus.value = "Head-shot ✅" }
-                        "FULLBODY" -> { fullBodyUrl = url; fullBodyStatus.value = "Full Body ✅" }
-                        "VIDEO" -> { videoUrl = url; videoStatus.value = "Video ✅" }
-                        "AUDIO" -> { audioUrl = url; audioStatus.value = "Audio ✅" }
-                    }
+                    if (type == "HEADSHOT") { headshotUrl = url; headshotStatus.value = "Head-shot ✅" }
+                    else { fullBodyUrl = url; fullBodyStatus.value = "Full Body ✅" }
                 } else {
-                    statusLiveData?.value = "Failed ❌"
-                    _errorMessage.value = "Upload failed"
+                    statusLiveData.value = "Failed ❌"
                 }
             }
             override fun onFailure(call: Call<ImgBBResponse>, t: Throwable) {
-                statusLiveData?.value = "Error ❌"
-                _errorMessage.value = "Network error"
+                statusLiveData.value = "Error ❌"
             }
         })
     }
@@ -192,46 +217,23 @@ class SignupViewModel : ViewModel() {
                         currentList.add(it)
                         _portfolioImages.value = currentList
                     }
-                } else {
-                    _errorMessage.value = "Portfolio upload failed"
                 }
             }
-
             override fun onFailure(call: Call<ImgBBResponse>, t: Throwable) {
                 _isUploading.value = false
-                _errorMessage.value = "Network error"
             }
         })
     }
 
     fun createAccount() {
-        if (email.isEmpty() || password.isEmpty() || userName.isEmpty()) {
-            _errorMessage.value = "Please fill in all required fields"
-            return
-        }
-
         val profile = UserProfile(
-            fullName = fullName,
-            email = email,
-            stageName = userName,
-            role = "TALENT",
-            profileImage = _profileImageUrl.value ?: "",
-            phoneNumber = phoneNumber,
-            age = age,
-            gender = gender,
-            province = province,
-            city = city,
-            relationshipStatus = relationshipStatus,
-            hobbies = hobbies,
-            bio = shortBio
+            fullName = fullName, email = email, stageName = userName, role = "TALENT",
+            profileImage = _profileImageUrl.value ?: "", phoneNumber = phoneNumber,
+            age = age, gender = gender, province = province, city = city,
+            relationshipStatus = relationshipStatus, hobbies = hobbies, bio = shortBio
         )
-
         repository.signupUser(profile, password) { success, error ->
-            if (success) {
-                _navigateToNextStep.value = "STEP2"
-            } else {
-                _errorMessage.value = error ?: "Signup failed"
-            }
+            if (success) _navigateToNextStep.value = "STEP2" else _errorMessage.value = error
         }
     }
     
@@ -240,76 +242,65 @@ class SignupViewModel : ViewModel() {
             _errorMessage.value = "Please select your primary craft"
             return
         }
-        
-        repository.updateUserField("spotlightCategory", spotlightCategory) { success ->
-            if (success) {
-                _navigateToNextStep.value = "STEP3"
-            } else {
-                _errorMessage.value = "Failed to update profile"
-            }
+        repository.saveProfessionalProfile(mapOf("spotlightCategory" to spotlightCategory)) { success ->
+            if (success) _navigateToNextStep.value = "STEP3" else _errorMessage.value = "Update failed"
         }
     }
 
     fun saveFoundationAndNavigate() {
         val updates = hashMapOf<String, Any>(
-            "qualification" to qualification,
+            "highest_qualification" to qualification,
             "languages" to languages,
-            "experience" to experience,
+            "experience_level" to experience,
             "portfolioLink" to portfolioLink,
             "socialMediaLinks" to socialMediaLinks
         )
-        
-        repository.updateUserFields(updates) { success ->
+        repository.saveProfessionalProfile(updates) { success ->
             if (success) {
-                _navigateToNextStep.value = when(spotlightCategory) {
-                    "Actor", "Model" -> "ACTOR_SPECS"
-                    else -> "STEP5"
-                }
+                _navigateToNextStep.value = if (spotlightCategory == "Actor" || spotlightCategory == "Model") "ACTOR_SPECS" else "STEP5"
             } else {
-                _errorMessage.value = "Failed to save data"
+                _errorMessage.value = "Failed to save foundation data"
             }
         }
     }
 
     fun saveActorSpecsAndNavigate() {
-        val updates = hashMapOf<String, Any>(
-            "height" to height,
+        val heightInt = height.replace(Regex("[^0-9]"), "").toIntOrNull() ?: 0
+        val specs = hashMapOf<String, Any>(
+            "height_cm" to heightInt,
             "hairColor" to hairColor,
-            "eyeColor" to eyeColor,
-            "bodyType" to bodyType,
+            "eye_color" to eyeColor,
+            "build_enum" to bodyType,
             "accents" to accents,
-            "otherSkills" to otherSkills,
+            "otherSkills" to otherSkills
+        )
+        val assets = hashMapOf<String, Any>(
             "headshotUrl" to headshotUrl,
             "fullBodyUrl" to fullBodyUrl,
-            "videoUrl" to videoUrl,
-            "audioUrl" to audioUrl
+            "videoUrl" to videoUrl
         )
-        
-        repository.updateUserFields(updates) { success ->
-            if (success) {
-                _navigateToNextStep.value = "STEP5"
-            } else {
-                _errorMessage.value = "Failed to save physical specs"
+
+        repository.saveTalentSpecs(specs) { specsSuccess ->
+            if (specsSuccess) {
+                repository.saveMediaAssets(assets) { assetsSuccess ->
+                    if (assetsSuccess) {
+                        syncProfileLifecycle(isFinalSubmit = false) 
+                        _navigateToNextStep.value = "STEP5"
+                    }
+                }
             }
         }
     }
 
     fun finalizeRegistration() {
-        val finalUpdates = hashMapOf<String, Any>(
-            "portfolioImages" to (_portfolioImages.value ?: emptyList<String>()),
-            "registrationComplete" to true
-        )
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        val portfolioData = mapOf("portfolioImages" to (_portfolioImages.value ?: emptyList<String>()))
         
-        repository.updateUserFields(finalUpdates) { success ->
-            if (success) {
-                _navigateToNextStep.value = "FINISH"
-            } else {
-                _errorMessage.value = "Failed to complete registration"
-            }
+        repository.saveMediaAssets(portfolioData) {
+            syncProfileLifecycle(isFinalSubmit = true) 
+            _navigateToNextStep.value = "FINISH"
         }
     }
-    
-    fun clearNavigation() {
-        _navigateToNextStep.value = null
-    }
+
+    fun clearNavigation() { _navigateToNextStep.value = null }
 }

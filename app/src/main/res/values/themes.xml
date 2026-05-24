@@ -10,10 +10,19 @@
 
     <style name="Theme.SceneX" parent="Base.Theme.SceneX" />
 
+    <!-- The missing style required by AndroidManifest.xml -->
+    <style name="Theme.SceneX.NoActionBar" parent="Theme.SceneX" />
+
     <!-- Specific style for pure magenta radio buttons -->
     <style name="PureMagentaRadioButton" parent="Widget.Material3.CompoundButton.RadioButton">
         <item name="useMaterialThemeColors">false</item>
         <item name="buttonTint">@color/gender_radio_selector</item>
+    </style>
+
+    <!-- Active indicator for Bottom Navigation -->
+    <style name="CustomMagentaIndicator">
+        <item name="android:color">#1AEC008C</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.Material3.Corner.Full</item>
     </style>
 
     <!-- Shapeable Image Styles -->
