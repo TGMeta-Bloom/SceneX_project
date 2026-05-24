@@ -17,19 +17,17 @@ class RoleSelectActivity : AppCompatActivity() {
         val recruiterButton = findViewById<Button>(R.id.recruiterButton)
 
         talentButton.setOnClickListener {
-            Log.d("RoleSelect", "Talent button clicked")
-            navigateToSignup()
+            navigateToSignup("TALENT")
         }
 
         recruiterButton.setOnClickListener {
-            Log.d("RoleSelect", "Recruiter button clicked")
-            navigateToSignup()
+            navigateToSignup("RECRUITER")
         }
     }
 
-    private fun navigateToSignup() {
-        Log.d("RoleSelect", "Navigating to SignupActivity")
+    private fun navigateToSignup(role: String) {
         val intent = Intent(this, SignupActivity::class.java)
+        intent.putExtra("USER_ROLE", role)
         startActivity(intent)
         finish()
     }
