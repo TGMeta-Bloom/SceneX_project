@@ -33,6 +33,7 @@ class RecruiterSignupStep1Fragment : Fragment() {
 
     private lateinit var ivProfileImage: ShapeableImageView
     private lateinit var pbImageUpload: ProgressBar
+    private lateinit var btnCreateAccount: AppCompatButton
 
     private val requestCameraPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -43,7 +44,6 @@ class RecruiterSignupStep1Fragment : Fragment() {
     private val galleryLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
-                // Instant Local Preview for better UX
                 Glide.with(this).load(uri).circleCrop().into(ivProfileImage)
                 viewModel.uploadProfilePicture(uriToFile(uri))
             }
@@ -77,28 +77,32 @@ class RecruiterSignupStep1Fragment : Fragment() {
         val etPhone = view.findViewById<EditText>(R.id.etPhone)
         val etPassword = view.findViewById<EditText>(R.id.etPassword)
         val ivTogglePassword = view.findViewById<ImageView>(R.id.ivTogglePassword)
-        val btnCreateAccount = view.findViewById<AppCompatButton>(R.id.btnCreateAccount)
+        btnCreateAccount = view.findViewById(R.id.btnCreateAccount)
         val tvLogin = view.findViewById<TextView>(R.id.tvLogin)
 
         btnUploadImage.setOnClickListener { showImagePickerDialog() }
 
+        // Observe Uploading State
         viewModel.isUploading.observe(viewLifecycleOwner) { isUploading ->
             pbImageUpload.visibility = if (isUploading == true) View.VISIBLE else View.GONE
+            btnCreateAccount.isEnabled = isUploading != true
         }
 
+        // Observe Profile Image URL
         viewModel.profileImageUrl.observe(viewLifecycleOwner) { url ->
             if (!url.isNullOrEmpty()) {
                 Glide.with(this).load(url).circleCrop().into(ivProfileImage)
             }
         }
 
+        // Password Visibility Toggle
         ivTogglePassword.setOnClickListener {
             isPasswordVisible = !isPasswordVisible
             etPassword.transformationMethod = if (isPasswordVisible) HideReturnsTransformationMethod.getInstance() else PasswordTransformationMethod.getInstance()
             etPassword.setSelection(etPassword.text.length)
         }
 
-        // FIX: Explicitly navigate back to LoginActivity to prevent task-termination crash
+        // Login Link Handshake
         tvLogin.setOnClickListener {
             val intent = Intent(requireContext(), LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -106,7 +110,15 @@ class RecruiterSignupStep1Fragment : Fragment() {
             requireActivity().finish()
         }
 
-        // Navigation Observer
+        // Senior Fix: Observe Errors to provide feedback and reset button state
+        viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
+            error?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
+                btnCreateAccount.isEnabled = true
+            }
+        }
+
+        // Navigation Observer for Recruiter Flow
         viewModel.navigateToNextStep.observe(viewLifecycleOwner) { destination ->
             if (destination == "RECRUITER_STEP2") {
                 parentFragmentManager.beginTransaction()
@@ -118,6 +130,7 @@ class RecruiterSignupStep1Fragment : Fragment() {
             }
         }
 
+        // Account Creation Handshake
         btnCreateAccount.setOnClickListener {
             val name = etFullName.text.toString().trim()
             val email = etEmail.text.toString().trim()
@@ -129,6 +142,15 @@ class RecruiterSignupStep1Fragment : Fragment() {
                 return@setOnClickListener
             }
 
+            if (pass.length < 6) {
+                etPassword.error = "Password must be at least 6 characters"
+                return@setOnClickListener
+            }
+
+            // Disable button to prevent double-click
+            btnCreateAccount.isEnabled = false
+            
+            // Sync Data with ViewModel
             viewModel.userRole = "RECRUITER"
             viewModel.fullName = name
             viewModel.email = email
@@ -136,6 +158,7 @@ class RecruiterSignupStep1Fragment : Fragment() {
             viewModel.password = pass
             viewModel.userName = name 
             
+            // Trigger Authentication Handshake
             viewModel.createAccount()
         }
     }
@@ -162,13 +185,13 @@ class RecruiterSignupStep1Fragment : Fragment() {
 
     private fun uriToFile(uri: Uri): File {
         val inputStream = requireContext().contentResolver.openInputStream(uri)
-        val tempFile = File(requireContext().cacheDir, "temp_recruiter_profile_${System.currentTimeMillis()}.jpg")
+        val tempFile = File(requireContext().cacheDir, "temp_rec_signup_${System.currentTimeMillis()}.jpg")
         inputStream?.use { input -> tempFile.outputStream().use { output -> input.copyTo(output) } }
         return tempFile
     }
 
     private fun bitmapToFile(bitmap: Bitmap): File {
-        val tempFile = File(requireContext().cacheDir, "temp_recruiter_camera_${System.currentTimeMillis()}.jpg")
+        val tempFile = File(requireContext().cacheDir, "temp_rec_cam_${System.currentTimeMillis()}.jpg")
         val out = FileOutputStream(tempFile)
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
         out.flush()

@@ -167,7 +167,9 @@ class SignupStep1Fragment : Fragment() {
             viewModel.userName = userName
             viewModel.password = password
             viewModel.phoneNumber = etPhone.text.toString()
-            viewModel.age = etAge.text.toString()
+            
+            // Fixed: Safely parse age as Int to match ViewModel and UserProfile
+            viewModel.age = etAge.text.toString().toIntOrNull() ?: 0
             
             val selectedGenderId = rgGender.checkedRadioButtonId
             viewModel.gender = if (selectedGenderId != -1) view.findViewById<RadioButton>(selectedGenderId).text.toString() else ""

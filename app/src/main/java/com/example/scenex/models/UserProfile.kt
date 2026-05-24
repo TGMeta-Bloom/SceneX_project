@@ -8,7 +8,7 @@ data class UserProfile(
     val role: String = "", // "TALENT" or "RECRUITER"
     val profileImage: String = "",
     val phoneNumber: String = "",
-    val age: String = "",
+    val age: Int = 0,
     val gender: String = "",
     val province: String = "",
     val city: String = "",
