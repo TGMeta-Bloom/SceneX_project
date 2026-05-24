@@ -2,15 +2,34 @@ package com.example.scenex.repository
 
 import android.util.Log
 import com.example.scenex.models.UserProfile
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
 
 class UserRepository {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    // Fix for RoleSelectViewModel
+    fun getCurrentUserId(): String? = auth.currentUser?.uid
+
+    /**
+     * Fetches complete profile data for the Home Screen.
+     */
+    fun getProfileData(userId: String, onComplete: (Map<String, Any>?) -> Unit) {
+        db.collection("profiles").document(userId).get()
+            .addOnSuccessListener { document ->
+                onComplete(document.data)
+            }
+            .addOnFailureListener {
+                onComplete(null)
+            }
+    }
+
+    /**
+     * Saves user role selection to the 'users' collection.
+     */
     fun saveUserRole(role: String, onComplete: (Boolean) -> Unit) {
         val userId = auth.currentUser?.uid ?: "guest_${System.currentTimeMillis()}"
         val userMap = hashMapOf(
@@ -24,47 +43,9 @@ class UserRepository {
             .addOnFailureListener { onComplete(false) }
     }
 
-    // Fix for Signup Process
-    fun signupUser(profile: UserProfile, password: String, onComplete: (Boolean, String?) -> Unit) {
-        auth.createUserWithEmailAndPassword(profile.email, password)
-            .addOnSuccessListener { result ->
-                val userId = result.user?.uid ?: ""
-                
-                // 1. users table (Auth strictly)
-                val userMap = hashMapOf(
-                    "userId" to userId,
-                    "email" to profile.email,
-                    "phoneNumber" to profile.phoneNumber,
-                    "role" to profile.role,
-                    "stageName" to profile.stageName,
-                    "createdAt" to System.currentTimeMillis()
-                )
-
-                // 2. profiles table (Foundation)
-                val profileMap = hashMapOf(
-                    "userId" to userId,
-                    "fullName" to profile.fullName,
-                    "age" to profile.age,
-                    "gender" to profile.gender,
-                    "province" to profile.province,
-                    "city" to profile.city,
-                    "relationshipStatus" to profile.relationshipStatus,
-                    "hobbies" to profile.hobbies,
-                    "bio" to profile.bio,
-                    "completenessScore" to 20
-                )
-
-                val batch = db.batch()
-                batch.set(db.collection("users").document(userId), userMap, SetOptions.merge())
-                batch.set(db.collection("profiles").document(userId), profileMap, SetOptions.merge())
-
-                batch.commit()
-                    .addOnSuccessListener { onComplete(true, null) }
-                    .addOnFailureListener { e -> onComplete(false, e.message) }
-            }
-            .addOnFailureListener { e -> onComplete(false, e.message) }
-    }
-
+    /**
+     * Updates profile data in the 'profiles' collection.
+     */
     fun saveProfessionalProfile(updates: Map<String, Any>, onComplete: (Boolean) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onComplete(false)
         db.collection("profiles").document(userId)
@@ -73,47 +54,82 @@ class UserRepository {
             .addOnFailureListener { onComplete(false) }
     }
 
+    /**
+     * Submits the talent profile for administrative review.
+     */
+    fun submitTalentProfileToAdmin(userId: String, fullName: String, userEmail: String, heightAndBuild: String, youtubeLink: String) {
+        val profilePayload = hashMapOf(
+            "status" to "pending_review",
+            "name" to fullName,
+            "email" to userEmail,
+            "physicalSpecs" to heightAndBuild,
+            "showreelUrl" to youtubeLink,
+            "updatedAt" to Timestamp.now()
+        )
+
+        db.collection("profiles").document(userId)
+            .set(profilePayload, SetOptions.merge())
+            .addOnSuccessListener { Log.d("SceneX_Sync", "✅ Profile submitted for review.") }
+            .addOnFailureListener { e -> Log.e("SceneX_Sync", "❌ Submission failed: ${e.message}") }
+    }
+
+    fun signupUser(profile: UserProfile, password: String, onComplete: (Boolean, String?) -> Unit) {
+        auth.createUserWithEmailAndPassword(profile.email, password)
+            .addOnSuccessListener { result ->
+                val userId = result.user?.uid ?: ""
+                val userMap = hashMapOf("userId" to userId, "role" to "TALENT", "email" to profile.email)
+                
+                // FIXED: Now including profileImage in the primary profile map
+                val profileMap = hashMapOf(
+                    "userId" to userId, 
+                    "fullName" to profile.fullName, 
+                    "profileImage" to profile.profileImage,
+                    "status" to "draft", 
+                    "completenessScore" to 20
+                )
+                
+                val batch = db.batch()
+                batch.set(db.collection("users").document(userId), userMap)
+                batch.set(db.collection("profiles").document(userId), profileMap)
+                batch.commit().addOnSuccessListener { onComplete(true, null) }
+            }
+            .addOnFailureListener { onComplete(false, it.message) }
+    }
+
+    fun getUserRoutingData(userId: String, onResult: (String?, String?, Exception?) -> Unit) {
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { userDoc ->
+                val role = userDoc.getString("role")
+                db.collection("profiles").document(userId).get()
+                    .addOnSuccessListener { profileDoc ->
+                        val status = profileDoc.getString("status")
+                        onResult(role, status, null)
+                    }
+                    .addOnFailureListener { onResult(role, null, it) }
+            }
+            .addOnFailureListener { onResult(null, null, it) }
+    }
+
     fun saveTalentSpecs(specs: Map<String, Any>, onComplete: (Boolean) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onComplete(false)
-        db.collection("talent_specs").document(userId)
-            .set(specs + ("userId" to userId), SetOptions.merge())
+        db.collection("talent_specs").document(userId).set(specs + ("userId" to userId), SetOptions.merge())
             .addOnSuccessListener { onComplete(true) }
             .addOnFailureListener { onComplete(false) }
     }
 
     fun saveMediaAssets(assets: Map<String, Any>, onComplete: (Boolean) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onComplete(false)
-        db.collection("media_assets").document(userId)
-            .set(assets + ("userId" to userId), SetOptions.merge())
+        db.collection("media_assets").document(userId).set(assets + ("userId" to userId), SetOptions.merge())
             .addOnSuccessListener { onComplete(true) }
             .addOnFailureListener { onComplete(false) }
     }
 
-    /**
-     * Synchronizes talent profile data with the Web Admin Dashboard.
-     * Utilizes precise web-synchronized field names to trigger real-time listeners.
-     */
-    fun submitTalentProfileToAdmin(userId: String, fullName: String, userEmail: String, heightAndBuild: String, youtubeLink: String) {
-        // 1. Structure the explicit data map for the Web Admin Dashboard
-        val profilePayload = hashMapOf(
-            "status" to "pending_review",                  // First Field: lowercase query rule flag
-            "name" to fullName,                            // Second Field: Profile Name
-            "email" to userEmail,                          // Third Field: User Email
-            "physicalSpecs" to heightAndBuild,             // Fourth Field: Physical specs mapper string
-            "showreelUrl" to youtubeLink                   // Fifth Field: Embedded video streaming showcase string
-        )
-
-        Log.d("SceneX_Firestore", "Initializing transaction write for User: $userId")
-
-        // 2. Apply the payload parameters atomically into our shared backend single source of truth
-        db.collection("profiles")
-            .document(userId)
-            .set(profilePayload, SetOptions.merge())       // Using merge to keep existing metadata safe
-            .addOnSuccessListener {
-                Log.d("SceneX_Firestore", "✅ Profile data synchronized successfully. Status: pending_review")
-            }
-            .addOnFailureListener { exception ->
-                Log.e("SceneX_Firestore", "❌ Cross-platform pipeline dispatch failed: ${exception.message}")
+    fun listenToProfileStatus(userId: String, onStatusChange: (String?) -> Unit): ListenerRegistration {
+        return db.collection("profiles").document(userId)
+            .addSnapshotListener { snapshot, _ ->
+                if (snapshot != null && snapshot.exists()) {
+                    onStatusChange(snapshot.getString("status"))
+                }
             }
     }
 
@@ -123,4 +139,13 @@ class UserRepository {
             .addOnSuccessListener { onComplete(true) }
             .addOnFailureListener { onComplete(false) }
     }
+
+    fun syncProfileLifecycle(userId: String, payload: Map<String, Any>, onComplete: (Boolean) -> Unit = {}) {
+        db.collection("profiles").document(userId)
+            .set(payload, SetOptions.merge())
+            .addOnSuccessListener { onComplete(true) }
+            .addOnFailureListener { onComplete(false) }
+    }
+
+    fun signOut() = auth.signOut()
 }

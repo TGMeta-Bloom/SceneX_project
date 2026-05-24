@@ -53,7 +53,7 @@ class SignupViewModel : ViewModel() {
 
     private val imgBBService = retrofit.create(ImgBBService::class.java)
 
-    // --- LOCATION DATA FOR STEP 1 ---
+    // --- LOCATION DATA ---
     val provinces = listOf(
         "Western Province", "Central Province", "Southern Province", 
         "Northern Province", "Eastern Province", "North Western Province", 
@@ -79,7 +79,6 @@ class SignupViewModel : ViewModel() {
         province = provinceName
         _availableCities.value = citiesMap[provinceName] ?: emptyList()
     }
-    // ------------------------------
 
     // Form Data Variables
     var fullName: String = ""
@@ -115,6 +114,50 @@ class SignupViewModel : ViewModel() {
 
     private val _portfolioImages = MutableLiveData<MutableList<String>>(mutableListOf())
     val portfolioImages: LiveData<MutableList<String>> get() = _portfolioImages
+
+    /**
+     * Executes the Profile Lifecycle logic and Calculates the Intelligence Score.
+     * Triggers real-time snapshot listeners for the Web Admin Dashboard.
+     */
+    private fun syncProfileLifecycle(isFinalSubmit: Boolean = false) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        // 1. Rule-Based Completeness Scoring System
+        var score = 0
+        if (fullName.isNotBlank() && email.isNotBlank() && phoneNumber.isNotBlank()) score += 20
+        if (height.isNotBlank() && bodyType.isNotBlank() && gender.isNotBlank()) score += 20
+        if (spotlightCategory.isNotBlank() && (accents.size + otherSkills.size) >= 3) score += 20
+        if (headshotUrl.isNotBlank() && fullBodyUrl.isNotBlank()) score += 20
+        if (videoUrl.isNotBlank()) score += 20
+
+        // 2. Profile Approval Workflow States
+        val currentStatus = when {
+            isFinalSubmit -> "pending_review" 
+            score >= 40 -> "active"           
+            else -> "draft"                   
+        }
+
+        // 3. Structured Firebase Map Payload (Synchronized with Admin Dashboard)
+        val profilePayload = hashMapOf(
+            "status" to currentStatus,
+            "completenessScore" to score,
+            "name" to fullName,
+            "email" to email,
+            "physicalSpecs" to "Height: $height | Build: $bodyType | Gender: $gender",
+            "showreelUrl" to videoUrl,
+            "updatedAt" to Timestamp.now()
+        )
+
+        // 4. Asynchronous Firestore Atomic Update
+        FirebaseFirestore.getInstance().collection("profiles").document(userId)
+            .set(profilePayload, SetOptions.merge())
+            .addOnSuccessListener {
+                Log.d("SceneX_Lifecycle", "✅ Sync Success: $currentStatus | Score: $score")
+            }
+            .addOnFailureListener { e ->
+                Log.e("SceneX_Lifecycle", "❌ Sync Failed: ${e.message}")
+            }
+    }
 
     fun uploadProfilePicture(file: File) {
         _isUploading.value = true
@@ -182,35 +225,6 @@ class SignupViewModel : ViewModel() {
         })
     }
 
-    private fun syncProfileLifecycle(isFinalSubmit: Boolean = false) {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-
-        var score = 0
-        if (fullName.isNotBlank() && email.isNotBlank() && phoneNumber.isNotBlank()) score += 20
-        if (height.isNotBlank() && bodyType.isNotBlank() && gender.isNotBlank()) score += 20
-        if (spotlightCategory.isNotBlank() && (accents.size + otherSkills.size) >= 3) score += 20
-        if (headshotUrl.isNotBlank() && fullBodyUrl.isNotBlank()) score += 20
-        if (videoUrl.isNotBlank()) score += 20
-
-        val currentStatus = when {
-            isFinalSubmit -> "pending_review" 
-            score >= 40 -> "active"           
-            else -> "draft"                   
-        }
-
-        val payload = hashMapOf(
-            "status" to currentStatus,
-            "completenessScore" to score,
-            "updatedAt" to Timestamp.now()
-        )
-
-        FirebaseFirestore.getInstance().collection("profiles").document(userId)
-            .set(payload, SetOptions.merge())
-            .addOnSuccessListener {
-                Log.d("SceneX_Sync", "✅ State Sync: $currentStatus | Score: $score")
-            }
-    }
-
     fun createAccount() {
         val profile = UserProfile(
             fullName = fullName, email = email, stageName = userName, role = "TALENT",
@@ -270,7 +284,7 @@ class SignupViewModel : ViewModel() {
             if (specsSuccess) {
                 repository.saveMediaAssets(assets) { assetsSuccess ->
                     if (assetsSuccess) {
-                        syncProfileLifecycle(isFinalSubmit = false)
+                        syncProfileLifecycle(isFinalSubmit = false) 
                         _navigateToNextStep.value = "STEP5"
                     }
                 }
@@ -284,13 +298,6 @@ class SignupViewModel : ViewModel() {
         
         repository.saveMediaAssets(portfolioData) {
             syncProfileLifecycle(isFinalSubmit = true) 
-            repository.submitTalentProfileToAdmin(
-                userId = userId,
-                fullName = fullName,
-                userEmail = email,
-                heightAndBuild = "Height: $height | Build: $bodyType",
-                youtubeLink = videoUrl
-            )
             _navigateToNextStep.value = "FINISH"
         }
     }

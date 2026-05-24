@@ -5,7 +5,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <application
         android:allowBackup="true"
@@ -15,7 +14,25 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SceneX">
+        android:theme="@style/Theme.SceneX"
+        tools:targetApi="31">
+        
+        <activity
+            android:name=".views.SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.SceneX.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".views.OnboardingActivity" android:exported="false" />
+        <activity android:name=".views.RoleSelectActivity" android:exported="false" />
+        <activity android:name=".views.SignupActivity" android:exported="false" />
+        <activity android:name=".views.LoginActivity" android:exported="false" />
+        <activity android:name=".views.WaitingRoomActivity" android:exported="false" />
+        <activity android:name=".MainActivity" android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -26,21 +43,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
-        <activity
-            android:name=".views.SplashActivity"
-            android:exported="true"
-            android:theme="@style/Theme.SceneX">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name=".views.OnboardingActivity" android:exported="false" />
-        <activity android:name=".views.RoleSelectActivity" android:exported="false" />
-        <activity android:name=".views.SignupActivity" android:exported="false" />
-        <activity android:name=".MainActivity" android:exported="false" />
 
     </application>
 
