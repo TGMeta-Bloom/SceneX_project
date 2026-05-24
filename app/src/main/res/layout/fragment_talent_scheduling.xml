@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        app:elevation="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="28dp">
+
+            <!-- Logo and Header -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/imgLogo"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/talent_schedule_logo" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="Schedule"
+                    android:textColor="#880E4F"
+                    android:textSize="26sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Toggle Buttons -->
+            <LinearLayout
+                android:id="@+id/customToggleContainer"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/calendar_container_bg"
+                android:orientation="horizontal"
+                android:padding="2dp">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnCalendarView"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/toggle_button_selector"
+                    android:text="Calendar View"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnListView"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/toggle_button_selector"
+                    android:text="List View"
+                    android:textAllCaps="false"
+                    android:textColor="@color/black" />
+            </LinearLayout>
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:tabIndicatorColor="#880E4F"
+                app:tabSelectedTextColor="#880E4F"
+                app:tabTextColor="#666666">
+                <com.google.android.material.tabs.TabItem android:text="Upcoming" />
+                <com.google.android.material.tabs.TabItem android:text="Past" />
+            </com.google.android.material.tabs.TabLayout>
+
+        </LinearLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- EVERYTHING FOR CALENDAR MODE -->
+            <LinearLayout
+                android:id="@+id/layoutCalendarMode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/calendarContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="24dp"
+                    android:background="@drawable/calendar_container_bg"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+                    <CalendarView
+                        android:id="@+id/calendarView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+                    <View android:layout_width="14dp" android:layout_height="14dp" android:background="@android:drawable/presence_online" android:backgroundTint="#2962FF" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:text="Auditions" android:textSize="13sp" />
+                    <View android:layout_width="14dp" android:layout_height="14dp" android:layout_marginStart="20dp" android:background="@android:drawable/presence_online" android:backgroundTint="#FF6D00" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:text="Shoot days" android:textSize="13sp" />
+                    <View android:layout_width="14dp" android:layout_height="14dp" android:layout_marginStart="20dp" android:background="@android:drawable/presence_online" android:backgroundTint="#00C853" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:text="Other" android:textSize="13sp" />
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvTimeline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:nestedScrollingEnabled="false"
+                    tools:listitem="@layout/item_schedule_timeline" />
+            </LinearLayout>
+
+            <!-- EVERYTHING FOR LIST MODE -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvBookings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:paddingBottom="120dp"
+                android:clipToPadding="false"
+                tools:listitem="@layout/item_schedule_card" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Round corner pill-shaped button with primary gradient -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnNewSchedule"
+        android:layout_width="wrap_content"
+        android:layout_height="56dp"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="24dp"
+        android:background="@drawable/bg_primary_gradient"
+        app:backgroundTint="@null"
+        android:paddingHorizontal="32dp"
+        android:text="New Schedule"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:cornerRadius="100dp" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

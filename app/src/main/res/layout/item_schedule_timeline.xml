@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
+
+    <!-- Time Label - Top Aligned -->
+    <TextView
+        android:id="@+id/txtTime"
+        android:layout_width="70dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:textColor="#666666"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="08.00 a.m" />
+
+    <!-- Timeline Dot - Aligned with the Time Label -->
+    <View
+        android:id="@+id/timelineDot"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_marginStart="8dp"
+        android:background="@android:drawable/presence_online"
+        android:backgroundTint="#880E4F"
+        app:layout_constraintBottom_toBottomOf="@id/txtTime"
+        app:layout_constraintStart_toEndOf="@id/txtTime"
+        app:layout_constraintTop_toTopOf="@id/txtTime" />
+
+    <!-- Timeline Line -->
+    <View
+        android:id="@+id/timelineLine"
+        android:layout_width="2dp"
+        android:layout_height="0dp"
+        android:background="#E0E0E0"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/timelineDot"
+        app:layout_constraintStart_toStartOf="@id/timelineDot"
+        app:layout_constraintTop_toBottomOf="@id/timelineDot" />
+
+    <!-- Content Container -->
+    <LinearLayout
+        android:id="@+id/contentContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:orientation="vertical"
+        android:paddingTop="10dp"
+        android:paddingBottom="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/timelineDot"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/txtTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#1A1C1E"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            tools:text="Costume Fitting" />
+
+        <TextView
+            android:id="@+id/txtDetails"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:lineSpacingExtra="4dp"
+            android:textColor="#757575"
+            android:textSize="13sp"
+            tools:text="Sihina Genena Kumariye\nKandy\n08.00 a.m - 9.30 a.m" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
