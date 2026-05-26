@@ -28,6 +28,19 @@ class UserRepository {
     }
 
     /**
+     * Fetches dynamic ranking weights from the admin calibration collection.
+     */
+    fun getRankingCalibration(onComplete: (Map<String, Any>?) -> Unit) {
+        db.collection("ranking_calibration").document("weights").get()
+            .addOnSuccessListener { document ->
+                onComplete(document.data)
+            }
+            .addOnFailureListener {
+                onComplete(null)
+            }
+    }
+
+    /**
      * Saves user role selection to the 'users' collection.
      */
     fun saveUserRole(role: String, onComplete: (Boolean) -> Unit) {
