@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Shader
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,12 +20,9 @@ import com.example.scenex.models.UserProfile
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 
-/**
- * Senior Architect Implementation: Recruiter Dashboard Home.
- * Integrated with the Visibility Prioritization Engine for Recommended Talent.
- */
 class RecruiterHomeFragment : Fragment() {
 
     private lateinit var ivProfileHeader: ShapeableImageView
@@ -34,6 +32,9 @@ class RecruiterHomeFragment : Fragment() {
     
     private lateinit var rvRecommendedTalent: RecyclerView
     private lateinit var cvTalentExample: View
+    
+    private var talentFeedListener: ListenerRegistration? = null
+    private var identityListener: ListenerRegistration? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,7 +46,6 @@ class RecruiterHomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize Components
         ivProfileHeader = view.findViewById(R.id.ivProfileHeader)
         tvRecruiterName = view.findViewById(R.id.tvRecruiterName)
         tvAppName = view.findViewById(R.id.tvAppName)
@@ -56,81 +56,71 @@ class RecruiterHomeFragment : Fragment() {
 
         rvRecommendedTalent.layoutManager = LinearLayoutManager(requireContext())
 
-        // 1. Sync Branding Colors: Apply primary gradient to App Name
         applyTextGradient(tvAppName)
-
-        // 2. Load Dashboard Handshake Data
-        loadRecruiterData()
-
-        // 3. Populate Recommended Talent using Visibility Prioritization Score
-        loadRecommendedTalent()
+        startIdentitySync()
+        startLiveDiscoveryEngine()
     }
 
-    private fun loadRecruiterData() {
+    private fun startIdentitySync() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        FirebaseFirestore.getInstance().collection("profiles").document(userId)
-            .get()
-            .addOnSuccessListener { document ->
-                if (document != null && document.exists()) {
-                    val name = document.getString("fullName") ?: "Recruiter"
-                    val profileImage = document.getString("profileImage") ?: document.getString("profileImageUrl") ?: ""
-
-                    tvRecruiterName.text = name
-
-                    if (profileImage.isNotEmpty()) {
-                        Glide.with(this)
-                            .load(profileImage)
-                            .placeholder(R.drawable.ic_profile_placeholder)
-                            .error(R.drawable.ic_profile_placeholder)
-                            .circleCrop()
-                            .into(ivProfileHeader)
-                    }
+        identityListener = FirebaseFirestore.getInstance().collection("profiles").document(userId)
+            .addSnapshotListener { snapshot, _ ->
+                if (snapshot != null && snapshot.exists()) {
+                    tvRecruiterName.text = snapshot.getString("fullName") ?: "Recruiter"
+                    val img = snapshot.getString("profileImage") ?: snapshot.getString("profileImageUrl")
+                    Glide.with(this).load(img).placeholder(R.drawable.ic_profile_placeholder).circleCrop().into(ivProfileHeader)
                 }
             }
     }
 
-    /**
-     * DYNAMIC CLOUD OUTPUT: Recommended Talent Feed
-     * Executes optimized query using pre-compiled rankingScore from the Weighted Engine.
-     */
-    private fun loadRecommendedTalent() {
+    private fun startLiveDiscoveryEngine() {
+        // 🎯 FIX: Include "pending" so you can see your test talents in the app
         FirebaseFirestore.getInstance().collection("profiles")
             .whereEqualTo("userRole", "TALENT")
-            .whereEqualTo("verificationStatus", "verified")
+            .whereIn("verificationStatus", listOf("verified", "pending"))
             .orderBy("rankingScore", Query.Direction.DESCENDING)
-            .limit(10)
-            .get()
-            .addOnSuccessListener { documents ->
-                val talentList = mutableListOf<UserProfile>()
-                for (doc in documents) {
-                    val talent = doc.toObject(UserProfile::class.java)
-                    talentList.add(talent)
-                }
+            .limit(20)
+            .addSnapshotListener { snapshots, error ->
+                if (error != null) { loadFailSafeTalent(); return@addSnapshotListener }
+                if (snapshots != null) displayTalentList(snapshots.toObjects(UserProfile::class.java))
+            }
+    }
 
-                if (talentList.isNotEmpty()) {
-                    // Hide static example card and show dynamic feed
-                    cvTalentExample.visibility = View.GONE
-                    rvRecommendedTalent.adapter = TalentAdapter(talentList)
-                }
+    private fun loadFailSafeTalent() {
+        FirebaseFirestore.getInstance().collection("profiles")
+            .whereEqualTo("userRole", "TALENT")
+            .limit(30).get().addOnSuccessListener { snapshots ->
+                val list = snapshots.toObjects(UserProfile::class.java).sortedByDescending { it.rankingScore }
+                displayTalentList(list)
             }
-            .addOnFailureListener { e ->
-                // Fallback to static example if query fails (usually due to missing index)
-                cvTalentExample.visibility = View.VISIBLE
-            }
+    }
+
+    private fun displayTalentList(list: List<UserProfile>) {
+        if (list.isNotEmpty()) {
+            cvTalentExample.visibility = View.GONE
+            rvRecommendedTalent.visibility = View.VISIBLE
+            rvRecommendedTalent.adapter = TalentAdapter(list)
+        } else {
+            cvTalentExample.visibility = View.VISIBLE
+        }
     }
 
     private fun applyTextGradient(textView: TextView) {
         textView.post {
             val width = textView.paint.measureText(textView.text.toString())
             if (width > 0) {
-                val textShader: Shader = LinearGradient(
-                    0f, 0f, width, 0f,
+                val textShader: Shader = LinearGradient(0f, 0f, width, 0f,
                     intArrayOf(Color.parseColor("#B0006D"), Color.parseColor("#4A0038")),
-                    null, Shader.TileMode.CLAMP
-                )
+                    null, Shader.TileMode.CLAMP)
                 textView.paint.shader = textShader
                 textView.invalidate()
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        talentFeedListener?.remove()
+        identityListener?.remove()
     }
 }

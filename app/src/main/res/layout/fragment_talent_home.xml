@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:paddingBottom="32dp">
 
-        <!-- 1. Header: Bell (Black), AppName (Hero Magenta Serif), Avatar (Circular) -->
+        <!-- 1. Header Section -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clHeader"
             android:layout_width="match_parent"
@@ -26,7 +26,7 @@
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:src="@drawable/ic_notification"
-                android:contentDescription="@string/notifications"
+                android:contentDescription="Notifications"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -37,7 +37,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="serif"
-                android:text="@string/app_name"
+                android:text="SceneX"
                 android:textColor="@color/primary_magenta"
                 android:textSize="36sp"
                 android:textStyle="bold"
@@ -52,14 +52,14 @@
                 android:layout_height="48dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_profile_placeholder"
-                android:contentDescription="@string/profile_picture"
+                android:contentDescription="Profile Picture"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:shapeAppearanceOverlay="@style/CircleImageView" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!-- 2. Welcome Headline -->
+        <!-- 2. Welcome Section -->
         <LinearLayout
             android:id="@+id/llWelcome"
             android:layout_width="wrap_content"
@@ -75,7 +75,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="serif"
-                android:text="@string/hello_label"
+                android:text="Hello,"
                 android:textColor="@color/primary_magenta"
                 android:textSize="20sp" />
 
@@ -90,7 +90,7 @@
                 android:textSize="20sp" />
         </LinearLayout>
 
-        <!-- 3. Rounded Search Bar -->
+        <!-- 3. Search Bar -->
         <LinearLayout
             android:id="@+id/searchBarContainer"
             android:layout_width="0dp"
@@ -109,7 +109,6 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:src="@drawable/ic_search"
-                android:contentDescription="@string/search_icon"
                 app:tint="@color/primary_magenta" />
 
             <EditText
@@ -118,21 +117,21 @@
                 android:layout_height="match_parent"
                 android:layout_marginStart="12dp"
                 android:background="@null"
-                android:hint="@string/search_hint"
+                android:hint="Search casting..."
                 android:inputType="text"
-                android:importantForAutofill="no"
                 android:textColor="@color/black"
-                android:textColorHint="#9E9E9E"
                 android:textSize="14sp" />
         </LinearLayout>
 
-        <!-- 4. Profile Strength Section -->
+        <!-- 4. Profile Strength & Intelligence Section -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clProfileStrength"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="24dp"
             android:layout_marginTop="24dp"
+            android:background="@drawable/talent_card_border"
+            android:padding="16dp"
             app:layout_constraintTop_toBottomOf="@id/searchBarContainer">
 
             <FrameLayout
@@ -176,26 +175,30 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/profile_strength_label"
+                    android:text="Profile Strength"
                     android:textColor="@color/black"
                     android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <!-- DYNAMIC RANKING DISPLAY -->
+                <TextView
+                    android:id="@+id/tvRankingStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="⚡ System Ranking: 0 Points"
+                    android:textColor="@color/primary_magenta"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvStrengthPercentLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
                     tools:text="95% complete"
                     android:textColor="@color/black"
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:id="@+id/tvStrengthAction"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/add_voice_clip_action"
-                    android:textColor="@color/black"
-                    android:textSize="14sp" />
+                    android:textSize="13sp" />
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -205,22 +208,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="32dp"
             android:fontFamily="serif"
-            android:text="@string/casting_opportunities_feed_title"
+            android:text="Casting Opportunities"
             android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/clProfileStrength" />
 
-        <!-- 6. Feed RecyclerView Placeholder -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvCastingFeed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:minHeight="400dp"
+            android:minHeight="300dp"
             android:nestedScrollingEnabled="false"
             app:layout_constraintTop_toBottomOf="@id/tvCastingFeedTitle" />
 

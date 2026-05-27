@@ -54,7 +54,6 @@ class SignupViewModel : ViewModel() {
 
     private val imgBBService = retrofit.create(ImgBBService::class.java)
 
-    // Dynamic Calibration Weights
     private var calibrationWeights: Map<String, Any>? = null
 
     init {
@@ -64,7 +63,7 @@ class SignupViewModel : ViewModel() {
         }
     }
 
-    // Location Data
+    // Location Data logic preserved...
     val provinces = listOf("Western Province", "Central Province", "Southern Province", "Northern Province", "Eastern Province", "North Western Province", "North Central Province", "Uva Province", "Sabaragamuwa Province")
     private val citiesMap = mapOf(
         "Western Province" to listOf("Colombo", "Dehiwala", "Moratuwa", "Sri Jayawardenepura Kotte", "Negombo", "Panadura", "Kalutara", "Horana", "Gampaha", "Wattala", "Kelaniya"),
@@ -126,83 +125,76 @@ class SignupViewModel : ViewModel() {
     private val _portfolioImages = MutableLiveData<MutableList<String>>(mutableListOf())
     val portfolioImages: LiveData<MutableList<String>> get() = _portfolioImages
 
-    /**
-     * 1. WEIGHTED PROFILE COMPLETION ENGINE
-     * Refactored into a rule-based system for the SL Media Industry.
-     */
     private fun calculateWeightedCompletion(): Int {
         var score = 0
         if (userRole == "TALENT") {
-            // Basic Info = 10
             if (fullName.isNotBlank() && email.isNotBlank() && phoneNumber.isNotBlank()) score += 10
-            // Identity / Physical Specs = 10
             if (height.isNotBlank() && age > 0 && gender.isNotBlank()) score += 10
-            // Professional Details = 20
             if (spotlightCategory.isNotBlank() && languages.isNotBlank() && experience.isNotBlank()) score += 20
-            // Media Assets = 30
             if (headshotUrl.isNotBlank() && fullBodyUrl.isNotBlank()) score += 30
-            // Verification Evidence = 30
             if (videoUrl.isNotBlank()) score += 30
         } else {
-            // Recruiter logic
-            if (fullName.isNotBlank() && email.isNotBlank()) score += 10 // Basic Info
-            if (spotlightCategory.isNotBlank()) score += 20 // Spotlight
-            if (companyName.isNotBlank()) score += 20 // Company Name
-            if (industryProofLinks.isNotEmpty()) score += 30 // Production Links (Mandatory)
-            if (nicImageUrl.isNotBlank()) score += 20 // NIC (Optional Trust Bonus)
+            if (fullName.isNotBlank() && email.isNotBlank()) score += 10 
+            if (spotlightCategory.isNotBlank()) score += 20 
+            if (companyName.isNotBlank()) score += 20 
+            if (industryProofLinks.isNotEmpty()) score += 30 
+            if (nicImageUrl.isNotBlank()) score += 20 
         }
         return score.coerceAtMost(100)
     }
 
-    /**
-     * 2. SYSTEM-BASED RANKING ENGINE
-     * Formula: ((Portfolio * wP) + (Skills * wS) + (Experience * eW) + (Completeness * wC)) / Sum(Weights)
-     */
-    private fun calculateRankingScore(completeness: Int): Int {
+    private fun calculateRankingScore(completeness: Int): Double {
         val cw = calibrationWeights ?: mapOf(
-            "completenessWeight" to 20L,
+            "completenessWeight" to 15L,
+            "experienceWeight" to 18L,
             "skillsWeight" to 25L,
-            "experienceWeight" to 25L,
             "portfolioWeight" to 30L
         )
-
-        val wC = (cw["completenessWeight"] as? Number)?.toDouble() ?: 20.0
+        val wC = (cw["completenessWeight"] as? Number)?.toDouble() ?: 15.0
+        val wE = (cw["experienceWeight"] as? Number)?.toDouble() ?: 18.0
         val wS = (cw["skillsWeight"] as? Number)?.toDouble() ?: 25.0
-        val wE = (cw["experienceWeight"] as? Number)?.toDouble() ?: 25.0
         val wP = (cw["portfolioWeight"] as? Number)?.toDouble() ?: 30.0
 
-        // Sub-metrics (Yields)
         val completenessYield = completeness.toDouble()
-        val skillsYield = Math.min(100.0, (accents.size + otherSkills.size) * 20.0) // 5 skills = 100% yield
+        val skillsYield = Math.min(100.0, (accents.size + otherSkills.size) * 20.0) 
         val experienceYield = if (experience.isNotBlank()) 100.0 else 0.0
         val portfolioYield = Math.min(100.0, ((if (portfolioLink.isNotBlank()) 50 else 0) + (_portfolioImages.value?.size ?: 0) * 10).toDouble())
 
-        // Math Engine
         val numerator = (portfolioYield * wP) + (skillsYield * wS) + (experienceYield * wE) + (completenessYield * wC)
         val denominator = wP + wS + wE + wC
-        
         val finalScore = if (denominator > 0) numerator / denominator else completenessYield
-        return finalScore.toInt().coerceAtMost(100)
+        return finalScore.coerceAtMost(100.0)
     }
 
     private fun syncProfileLifecycle(isFinalSubmit: Boolean = false) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val completion = calculateWeightedCompletion()
-        val ranking = calculateRankingScore(completion)
+        val rankingDecimal = calculateRankingScore(completion)
 
-        // 4. Lifecycle Status Rules
+        val featuredThreshold = (calibrationWeights?.get("featuredThreshold") as? Number)?.toInt() ?: 80
+        val normalThreshold = (calibrationWeights?.get("normalThreshold") as? Number)?.toInt() ?: 50
+
+        val tier = when {
+            rankingDecimal >= featuredThreshold -> "FEATURED"
+            rankingDecimal >= normalThreshold -> "NORMAL"
+            else -> "BASIC"
+        }
+
         val currentStatus = when {
-            isFinalSubmit && completion >= 70 -> "pending_review"
+            isFinalSubmit && completion >= 70 -> "pending_review" 
             completion >= 70 -> "eligible_for_review"
             completion >= 40 -> "active"
             else -> "draft"
         }
 
+        val accountProfilePicture = _profileImageUrl.value ?: ""
+
         val profilePayload = mutableMapOf<String, Any>(
             "status" to currentStatus,
-            "completenessScore" to completion,
-            "rankingScore" to ranking,
-            "calculated_score" to ranking.toDouble(), // Database Blueprint alignment
+            "completenessScore" to completion.toLong(),
+            "rankingScore" to rankingDecimal.toLong(),
+            "calculated_score" to rankingDecimal,
+            "visibility_tier" to tier,
             "fullName" to fullName,
             "email" to email,
             "phoneNumber" to phoneNumber,
@@ -211,26 +203,35 @@ class SignupViewModel : ViewModel() {
             "province" to province,
             "city" to city,
             "userRole" to userRole,
+            "rankingVersion" to (calibrationWeights?.get("rankingVersion") ?: 1),
+            "verificationStatus" to if (currentStatus == "pending_review") "pending" else "unverified",
             "updatedAt" to Timestamp.now()
         )
+
+        // 🎯 SINGLE IDENTITY FIELD: Root 'profileImage' is the source of truth for all avatars
+        if (accountProfilePicture.isNotEmpty()) {
+            profilePayload["profileImage"] = accountProfilePicture
+        }
         
         if (userRole == "RECRUITER") {
             profilePayload["companyName"] = companyName
             profilePayload["industryProofLinks"] = industryProofLinks
             profilePayload["nicImageUrl"] = nicImageUrl
-            profilePayload["verificationStatus"] = if (currentStatus == "pending_review") "pending" else "unverified"
         } else {
             profilePayload["physicalSpecs"] = "Height: $height | Build: $bodyType | Gender: $gender"
             profilePayload["showreelUrl"] = videoUrl
-            profilePayload["category"] = spotlightCategory
+            profilePayload["spotlightCategory"] = spotlightCategory
+            // 🎯 FLAT HIERARCHY: Portfolio links stored strictly at root to avoid 'mediaAssets' duplication
+            profilePayload["headshotUrl"] = headshotUrl 
+            profilePayload["fullBodyUrl"] = fullBodyUrl 
         }
 
         FirebaseFirestore.getInstance().collection("profiles").document(userId)
             .set(profilePayload, SetOptions.merge())
-            .addOnSuccessListener { Log.d("SceneX_Engine", "✅ Weighted Sync: $currentStatus | Strength: $completion%") }
+            .addOnSuccessListener { Log.d("SceneX_Engine", "✅ Flat Hierarchy Sync successful: Duplicates Removed") }
     }
 
-    // --- RESTORED CORE METHODS ---
+    // --- PRESERVED METHODS ---
 
     fun uploadProfilePicture(file: File) {
         _isUploading.value = true
@@ -278,8 +279,7 @@ class SignupViewModel : ViewModel() {
     }
 
     fun createAccount() {
-        // FIXED: Using 'role' parameter to match team data model (UserProfile.kt)
-        val profile = UserProfile(fullName = fullName, email = email, stageName = userName, role = userRole, phoneNumber = phoneNumber, age = age, gender = gender)
+        val profile = UserProfile(fullName = fullName, email = email, stageName = userName, role = userRole, userRole = userRole, phoneNumber = phoneNumber, age = age, gender = gender)
         repository.signupUser(profile, password) { success, error ->
             if (success) { syncProfileLifecycle(false); _navigateToNextStep.value = if (userRole == "RECRUITER") "RECRUITER_STEP2" else "STEP2" } 
             else _errorMessage.value = error
@@ -293,16 +293,15 @@ class SignupViewModel : ViewModel() {
 
     fun saveRecruiterExperienceAndNavigate(company: String, proofLinks: List<String>, exp: String) {
         companyName = company; industryProofLinks = proofLinks; experience = exp
-        if (proofLinks.isEmpty()) { _errorMessage.value = "Mandatory: Please provide production links (YouTube/Social)"; return }
+        if (proofLinks.isEmpty()) { _errorMessage.value = "Mandatory: Provide links"; return }
         repository.saveProfessionalProfile(hashMapOf("companyName" to company, "industryProofLinks" to proofLinks, "experience" to exp)) { 
             if (it) { syncProfileLifecycle(false); _navigateToNextStep.value = "RECRUITER_VERIFICATION" } 
         }
     }
 
     fun finalizeRecruiterSignup() {
-        // 5. Validation Before Pending Review
         val score = calculateWeightedCompletion()
-        if (score < 70) { _errorMessage.value = "Profile strength is $score%. Minimum 70% required for Admin Review."; return }
+        if (score < 70) { _errorMessage.value = "Profile strength: $score%. Admin Review requires 70%."; return }
         syncProfileLifecycle(isFinalSubmit = true); _navigateToNextStep.value = "FINISH"
     }
 
@@ -350,7 +349,7 @@ class SignupViewModel : ViewModel() {
 
     fun finalizeRegistration() {
         val score = calculateWeightedCompletion()
-        if (score < 70) { _errorMessage.value = "Strength is $score%. Upload Video Reel to reach 70% for Review."; return }
+        if (score < 70) { _errorMessage.value = "Strength is $score%. Minimum 70% required."; return }
         repository.saveMediaAssets(mapOf("portfolioImages" to (_portfolioImages.value ?: emptyList<String>()))) { 
             syncProfileLifecycle(true); _navigateToNextStep.value = "FINISH" 
         } 
