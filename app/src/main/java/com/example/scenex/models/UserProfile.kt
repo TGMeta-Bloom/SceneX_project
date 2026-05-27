@@ -23,6 +23,7 @@ data class UserProfile(
     val relationshipStatus: String = "",
     val hobbies: String = "",
     val bio: String = "",
+    val physicalSpecs: String = "", // Added for Portfolio Detail View
     
     // Nested assets map from backend standard
     val mediaAssets: Map<String, String> = emptyMap(),

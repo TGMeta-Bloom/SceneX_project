@@ -99,7 +99,14 @@ class RecruiterHomeFragment : Fragment() {
         if (list.isNotEmpty()) {
             cvTalentExample.visibility = View.GONE
             rvRecommendedTalent.visibility = View.VISIBLE
-            rvRecommendedTalent.adapter = TalentAdapter(list)
+            // 🎯 NAVIGATION TRIGGER: Pass click listener to open TalentDetailFragment
+            rvRecommendedTalent.adapter = TalentAdapter(list) { talent ->
+                val detailFragment = TalentDetailFragment.newInstance(talent)
+                parentFragmentManager?.beginTransaction()
+                    ?.replace(R.id.nav_host_fragment, detailFragment)
+                    ?.addToBackStack(null)
+                    ?.commit()
+            }
         } else {
             cvTalentExample.visibility = View.VISIBLE
         }

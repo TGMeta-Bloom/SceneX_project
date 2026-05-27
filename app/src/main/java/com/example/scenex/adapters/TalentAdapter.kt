@@ -16,10 +16,12 @@ import com.google.android.material.imageview.ShapeableImageView
 
 /**
  * Senior Technical Implementation: Talent Discovery Adapter.
- * Optimized for Nested Identity Mapping (mediaAssets.headshotUrl).
+ * Optimized for Nested Identity Mapping and Navigation.
  */
-class TalentAdapter(private val talentList: List<UserProfile>) :
-    RecyclerView.Adapter<TalentAdapter.TalentViewHolder>() {
+class TalentAdapter(
+    private val talentList: List<UserProfile>,
+    private val onItemClicked: (UserProfile) -> Unit
+) : RecyclerView.Adapter<TalentAdapter.TalentViewHolder>() {
 
     class TalentViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val ivTalentPhoto: ShapeableImageView = view.findViewById(R.id.ivTalentPhoto)
@@ -49,8 +51,7 @@ class TalentAdapter(private val talentList: List<UserProfile>) :
         holder.tvTalentRole.text = talent.spotlightCategory.ifEmpty { "Actor" }
         holder.tvLocation.text = "Location : ${talent.city.ifEmpty { "Colombo" }}"
 
-        // 2. NESTED IMAGE SYNC ENGINE
-        // Uses the 'effectiveAvatarUrl' Waterfall logic: mediaAssets -> profileImage -> Initials
+        // 2. IMAGE SYNC
         Glide.with(holder.itemView.context)
             .load(talent.effectiveAvatarUrl)
             .placeholder(R.drawable.ic_profile_placeholder)
@@ -77,6 +78,11 @@ class TalentAdapter(private val talentList: List<UserProfile>) :
         setupLink(holder.tvPortfolioLink, talent.portfolioLink)
         setupLink(holder.tvShowreelLink, talent.showreelUrl)
         setupLink(holder.tvSocialMatrix, talent.socialMediaLinks)
+
+        // 5. NAVIGATION TRIGGER
+        holder.itemView.setOnClickListener {
+            onItemClicked(talent)
+        }
     }
 
     private fun setupLink(textView: TextView, url: String) {
