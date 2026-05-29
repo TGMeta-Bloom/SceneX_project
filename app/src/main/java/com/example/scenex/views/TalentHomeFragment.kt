@@ -35,13 +35,17 @@ class TalentHomeFragment : Fragment() {
         val tvUserName = view.findViewById<TextView>(R.id.tvUserName)
         val pbProfileStrength = view.findViewById<ProgressBar>(R.id.pbProfileStrength)
         val tvStrengthPercent = view.findViewById<TextView>(R.id.tvStrengthPercent)
+        val tvRankingStatus = view.findViewById<TextView>(R.id.tvRankingStatus)
 
-        // Apply Primary Gradient to branding elements matching button_rounded_magenta
         applyTextGradient(tvAppName)
 
+        // REAL-TIME IDENTITY OBSERVATION
         viewModel.profileData.observe(viewLifecycleOwner) { data ->
             data?.let {
-                val imageUrl = it["profileImage"] as? String ?: it["profileImageUrl"] as? String
+                // ROBUST IMAGE LOOKUP: Checks multiple naming conventions for the avatar
+                val imageUrl = (it["profileImage"] as? String)?.takeIf { it.isNotEmpty() }
+                    ?: (it["profileImageUrl"] as? String)?.takeIf { it.isNotEmpty() }
+
                 Glide.with(this)
                     .load(imageUrl)
                     .placeholder(R.drawable.ic_profile_placeholder)
@@ -49,21 +53,20 @@ class TalentHomeFragment : Fragment() {
                     .circleCrop()
                     .into(ivProfileHeader)
 
-                val name = it["fullName"] as? String ?: it["name"] as? String ?: "Talent"
-                tvUserName.text = name
+                tvUserName.text = it["fullName"] as? String ?: "Talent"
 
-                val score = (it["completenessScore"] as? Long)?.toInt() ?: 0
-                pbProfileStrength.progress = score
-                tvStrengthPercent.text = "$score%"
+                val yield = (it["completenessScore"] as? Number)?.toInt() ?: 0
+                pbProfileStrength.progress = yield
+                tvStrengthPercent.text = "$yield%"
+
+                val ranking = (it["rankingScore"] as? Number)?.toInt() ?: 0
+                tvRankingStatus?.text = "⚡ System Ranking: $ranking Points"
             }
         }
 
         viewModel.fetchProfileData()
     }
 
-    /**
-     * Programmatically applies the branding gradient (#B0006D to #4A0038) to match button styles.
-     */
     private fun applyTextGradient(textView: TextView) {
         textView.post {
             val width = textView.paint.measureText(textView.text.toString())
