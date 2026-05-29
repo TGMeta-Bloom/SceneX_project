@@ -3,9 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/scenex_background">
+    android:background="#FFF9FC">
 
-    <!-- Elite Toolbar -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/ic_arrow_back_elite"
-            app:navigationIconTint="@color/scenex_primary">
+            app:navigationIconTint="@color/primary_magenta">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -25,12 +24,11 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <!-- Icon Sync -->
                 <ImageView
                     android:layout_width="28dp"
                     android:layout_height="28dp"
                     android:src="@drawable/ic_clapperboard"
-                    app:tint="@color/scenex_primary" />
+                    app:tint="@color/primary_magenta" />
 
                 <TextView
                     android:id="@+id/tvToolbarTitle"
@@ -39,7 +37,7 @@
                     android:layout_marginStart="12dp"
                     android:fontFamily="serif"
                     android:text="Create Casting Call"
-                    android:textColor="@color/scenex_primary_light"
+                    android:textColor="@color/black"
                     android:textSize="22sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -60,6 +58,81 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Poster Image Picker Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/black"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:fontFamily="serif"
+                        android:text="Casting Call Poster"
+                        android:textColor="@color/primary_magenta"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardPoster"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="#DDDDDD"
+                        app:strokeWidth="1dp">
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+                            <ImageView
+                                android:id="@+id/ivPoster"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/ic_image_placeholder" />
+
+                            <LinearLayout
+                                android:id="@+id/layoutPickImage"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <ImageView
+                                    android:layout_width="48dp"
+                                    android:layout_height="48dp"
+                                    android:src="@drawable/ic_add_photo"
+                                    app:tint="@color/primary_magenta" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="8dp"
+                                    android:text="Click to add poster"
+                                    android:textColor="@color/primary_magenta"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+                        </FrameLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- 1. Production Information Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
@@ -68,7 +141,8 @@
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="24dp"
                 app:cardElevation="4dp"
-                app:strokeWidth="0dp">
+                app:strokeColor="@color/black"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -82,11 +156,11 @@
                         android:layout_marginBottom="20dp"
                         android:fontFamily="serif"
                         android:text="1. Production Information"
-                        android:textColor="@color/scenex_text_primary"
+                        android:textColor="@color/primary_magenta"
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
-                    <TextView style="@style/AppTextStyle_BodySmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Project Title" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Project Title" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
                     <EditText
                         android:id="@+id/etProjectTitle"
                         android:layout_width="match_parent"
@@ -103,7 +177,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="8dp">
-                            <TextView style="@style/AppTextStyle_BodySmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Type" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Type" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
                             <AutoCompleteTextView
                                 android:id="@+id/dropdownProductionType"
                                 android:layout_width="match_parent"
@@ -115,7 +189,7 @@
                                 android:textSize="14sp" />
                         </LinearLayout>
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1.2" android:orientation="vertical">
-                            <TextView style="@style/AppTextStyle_BodySmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Company" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Company" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
                             <EditText
                                 android:id="@+id/etProductionCompany"
                                 android:layout_width="match_parent"
@@ -127,7 +201,7 @@
                         </LinearLayout>
                     </LinearLayout>
 
-                    <TextView style="@style/AppTextStyle_BodySmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Director Name" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginTop="16dp" android:layout_marginBottom="4dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Director Name" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginTop="16dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
                     <EditText
                         android:id="@+id/etDirectorName"
                         android:layout_width="match_parent"
@@ -137,7 +211,7 @@
                         android:paddingHorizontal="24dp"
                         android:textSize="14sp" />
 
-                    <TextView style="@style/AppTextStyle_BodySmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Project Synopsis" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginTop="16dp" android:layout_marginBottom="4dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Project Synopsis" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginTop="16dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
                     <EditText
                         android:id="@+id/etSynopsis"
                         android:layout_width="match_parent"
@@ -150,7 +224,7 @@
                         android:padding="20dp"
                         android:textSize="14sp" />
 
-                    <TextView style="@style/AppTextStyle_BodySmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Production Language" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginTop="16dp" android:layout_marginBottom="4dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Production Language" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginTop="16dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
                     <AutoCompleteTextView
                         android:id="@+id/dropdownLanguage"
                         android:layout_width="match_parent"
@@ -170,7 +244,9 @@
                 android:layout_marginBottom="20dp"
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="24dp"
-                app:cardElevation="4dp">
+                app:cardElevation="4dp"
+                app:strokeColor="@color/black"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -184,11 +260,11 @@
                         android:layout_marginBottom="20dp"
                         android:fontFamily="serif"
                         android:text="2. Audition Information"
-                        android:textColor="@color/scenex_text_primary"
+                        android:textColor="@color/primary_magenta"
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
-                    <TextView style="@style/AppTextStyle_BodySmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Audition Type" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Audition Type" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
                     <AutoCompleteTextView
                         android:id="@+id/dropdownAuditionType"
                         android:layout_width="match_parent"
@@ -200,7 +276,7 @@
                         android:paddingHorizontal="24dp"
                         android:textSize="14sp" />
 
-                    <TextView style="@style/AppTextStyle_BodySmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Audition Date" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Audition Date" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
                     <EditText
                         android:id="@+id/etAuditionDate"
                         android:layout_width="match_parent"
@@ -218,7 +294,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="8dp">
-                            <TextView style="@style/AppTextStyle_BodySmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Start Time" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Start Time" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
                             <EditText
                                 android:id="@+id/etStartTime"
                                 android:layout_width="match_parent"
@@ -230,7 +306,7 @@
                                 android:textSize="14sp" />
                         </LinearLayout>
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                            <TextView style="@style/AppTextStyle_BodySmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="End Time" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="End Time" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
                             <EditText
                                 android:id="@+id/etEndTime"
                                 android:layout_width="match_parent"
@@ -243,7 +319,7 @@
                         </LinearLayout>
                     </LinearLayout>
 
-                    <TextView style="@style/AppTextStyle_BodySmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Audition Location" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginTop="16dp" android:layout_marginBottom="4dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Audition Location" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginTop="16dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
                     <EditText
                         android:id="@+id/etAuditionLocation"
                         android:layout_width="match_parent"
@@ -251,11 +327,10 @@
                         android:layout_marginBottom="16dp"
                         android:background="@drawable/edittext_outline"
                         android:hint="Enter location"
-                        android:inputType="textPostalAddress"
                         android:paddingHorizontal="24dp"
                         android:textSize="14sp" />
 
-                    <TextView style="@style/AppTextStyle_BodySmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Submission Deadline" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Submission Deadline" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
                     <EditText
                         android:id="@+id/etDeadline"
                         android:layout_width="match_parent"
@@ -276,7 +351,9 @@
                 android:layout_marginBottom="24dp"
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="24dp"
-                app:cardElevation="4dp">
+                app:cardElevation="4dp"
+                app:strokeColor="@color/black"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -290,11 +367,11 @@
                         android:layout_marginBottom="20dp"
                         android:fontFamily="serif"
                         android:text="3. Role Information"
-                        android:textColor="@color/scenex_text_primary"
+                        android:textColor="@color/primary_magenta"
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
-                    <TextView style="@style/AppTextStyle_BodySmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Role Title" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Role Title" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
                     <EditText
                         android:id="@+id/etRoleTitle"
                         android:layout_width="match_parent"
@@ -310,7 +387,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="8dp">
-                            <TextView style="@style/AppTextStyle_BodySmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Gender" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Gender" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
                             <AutoCompleteTextView
                                 android:id="@+id/dropdownGender"
                                 android:layout_width="match_parent"
@@ -322,19 +399,72 @@
                                 android:textSize="14sp" />
                         </LinearLayout>
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                            <TextView style="@style/AppTextStyle_BodySmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Age Range" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp"/>
-                            <EditText
-                                android:id="@+id/etAgeRange"
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Role Type" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                            <AutoCompleteTextView
+                                android:id="@+id/dropdownRoleType"
                                 android:layout_width="match_parent"
                                 android:layout_height="56dp"
                                 android:background="@drawable/edittext_outline"
-                                android:hint="e.g. 20-30"
+                                android:hint="Select"
+                                android:inputType="none"
                                 android:paddingHorizontal="24dp"
                                 android:textSize="14sp" />
                         </LinearLayout>
                     </LinearLayout>
 
-                    <TextView style="@style/AppTextStyle_BodySmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Role Description" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginTop="16dp" android:layout_marginBottom="4dp"/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:orientation="horizontal">
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="8dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Min Age" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                            <EditText
+                                android:id="@+id/etMinAge"
+                                android:layout_width="match_parent"
+                                android:layout_height="56dp"
+                                android:background="@drawable/edittext_outline"
+                                android:hint="15"
+                                android:inputType="number"
+                                android:paddingHorizontal="24dp"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Max Age" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                            <EditText
+                                android:id="@+id/etMaxAge"
+                                android:layout_width="match_parent"
+                                android:layout_height="56dp"
+                                android:background="@drawable/edittext_outline"
+                                android:hint="100"
+                                android:inputType="number"
+                                android:paddingHorizontal="24dp"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Experience Level" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginTop="16dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                    <AutoCompleteTextView
+                        android:id="@+id/dropdownExperience"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:background="@drawable/edittext_outline"
+                        android:hint="Select"
+                        android:inputType="none"
+                        android:paddingHorizontal="24dp"
+                        android:textSize="14sp" />
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Required Skills" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginTop="16dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                    <EditText
+                        android:id="@+id/etSkills"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:background="@drawable/edittext_outline"
+                        android:hint="e.g. Singing, Dancing"
+                        android:paddingHorizontal="24dp"
+                        android:textSize="14sp" />
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Role Description" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginTop="16dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
                     <EditText
                         android:id="@+id/etRoleDescription"
                         android:layout_width="match_parent"
@@ -349,18 +479,135 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Post Button -->
+            <!-- 4. Compensation & Schedule Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/black"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:fontFamily="serif"
+                        android:text="4. Compensation &amp; Schedule"
+                        android:textColor="@color/primary_magenta"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Compensation" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                    <AutoCompleteTextView
+                        android:id="@+id/dropdownCompensation"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="@drawable/edittext_outline"
+                        android:hint="Select"
+                        android:inputType="none"
+                        android:paddingHorizontal="24dp"
+                        android:textSize="14sp" />
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Shoot Location" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                    <EditText
+                        android:id="@+id/etShootLocation"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="@drawable/edittext_outline"
+                        android:hint="Enter location"
+                        android:paddingHorizontal="24dp"
+                        android:textSize="14sp" />
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="First Day of Shoot" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                    <EditText
+                        android:id="@+id/etShootDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:background="@drawable/edittext_outline"
+                        android:drawableEnd="@android:drawable/ic_menu_my_calendar"
+                        android:focusable="false"
+                        android:hint="Select date"
+                        android:paddingHorizontal="24dp"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 5. Recruiter Contact Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/black"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:fontFamily="serif"
+                        android:text="5. Contact Information"
+                        android:textColor="@color/primary_magenta"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Contact Email" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                    <EditText
+                        android:id="@+id/etContactEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="@drawable/edittext_outline"
+                        android:hint="Enter email"
+                        android:inputType="textEmailAddress"
+                        android:paddingHorizontal="24dp"
+                        android:textSize="14sp" />
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Phone Number" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                    <EditText
+                        android:id="@+id/etContactPhone"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:background="@drawable/edittext_outline"
+                        android:hint="Enter phone"
+                        android:inputType="phone"
+                        android:paddingHorizontal="24dp"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPublish"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
                 android:layout_marginTop="10dp"
-                android:backgroundTint="@color/scenex_primary"
+                android:background="@drawable/button_rounded_magenta"
+                app:backgroundTint="@null"
                 android:text="Publish Casting Call"
                 android:textAllCaps="false"
+                android:textColor="@color/white"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                app:cornerRadius="32dp" />
+                app:cornerRadius="28dp" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

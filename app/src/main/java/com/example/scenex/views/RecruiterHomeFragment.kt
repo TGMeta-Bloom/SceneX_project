@@ -4,7 +4,6 @@ import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Shader
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +16,7 @@ import com.bumptech.glide.Glide
 import com.example.scenex.R
 import com.example.scenex.adapters.TalentAdapter
 import com.example.scenex.models.UserProfile
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -32,6 +32,7 @@ class RecruiterHomeFragment : Fragment() {
     
     private lateinit var rvRecommendedTalent: RecyclerView
     private lateinit var cvTalentExample: View
+    private lateinit var fabCreateCasting: ExtendedFloatingActionButton
     
     private var talentFeedListener: ListenerRegistration? = null
     private var identityListener: ListenerRegistration? = null
@@ -53,8 +54,17 @@ class RecruiterHomeFragment : Fragment() {
         
         rvRecommendedTalent = view.findViewById(R.id.rvRecommendedTalent)
         cvTalentExample = view.findViewById(R.id.cvTalentExample)
+        fabCreateCasting = view.findViewById(R.id.fabCreateCasting)
 
         rvRecommendedTalent.layoutManager = LinearLayoutManager(requireContext())
+
+        // Setup FAB Click
+        fabCreateCasting.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.nav_host_fragment, CreateCastingFragment())
+                .addToBackStack(null)
+                .commit()
+        }
 
         applyTextGradient(tvAppName)
         startIdentitySync()
@@ -74,7 +84,6 @@ class RecruiterHomeFragment : Fragment() {
     }
 
     private fun startLiveDiscoveryEngine() {
-        // 🎯 FIX: Include "pending" so you can see your test talents in the app
         FirebaseFirestore.getInstance().collection("profiles")
             .whereEqualTo("userRole", "TALENT")
             .whereIn("verificationStatus", listOf("verified", "pending"))
@@ -99,7 +108,6 @@ class RecruiterHomeFragment : Fragment() {
         if (list.isNotEmpty()) {
             cvTalentExample.visibility = View.GONE
             rvRecommendedTalent.visibility = View.VISIBLE
-            // 🎯 NAVIGATION TRIGGER: Pass click listener to open TalentDetailFragment
             rvRecommendedTalent.adapter = TalentAdapter(list) { talent ->
                 val detailFragment = TalentDetailFragment.newInstance(talent)
                 parentFragmentManager?.beginTransaction()

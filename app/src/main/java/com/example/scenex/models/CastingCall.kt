@@ -5,6 +5,7 @@ import com.google.firebase.Timestamp
 data class CastingCall(
     val id: String = "",
     val recruiterId: String = "",
+    val posterUrl: String = "",
     
     // 1. Production Information
     val projectTitle: String = "",
@@ -16,11 +17,11 @@ data class CastingCall(
     
     // 2. Audition Information
     val auditionType: String = "",
-    val auditionDate: Timestamp? = null,
+    val auditionDate: String = "",
     val startTime: String = "",
     val endTime: String = "",
     val auditionLocation: String = "",
-    val submissionDeadline: Timestamp? = null,
+    val submissionDeadline: String = "",
     
     // 3. Role Information
     val characterName: String = "",
@@ -35,7 +36,7 @@ data class CastingCall(
     // 4. Compensation & Schedule
     val compensation: String = "",
     val shootLocation: String = "",
-    val firstDayOfShoot: Timestamp? = null,
+    val firstDayOfShoot: String = "",
     
     // 5. Recruiter Contact
     val contactEmail: String = "",
