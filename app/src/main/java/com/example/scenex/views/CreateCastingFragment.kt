@@ -43,6 +43,7 @@ class CreateCastingFragment : Fragment() {
     private val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
 
     private var selectedImageUri: Uri? = null
+    private var selectedCategory: String = "Actor"
     private val IMGBB_API_KEY = "113d28dab202d082d441249d7debf1f7"
 
     private val retrofit = Retrofit.Builder()
@@ -73,6 +74,7 @@ class CreateCastingFragment : Fragment() {
         applyTextGradient(tvToolbarTitle)
         toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
 
+        setupCategoryToggle(view)
         setupDropdowns(view)
         setupPickers(view)
         
@@ -83,11 +85,51 @@ class CreateCastingFragment : Fragment() {
         view.findViewById<View>(R.id.btnPublish)?.setOnClickListener { prepareAndSubmit(view) }
     }
 
+    private fun setupCategoryToggle(view: View) {
+        val tvActor = view.findViewById<TextView>(R.id.tvToggleActor)
+        val tvDancer = view.findViewById<TextView>(R.id.tvToggleDancer)
+        
+        val tvRoleTitleLabel = view.findViewById<TextView>(R.id.tvRoleTitleLabel)
+        val etRoleTitle = view.findViewById<EditText>(R.id.etRoleTitle)
+        val tvSkillsLabel = view.findViewById<TextView>(R.id.tvSkillsLabel)
+        val etSkills = view.findViewById<EditText>(R.id.etSkills)
+        val dropdownRoleType = view.findViewById<AutoCompleteTextView>(R.id.dropdownRoleType)
+
+        fun updateUI(category: String) {
+            selectedCategory = category
+            tvActor.isSelected = category == "Actor"
+            tvDancer.isSelected = category == "Dancer"
+
+            if (category == "Actor") {
+                tvRoleTitleLabel.text = "Role Title / Character Name"
+                etRoleTitle.hint = "e.g. Lead Male"
+                tvSkillsLabel.text = "Required Skills"
+                etSkills.hint = "e.g. Singing, Dialects"
+                setupAdapter(dropdownRoleType, R.array.role_types)
+                dropdownRoleType.setText("", false)
+                dropdownRoleType.hint = "Select Role"
+            } else {
+                tvRoleTitleLabel.text = "Dance Style / Role"
+                etRoleTitle.hint = "e.g. Ballet Soloist"
+                tvSkillsLabel.text = "Required Dance Techniques"
+                etSkills.hint = "e.g. Contemporary, Jazz, Acrobatics"
+                setupAdapter(dropdownRoleType, R.array.dance_role_types)
+                dropdownRoleType.setText("", false)
+                dropdownRoleType.hint = "Select Dance Role"
+            }
+        }
+
+        tvActor.setOnClickListener { updateUI("Actor") }
+        tvDancer.setOnClickListener { updateUI("Dancer") }
+        
+        // Initial setup
+        updateUI("Actor")
+    }
+
     private fun setupDropdowns(view: View) {
         setupAdapter(view.findViewById(R.id.dropdownProductionType), R.array.production_types)
         setupAdapter(view.findViewById(R.id.dropdownLanguage), R.array.production_languages)
         setupAdapter(view.findViewById(R.id.dropdownAuditionType), R.array.audition_types)
-        setupAdapter(view.findViewById(R.id.dropdownRoleType), R.array.role_types)
         setupAdapter(view.findViewById(R.id.dropdownGender), R.array.gender_requirements)
         setupAdapter(view.findViewById(R.id.dropdownExperience), R.array.experience_levels)
         setupAdapter(view.findViewById(R.id.dropdownCompensation), R.array.compensation_options)
@@ -208,6 +250,7 @@ class CreateCastingFragment : Fragment() {
             id = castingId,
             recruiterId = recruiterId,
             posterUrl = posterUrl,
+            category = selectedCategory,
             projectTitle = title,
             productionType = view.findViewById<AutoCompleteTextView>(R.id.dropdownProductionType)?.text.toString(),
             productionCompany = view.findViewById<EditText>(R.id.etProductionCompany)?.text.toString(),

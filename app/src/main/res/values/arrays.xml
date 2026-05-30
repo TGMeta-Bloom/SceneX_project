@@ -9,6 +9,8 @@
         <item>Documentary</item>
         <item>Music Video</item>
         <item>Theater</item>
+        <item>Live Event / Concert</item>
+        <item>Stage Show</item>
     </string-array>
 
     <string-array name="production_languages">
@@ -19,9 +21,10 @@
     </string-array>
 
     <string-array name="audition_types">
-        <item>In-Person</item>
+        <item>In-Person Audition</item>
         <item>Virtual / Self-Tape</item>
         <item>Open Call</item>
+        <item>Dance Workshop Call</item>
     </string-array>
 
     <string-array name="gender_requirements">
@@ -32,10 +35,19 @@
     </string-array>
 
     <string-array name="role_types">
-        <item>Lead</item>
-        <item>Supporting</item>
+        <item>Lead Role</item>
+        <item>Supporting Role</item>
         <item>Background / Extra</item>
         <item>Cameo</item>
+    </string-array>
+
+    <string-array name="dance_role_types">
+        <item>Principal Dancer</item>
+        <item>Soloist</item>
+        <item>Ensemble / Corps de Ballet</item>
+        <item>Background Dancer</item>
+        <item>Backup Dancer</item>
+        <item>Choreographer Assistant</item>
     </string-array>
 
     <string-array name="experience_levels">

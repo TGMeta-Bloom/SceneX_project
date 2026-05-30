@@ -58,6 +58,70 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Category Selection Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/black"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:fontFamily="serif"
+                        android:text="Casting For"
+                        android:textColor="@color/primary_magenta"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <!-- Improved Pill Toggle (Pragmatic Fix for Crash) -->
+                    <LinearLayout
+                        android:id="@+id/layoutToggle"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:background="@drawable/toggle_container_bg"
+                        android:orientation="horizontal"
+                        android:padding="4dp">
+
+                        <TextView
+                            android:id="@+id/tvToggleActor"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:background="@drawable/toggle_button_selector"
+                            android:gravity="center"
+                            android:text="Actor"
+                            android:textColor="@color/toggle_text_selector"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvToggleDancer"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:background="@drawable/toggle_button_selector"
+                            android:gravity="center"
+                            android:text="Dancer"
+                            android:textColor="@color/toggle_text_selector"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- Poster Image Picker Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
@@ -371,7 +435,7 @@
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Role Title" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                    <TextView android:id="@+id/tvRoleTitleLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Role Title / Character Name" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
                     <EditText
                         android:id="@+id/etRoleTitle"
                         android:layout_width="match_parent"
@@ -454,7 +518,7 @@
                         android:paddingHorizontal="24dp"
                         android:textSize="14sp" />
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Required Skills" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginTop="16dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                    <TextView android:id="@+id/tvSkillsLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Required Skills" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginTop="16dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
                     <EditText
                         android:id="@+id/etSkills"
                         android:layout_width="match_parent"
@@ -464,7 +528,7 @@
                         android:paddingHorizontal="24dp"
                         android:textSize="14sp" />
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Role Description" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginTop="16dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                    <TextView android:id="@+id/tvRoleDescLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Role Description" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginTop="16dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
                     <EditText
                         android:id="@+id/etRoleDescription"
                         android:layout_width="match_parent"
