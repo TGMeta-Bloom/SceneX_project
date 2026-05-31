@@ -1,9 +1,12 @@
 package com.example.scenex.views
 
+import android.graphics.LinearGradient
+import android.graphics.Shader
 import android.os.Bundle
-import android.widget.Toast
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.example.scenex.R
 import com.example.scenex.models.CastingCall
@@ -32,7 +35,6 @@ class CastingCallDetailsActivity : AppCompatActivity() {
         toolbar.setNavigationOnClickListener { finish() }
 
         val castingCallJson = intent.getStringExtra("CASTING_CALL_JSON")
-        // Note: If Timestamp fails to deserialize, consider making CastingCall Parcelable
         val call = try {
             Gson().fromJson(castingCallJson, CastingCall::class.java)
         } catch (e: Exception) {
@@ -46,9 +48,22 @@ class CastingCallDetailsActivity : AppCompatActivity() {
     }
 
     private fun populateDetails(call: CastingCall) {
+        val tvTitle = findViewById<TextView>(R.id.tvProjectTitleDetail)
+        val tvRole = findViewById<TextView>(R.id.tvRoleAndGender)
+        val tvProdCompany = findViewById<TextView>(R.id.tvProductionCompany)
+        val tvExperience = findViewById<TextView>(R.id.tvExperience)
+        val tvSkills = findViewById<TextView>(R.id.tvSkills)
+        
         with(call) {
-            findViewById<TextView>(R.id.tvProjectTitleDetail).text = projectTitle
-            findViewById<TextView>(R.id.tvRoleAndGender).text = "$characterName • $genderRequirement"
+            tvTitle.text = projectTitle
+            tvRole.text = "$characterName • $genderRequirement"
+
+            // Apply brand gradient to all primary labels
+            applyTextGradient(tvTitle)
+            applyTextGradient(tvRole)
+            applyTextGradient(tvProdCompany)
+            applyTextGradient(tvExperience)
+            applyTextGradient(tvSkills)
 
             // Highlights
             findViewById<TextView>(R.id.tvDeadline).text = "Deadline: $submissionDeadline"
@@ -57,7 +72,7 @@ class CastingCallDetailsActivity : AppCompatActivity() {
             findViewById<TextView>(R.id.tvLangDetail).text = productionLanguage
 
             // Project Section
-            findViewById<TextView>(R.id.tvProductionCompany).text = "Production: $productionCompany"
+            tvProdCompany.text = "Production: $productionCompany"
             findViewById<TextView>(R.id.tvDirector).text = "Director: $directorName"
             findViewById<TextView>(R.id.tvSynopsis).text = projectSynopsis
 
@@ -83,6 +98,23 @@ class CastingCallDetailsActivity : AppCompatActivity() {
 
             findViewById<MaterialButton>(R.id.btnApply).setOnClickListener {
                 handleApplication(call)
+            }
+        }
+    }
+
+    private fun applyTextGradient(textView: TextView) {
+        textView.post {
+            val width = textView.paint.measureText(textView.text.toString())
+            if (width > 0) {
+                val textShader: Shader = LinearGradient(
+                    0f, 0f, width, 0f,
+                    intArrayOf(
+                        ContextCompat.getColor(this, R.color.gradient_start),
+                        ContextCompat.getColor(this, R.color.gradient_end)
+                    ), null, Shader.TileMode.CLAMP
+                )
+                textView.paint.shader = textShader
+                textView.invalidate()
             }
         }
     }
