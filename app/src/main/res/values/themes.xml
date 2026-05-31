@@ -30,6 +30,10 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <style name="RoundedImageView8" parent="">
+        <item name="cornerSize">8dp</item>
+    </style>
+
     <!-- Spotlight Chip Style (Selectable - Senior Fix) -->
     <style name="SpotlightChipStyle_Selectable" parent="Widget.Material3.Chip.Filter">
         <item name="chipBackgroundColor">@color/spotlight_chip_bg_selector</item>

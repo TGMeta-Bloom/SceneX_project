@@ -1,5 +1,6 @@
 package com.example.scenex.views
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Shader
@@ -18,6 +19,7 @@ import com.example.scenex.R
 import com.example.scenex.adapters.CastingCallAdapter
 import com.example.scenex.viewmodels.TalentHomeViewModel
 import com.google.android.material.imageview.ShapeableImageView
+import com.google.gson.Gson
 
 class TalentHomeFragment : Fragment() {
 
@@ -44,9 +46,12 @@ class TalentHomeFragment : Fragment() {
 
         applyTextGradient(tvAppName)
 
-        // Setup RecyclerView
+        // Setup RecyclerView with Click Listener
         castingAdapter = CastingCallAdapter(emptyList()) { castingCall ->
-            // TODO: Handle item click (e.g., navigate to details)
+            val intent = Intent(requireContext(), CastingCallDetailsActivity::class.java)
+            val json = Gson().toJson(castingCall)
+            intent.putExtra("CASTING_CALL_JSON", json)
+            startActivity(intent)
         }
         rvCastingFeed.layoutManager = LinearLayoutManager(requireContext())
         rvCastingFeed.adapter = castingAdapter
