@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -16,7 +17,6 @@ import com.bumptech.glide.Glide
 import com.example.scenex.R
 import com.example.scenex.adapters.TalentAdapter
 import com.example.scenex.models.UserProfile
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -32,7 +32,7 @@ class RecruiterHomeFragment : Fragment() {
     
     private lateinit var rvRecommendedTalent: RecyclerView
     private lateinit var cvTalentExample: View
-    private lateinit var fabCreateCasting: ExtendedFloatingActionButton
+    private lateinit var fabCreateCasting: Button
     
     private var talentFeedListener: ListenerRegistration? = null
     private var identityListener: ListenerRegistration? = null

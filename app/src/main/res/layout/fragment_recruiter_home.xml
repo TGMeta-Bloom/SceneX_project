@@ -131,16 +131,22 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/fabCreateCasting"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:layout_margin="24dp"
+        android:background="@drawable/button_rounded_magenta"
+        android:drawableStart="@drawable/ic_plus"
+        android:drawablePadding="12dp"
+        android:drawableTint="@color/white"
+        android:elevation="8dp"
+        android:fontFamily="serif"
+        android:paddingHorizontal="24dp"
         android:text="Casting Call"
+        android:textAllCaps="false"
         android:textColor="@color/white"
-        app:backgroundTint="@color/primary_magenta"
-        app:icon="@drawable/ic_plus"
-        app:iconTint="@color/white"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
