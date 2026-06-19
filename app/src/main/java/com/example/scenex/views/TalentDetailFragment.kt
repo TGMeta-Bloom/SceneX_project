@@ -11,26 +11,24 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
-import com.bumptech.glide.Priority
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.example.scenex.R
 import com.example.scenex.models.UserProfile
-import com.google.android.material.imageview.ShapeableImageView
+import com.example.scenex.utils.SessionManager
+import com.example.scenex.viewmodels.TalentNavEvent
+import com.example.scenex.viewmodels.TalentResultsViewModel
 import com.google.gson.Gson
+import kotlinx.coroutines.flow.collectLatest
 
-/**
- * Senior Technical Implementation: Talent Analytical Profile.
- * Features: High-Speed Image Delivery and Blur-Thumbnail Feedback.
- */
 class TalentDetailFragment : Fragment() {
 
+    private val viewModel: TalentResultsViewModel by viewModels()
     private lateinit var talent: UserProfile
 
     companion object {
         private const val ARG_TALENT_JSON = "arg_talent_json"
-
         fun newInstance(talent: UserProfile): TalentDetailFragment {
             val fragment = TalentDetailFragment()
             val args = Bundle()
@@ -48,106 +46,59 @@ class TalentDetailFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_talent_detail, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. UI Binding
+        // 1. Bind Cinematic UI
+        val ivHeaderImage = view.findViewById<ImageView>(R.id.ivHeaderImage)
+        val tvName = view.findViewById<TextView>(R.id.tvDetailName)
+        val tvRole = view.findViewById<TextView>(R.id.tvDetailRole)
+        val chipLocation = view.findViewById<TextView>(R.id.chipLocation)
+        val chipAge = view.findViewById<TextView>(R.id.chipAge)
+        val tvBio = view.findViewById<TextView>(R.id.tvDetailBio)
+        
+        val tvStatHeight = view.findViewById<TextView>(R.id.tvStatHeight)
+        val tvStatWeight = view.findViewById<TextView>(R.id.tvStatWeight)
+        
+        val ivPortfolio1 = view.findViewById<ImageView>(R.id.ivPortfolio1)
+        val ivPortfolio2 = view.findViewById<ImageView>(R.id.ivPortfolio2)
+        val btnHire = view.findViewById<Button>(R.id.btnHireTalent)
         val btnBack = view.findViewById<ImageView>(R.id.btnBack)
-        val ivDetailAvatar = view.findViewById<ShapeableImageView>(R.id.ivDetailAvatar)
-        val tvDetailName = view.findViewById<TextView>(R.id.tvDetailName)
-        val tvDetailRole = view.findViewById<TextView>(R.id.tvDetailRole)
-        val tvDetailLocation = view.findViewById<TextView>(R.id.tvDetailLocation)
-        val tvDetailRanking = view.findViewById<TextView>(R.id.tvDetailRanking)
-        val tvDetailYield = view.findViewById<TextView>(R.id.tvDetailYield)
-        val tvDetailBio = view.findViewById<TextView>(R.id.tvDetailBio)
-        val tvDetailSpecs = view.findViewById<TextView>(R.id.tvDetailSpecs)
-        val tvDetailPro = view.findViewById<TextView>(R.id.tvDetailPro)
+
+        // 2. Set Data
+        tvName.text = talent.fullName
+        tvRole.text = talent.spotlightCategory.uppercase()
+        chipLocation.text = "📍 ${talent.city}"
+        chipAge.text = "🎂 ${talent.age} Years"
+        tvBio.text = talent.bio.ifBlank { "Professional SceneX Elite Talent." }
         
-        val ivDetailHeadshot = view.findViewById<ImageView>(R.id.ivDetailHeadshot)
-        val ivDetailFullBody = view.findViewById<ImageView>(R.id.ivDetailFullBody)
-        
-        val tvDetailPortfolio = view.findViewById<TextView>(R.id.tvDetailPortfolio)
-        val tvDetailShowreel = view.findViewById<TextView>(R.id.tvDetailShowreel)
-        val tvDetailSocial = view.findViewById<TextView>(R.id.tvDetailSocial)
-        val btnHireTalent = view.findViewById<Button>(R.id.btnHireTalent)
+        // Split physical specs if possible, or show raw
+        tvStatHeight.text = if (talent.physicalSpecs.contains("|")) talent.physicalSpecs.split("|")[0] else talent.physicalSpecs
+        tvStatWeight.text = talent.gender.uppercase()
 
-        // 2. Data Binding
-        tvDetailName.text = talent.fullName
-        tvDetailRole.text = (talent.spotlightCategory.ifEmpty { "Performer" }).uppercase()
-        tvDetailLocation.text = "📍 ${talent.city}, ${talent.province}"
-        tvDetailRanking.text = "${talent.rankingScore.toInt()} Pts"
-        tvDetailYield.text = "${talent.completenessScore.toInt()}%"
-        tvDetailBio.text = talent.bio.ifEmpty { "Professional artist with verified portfolio assets." }
-        tvDetailSpecs.text = talent.physicalSpecs.ifEmpty { "Physical specifications verified." }
-        
-        val matrix = "🎓 Qualification: ${talent.qualification.ifEmpty { "Not Disclosed" }}\n" +
-                     "⏱️ Experience: ${talent.experience.ifEmpty { "1-3 Years" }}\n" +
-                     "🗣️ Languages: ${talent.languages.ifEmpty { "Sinhala / English" }}"
-        tvDetailPro.text = matrix
+        Glide.with(this).load(talent.effectiveAvatarUrl).centerCrop().into(ivHeaderImage)
+        Glide.with(this).load(talent.headshotUrl).centerCrop().into(ivPortfolio1)
+        Glide.with(this).load(talent.fullBodyUrl).centerCrop().into(ivPortfolio2)
 
-        // 3. EXTREME SPEED ASSET SYNC (Blur-Thumbnail Logic)
-        loadProfessionalImage(talent.effectiveAvatarUrl, ivDetailAvatar, isCircle = true)
-        loadProfessionalImage(talent.headshotUrl, ivDetailHeadshot, isCircle = false)
-        loadProfessionalImage(talent.fullBodyUrl, ivDetailFullBody, isCircle = false)
-
-        // 4. Click Listeners for Inspection
-        ivDetailAvatar.setOnClickListener { openInspector(talent.effectiveAvatarUrl) }
-        ivDetailHeadshot.setOnClickListener { openInspector(talent.headshotUrl) }
-        ivDetailFullBody.setOnClickListener { openInspector(talent.fullBodyUrl) }
-
-        // 5. Matrix Link Routing
-        setupLink(tvDetailPortfolio, talent.portfolioLink)
-        setupLink(tvDetailShowreel, talent.showreelUrl)
-        setupLink(tvDetailSocial, talent.socialMediaLinks)
-
-        // 6. Navigation
+        // 3. Navigation & Actions
         btnBack.setOnClickListener { parentFragmentManager.popBackStack() }
-        btnHireTalent.setOnClickListener {
-            Toast.makeText(requireContext(), "Initiating contract acquisition protocol...", Toast.LENGTH_SHORT).show()
+        
+        btnHire.setOnClickListener {
+            val recruiterId = SessionManager.getUserId(requireContext()) ?: "anon"
+            viewModel.initiateHire(talent, recruiterId)
         }
-    }
 
-    private fun loadProfessionalImage(url: String, imageView: ImageView, isCircle: Boolean) {
-        val request = Glide.with(this)
-            .load(url)
-            .thumbnail(0.1f) // ⚡ Shows blurry image instantly while loading high-res
-            .diskCacheStrategy(DiskCacheStrategy.ALL) // Aggressive caching
-            .transition(DrawableTransitionOptions.withCrossFade()) // Smooth pop-in
-            .priority(Priority.HIGH)
-            
-        if (isCircle) request.circleCrop().into(imageView) 
-        else request.into(imageView)
-    }
-
-    private fun openInspector(imageUrl: String) {
-        if (imageUrl.isBlank()) return
-        val viewer = FullImageViewerFragment.newInstance(imageUrl)
-        parentFragmentManager.beginTransaction()
-            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-            .add(R.id.nav_host_fragment, viewer)
-            .addToBackStack(null)
-            .commit()
-    }
-
-    private fun setupLink(textView: TextView, url: String) {
-        if (url.isNotBlank() && url.startsWith("http")) {
-            textView.visibility = View.VISIBLE
-            textView.setOnClickListener {
-                try {
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-                } catch (e: Exception) {
-                    Toast.makeText(requireContext(), "Link unreachable", Toast.LENGTH_SHORT).show()
+        // Observe WhatsApp Bridge
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.navEvent.collectLatest { event ->
+                if (event is TalentNavEvent.OpenWhatsApp) {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(event.url)))
                 }
             }
-        } else {
-            textView.visibility = View.GONE
         }
     }
 }
