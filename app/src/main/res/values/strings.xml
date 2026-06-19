@@ -8,4 +8,43 @@
     <string name="profile_strength_label">Profile Strength</string>
     <string name="add_voice_clip_action">Add voice clip for 100%</string>
     <string name="casting_opportunities_feed_title">Casting opportunities feed</string>
+
+    <!-- Calendar & Availability (Member 1) -->
+    <string name="schedule_title">Schedule</string>
+    <string name="calendar_view">Calendar View</string>
+    <string name="list_view">List View</string>
+    <string name="day_mo">Mo</string>
+    <string name="day_tu">Tu</string>
+    <string name="day_we">We</string>
+    <string name="day_th">Th</string>
+    <string name="day_fr">Fr</string>
+    <string name="day_sa">Sa</string>
+    <string name="day_su">Su</string>
+    <string name="legend_casting_calls"> Casting Calls</string>
+    <string name="legend_bookings"> Bookings</string>
+    <string name="legend_pending"> Pending</string>
+    <string name="new_schedule">New Schedule</string>
+    <string name="january_2026">January 2026</string>
+
+    <!-- Selection Flow -->
+    <string name="select_time_title">Select Time Slot</string>
+    <string name="select_time_subtitle">Choose a fixed 1-hour interval for your availability block.</string>
+    <string name="btn_confirm_schedule">Confirm Schedule</string>
+    <string name="msg_select_required">Please select a time slot to continue</string>
+    <string name="msg_sync_success">Availability Synced Successfully</string>
+    <string name="msg_sync_error">Engine Sync: Network Error</string>
+
+<!--    <string-array name="fixed_time_slots">-->
+<!--        <item>08:00 - 09:00</item>-->
+<!--        <item>09:00 - 10:00</item>-->
+<!--        <item>10:00 - 11:00</item>-->
+<!--        <item>11:00 - 12:00</item>-->
+<!--        <item>12:00 - 13:00</item>-->
+<!--        <item>13:00 - 14:00</item>-->
+<!--        <item>14:00 - 15:00</item>-->
+<!--        <item>15:00 - 16:00</item>-->
+<!--        <item>16:00 - 17:00</item>-->
+<!--        <item>17:00 - 18:00</item>-->
+<!--        <item>18:00 - 19:00</item>-->
+<!--    </string-array>-->
 </resources>
