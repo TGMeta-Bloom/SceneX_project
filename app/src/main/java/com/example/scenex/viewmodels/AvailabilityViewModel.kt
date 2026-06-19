@@ -33,6 +33,7 @@ class AvailabilityViewModel : ViewModel() {
     private val _syncError = MutableLiveData<String?>()
     val syncError: LiveData<String?> = _syncError
 
+    // Use UTC for internal calendar state to prevent date shifting
     private var currentMonth = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
 
     private fun getSafeTimestamp(doc: DocumentSnapshot, field: String): Long? {
@@ -65,7 +66,7 @@ class AvailabilityViewModel : ViewModel() {
             
             val clean = raw.replace("\u00A0", " ").replace(Regex("\\s+"), " ")
             
-            // 🎯 Support for ISO/Slash formats (yyyy-MM-dd)
+            // Handle ISO/Slash formats (yyyy-MM-dd) even with single digits
             if (clean.matches(Regex("\\d{4}[\\-/]\\d{1,2}[\\-/]\\d{1,2}"))) {
                 val p = clean.split(Regex("[\\-/]"))
                 return String.format(Locale.US, "%04d-%02d-%02d", p[0].toInt(), p[1].toInt(), p[2].toInt())
@@ -143,23 +144,26 @@ class AvailabilityViewModel : ViewModel() {
         
         fun getEntry(date: String) = dataMap.getOrPut(date) { mutableSetOf<DayStatus>() to mutableListOf<CalendarEvent>() }
 
-        val isRecruiterView = userRole?.equals("Recruiter", ignoreCase = true) == true
-
         // 1. Casting Calls Processing
         castingCalls.forEach { doc ->
             getFormattedDate(doc)?.let { dateStr ->
-                // Case-resilient identity check
+                // Check all ID field variations
                 val rId = doc.getString("recruiterId") ?: doc.getString("recruiterid") ?: 
                           doc.getString("recruiter_id") ?: doc.getString("userId") ?: ""
+                
+                // 🎯 FIX: Only show Casting Call on the calendar IF the viewed user is the OWNER (Recruiter).
+                // Talents should not see all public auditions as personal calendar commitments.
                 val isOwner = rId == viewedUserId
                 
-                if (isOwner || !isRecruiterView) {
+                if (isOwner) {
                     val project = doc.getString("projectTitle") ?: "Casting Audition"
                     val role = doc.getString("characterName") ?: doc.getString("category") ?: "Audition"
                     val time = "${doc.getString("startTime") ?: "TBA"} - ${doc.getString("endTime") ?: "TBA"}"
                     val loc = doc.getString("auditionLocation") ?: "TBA"
 
                     val (statuses, events) = getEntry(dateStr)
+                    
+                    // Add visual guide dot (Blue) and details
                     statuses.add(DayStatus.CASTING_CALL)
                     events.add(CalendarEvent(
                         title = project,
@@ -168,15 +172,14 @@ class AvailabilityViewModel : ViewModel() {
                         description = "Casting Call | Role: $role | Loc: $loc"
                     ))
                     
-                    if (isOwner) {
-                        statuses.add(DayStatus.BUSY)
-                        events.add(CalendarEvent(
-                            title = "Audition Commitment: $project",
-                            time = time,
-                            type = DayStatus.BUSY,
-                            description = "You are conducting this audition session.\nRole: $role\nLoc: $loc"
-                        ))
-                    }
+                    // Recruiters are "BUSY" during their own audition sessions
+                    statuses.add(DayStatus.BUSY)
+                    events.add(CalendarEvent(
+                        title = "Audition Commitment: $project",
+                        time = time,
+                        type = DayStatus.BUSY,
+                        description = "You are conducting this audition session.\nRole: $role\nLoc: $loc"
+                    ))
                 }
             }
         }
@@ -186,7 +189,7 @@ class AvailabilityViewModel : ViewModel() {
             getFormattedDate(doc)?.let { dateStr ->
                 val statusStr = doc.getString("status")?.uppercase() ?: "PENDING"
                 
-                // 🎯 FIX: Skip REJECTED or CANCELLED bookings as they don't consume time
+                // Skip REJECTED or CANCELLED bookings as they don't consume time
                 if (statusStr == "REJECTED" || statusStr == "CANCELLED") return@forEach
 
                 val statusType = if (statusStr == "CONFIRMED" || statusStr == "ACCEPTED") DayStatus.BUSY else DayStatus.PENDING
