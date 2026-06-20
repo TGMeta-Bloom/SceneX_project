@@ -42,19 +42,19 @@ class NotificationsActivity : AppCompatActivity() {
                     intent.putExtra("BOOKING_ID", notif.referenceId)
                     startActivity(intent)
                 }
-                "BOOKING_ACCEPTED", "RESCHEDULE_REQUEST" -> {
-                    // These are for Recruiter - Navigation removed for BOOKING_REJECTED
+                "BOOKING_ACCEPTED" -> {
                     val intent = Intent(this, RecruiterBookingDetailsActivity::class.java)
                     intent.putExtra("BOOKING_ID", notif.referenceId)
                     startActivity(intent)
                 }
-                "NEW_MESSAGE" -> {
+                "RESCHEDULE_REQUEST", "NEW_MESSAGE" -> {
+                    // Redirect directly to Chat screen so the message "pops up"
                     val intent = Intent(this, ChatActivity::class.java)
                     intent.putExtra("BOOKING_ID", notif.referenceId)
                     startActivity(intent)
                 }
                 "BOOKING_REJECTED" -> {
-                    // No navigation for rejected bookings, only mark as read (handled above)
+                    // No navigation for rejected bookings, only mark as read
                     Log.d("Notifications", "Booking rejected: Staying on notification screen")
                 }
             }

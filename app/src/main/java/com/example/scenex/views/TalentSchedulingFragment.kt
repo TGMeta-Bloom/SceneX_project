@@ -89,7 +89,8 @@ class TalentSchedulingFragment : Fragment() {
     }
 
     private fun setupStatusFilter() {
-        val statuses = arrayOf("All Status", "Pending", "Confirmed", "Cancelled")
+        // Added "Requested Reschedule" to the statuses array
+        val statuses = arrayOf("All Status", "Pending", "Confirmed", "Cancelled", "Requested Reschedule")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, statuses)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerStatusFilter.adapter = adapter
@@ -101,6 +102,7 @@ class TalentSchedulingFragment : Fragment() {
                     1 -> "PENDING"
                     2 -> "CONFIRMED"
                     3 -> "CANCELLED"
+                    4 -> "RESCHEDULE_REQUESTED"
                     else -> "ALL"
                 }
                 viewModel.setStatusFilter(selected)

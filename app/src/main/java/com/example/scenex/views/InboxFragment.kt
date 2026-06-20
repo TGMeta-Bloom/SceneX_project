@@ -2,6 +2,7 @@ package com.example.scenex.views
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +14,7 @@ import com.example.scenex.views.adapter.ChatThreadAdapter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.Filter
 
 class InboxFragment : Fragment() {
     private var _binding: FragmentInboxBinding? = null
@@ -55,27 +57,33 @@ class InboxFragment : Fragment() {
         val userId = auth.currentUser?.uid ?: return
         binding.progressBar.visibility = View.VISIBLE
 
-        // Member 3 Logic: A chat thread is created for every booking.
-        // We fetch bookings where the user is either the recruiter or the talent.
-        
-        // Strategy: Query both fields or use a logical OR (if possible) 
-        // For simplicity and speed in Firestore, we'll listen to both.
-        
+        // DISPLAY ALL CHATS: No status filter, so Rejected/Cancelled/Old chats show up.
+        // NEW CHATS FIRST: Order by lastActivityTimestamp descending.
+        // Filter by current user ID (either as Recruiter or Talent).
         db.collection("bookings")
-            .whereIn("status", listOf("PENDING", "CONFIRMED", "RESCHEDULE_REQUESTED", "COMPLETED"))
-            .orderBy("createdAt", Query.Direction.DESCENDING)
+            .where(Filter.or(
+                Filter.equalTo("recruiterId", userId),
+                Filter.equalTo("talentId", userId)
+            ))
+            .orderBy("lastActivityTimestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, e ->
+                if (_binding == null) return@addSnapshotListener
                 binding.progressBar.visibility = View.GONE
-                if (e != null || snapshot == null) return@addSnapshotListener
+                
+                if (e != null) {
+                    Log.e("InboxFragment", "Firestore error: ${e.message}")
+                    return@addSnapshotListener
+                }
 
-                val allBookings = snapshot.toObjects(Booking::class.java)
-                val userThreads = allBookings.filter { it.talentId == userId || it.recruiterId == userId }
-
-                if (userThreads.isEmpty()) {
-                    binding.tvNoMessages.visibility = View.VISIBLE
-                } else {
-                    binding.tvNoMessages.visibility = View.GONE
-                    adapter.submitList(userThreads)
+                if (snapshot != null) {
+                    val userThreads = snapshot.toObjects(Booking::class.java)
+                    if (userThreads.isEmpty()) {
+                        binding.tvNoMessages.visibility = View.VISIBLE
+                        adapter.submitList(emptyList())
+                    } else {
+                        binding.tvNoMessages.visibility = View.GONE
+                        adapter.submitList(userThreads)
+                    }
                 }
             }
     }

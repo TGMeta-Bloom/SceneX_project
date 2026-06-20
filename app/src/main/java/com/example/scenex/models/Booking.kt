@@ -20,7 +20,12 @@ data class Booking(
     val status: String = "PENDING",
     val notes: String = "",
     val hasConflict: Boolean = false,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val lastActivityTimestamp: Long = System.currentTimeMillis(),
+    val isRescheduleSeen: Boolean = true,
+    val lastMessage: String = "",
+    val lastMessageSenderId: String = "",
+    val isLastMessageSeen: Boolean = true
 ) {
-    constructor() : this("", "", "", "", "", "", "", "", "", 0L, "", "", "", "PENDING", "", false, System.currentTimeMillis())
+    constructor() : this("", "", "", "", "", "", "", "", "", 0L, "", "", "", "PENDING", "", false, System.currentTimeMillis(), System.currentTimeMillis(), true, "", "", true)
 }

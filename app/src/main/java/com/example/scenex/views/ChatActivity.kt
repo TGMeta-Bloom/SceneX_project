@@ -2,6 +2,7 @@ package com.example.scenex.views
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -38,19 +39,89 @@ class ChatActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         bookingId = intent.getStringExtra("BOOKING_ID")
-        otherPartyName = intent.getStringExtra("OTHER_PARTY_NAME")
         
+        if (intent.hasExtra("OTHER_PARTY_NAME") && intent.hasExtra("RECRUITER_ID")) {
+            initUIFromIntent()
+        } else {
+            fetchBookingDetailsAndInit()
+        }
+
+        setupRecyclerView()
+        listenForMessages()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        updateMyPresence(true)
+        startBookingStatusListener()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        updateMyPresence(false)
+        bookingListener?.remove()
+    }
+
+    private fun markAllAsSeen(booking: Booking) {
+        val currentUserId = auth.currentUser?.uid ?: return
+        val lastSenderId = booking.lastMessageSenderId
+        
+        // CRITICAL FIX: Only mark as seen if the last message was sent by the OTHER person.
+        // This prevents the sender from marking their own message as seen incorrectly.
+        if (lastSenderId.isNotEmpty() && lastSenderId != currentUserId) {
+            if (!booking.isLastMessageSeen || !booking.isRescheduleSeen) {
+                db.collection("bookings").document(booking.id).update(mapOf(
+                    "isRescheduleSeen" to true,
+                    "isLastMessageSeen" to true
+                ))
+            }
+        }
+    }
+
+    private fun initUIFromIntent() {
+        otherPartyName = intent.getStringExtra("OTHER_PARTY_NAME")
         val recruiterId = intent.getStringExtra("RECRUITER_ID")
         val talentId = intent.getStringExtra("TALENT_ID")
         val currentUserId = auth.currentUser?.uid
         receiverId = if (currentUserId == recruiterId) talentId else recruiterId
 
         setupUI()
-        setupRecyclerView()
-        listenForMessages()
         loadReceiverProfile()
-        listenToBookingStatus()
-        updateMyPresence(true)
+    }
+
+    private fun fetchBookingDetailsAndInit() {
+        val bId = bookingId ?: return
+        db.collection("bookings").document(bId).get().addOnSuccessListener { snapshot ->
+            val booking = snapshot.toObject(Booking::class.java) ?: return@addOnSuccessListener
+            val currentUserId = auth.currentUser?.uid ?: return@addOnSuccessListener
+            
+            val isRecruiter = currentUserId == booking.recruiterId
+            otherPartyName = if (isRecruiter) booking.name else booking.recruiterName
+            receiverId = if (isRecruiter) booking.talentId else booking.recruiterId
+            
+            setupUI()
+            loadReceiverProfile()
+            markAllAsSeen(booking)
+        }
+    }
+
+    private fun startBookingStatusListener() {
+        val bId = bookingId ?: return
+        bookingListener = db.collection("bookings").document(bId)
+            .addSnapshotListener { snapshot, e ->
+                if (e != null || snapshot == null) return@addSnapshotListener
+                val booking = snapshot.toObject(Booking::class.java)
+                if (booking != null) {
+                    val currentUserId = auth.currentUser?.uid
+                    if (booking.status == "RESCHEDULE_REQUESTED" && booking.recruiterId == currentUserId) {
+                        binding.btnEditBooking.visibility = View.VISIBLE
+                    } else {
+                        binding.btnEditBooking.visibility = View.GONE
+                    }
+                    // Mark as seen ONLY if we are active in the chat and a new message arrives from the other person
+                    markAllAsSeen(booking)
+                }
+            }
     }
 
     private fun setupUI() {
@@ -65,7 +136,6 @@ class ChatActivity : AppCompatActivity() {
         }
 
         binding.btnEditBooking.setOnClickListener {
-            // Navigate to Edit Booking Screen
             val intent = Intent(this, EditBookingActivity::class.java)
             intent.putExtra("BOOKING_ID", bookingId)
             startActivity(intent)
@@ -78,36 +148,17 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    private fun listenToBookingStatus() {
-        val bId = bookingId ?: return
-        val currentUserId = auth.currentUser?.uid ?: return
-
-        bookingListener = db.collection("bookings").document(bId)
-            .addSnapshotListener { snapshot, e ->
-                if (e != null || snapshot == null) return@addSnapshotListener
-                val booking = snapshot.toObject(Booking::class.java)
-                if (booking != null) {
-                    // Business Rule: Show Edit button only if status is RESCHEDULE_REQUESTED and user is the Recruiter
-                    if (booking.status == "RESCHEDULE_REQUESTED" && booking.recruiterId == currentUserId) {
-                        binding.btnEditBooking.visibility = View.VISIBLE
-                    } else {
-                        binding.btnEditBooking.visibility = View.GONE
-                    }
-                }
-            }
-    }
-
     private fun loadReceiverProfile() {
         val rId = receiverId ?: return
         receiverListener = db.collection("profiles").document(rId)
             .addSnapshotListener { snapshot, e ->
                 if (e != null || snapshot == null) return@addSnapshotListener
-                val imageUrl = snapshot.getString("profileImage") ?: ""
+                val imageUrl = snapshot.getString("profileImage") ?: snapshot.getString("profileImageUrl") ?: ""
                 if (imageUrl.isNotEmpty()) {
                     Glide.with(this).load(imageUrl).placeholder(R.drawable.ic_profile_placeholder).into(binding.imgChatProfile)
                 }
-                val receiverInThisChat = snapshot.getString("currentChatWith") == bookingId
-                binding.tvOnlineStatus.visibility = if (receiverInThisChat) View.VISIBLE else View.GONE
+                val isReceiverOnline = snapshot.getString("currentChatWith") == bookingId
+                binding.tvOnlineStatus.visibility = if (isReceiverOnline) View.VISIBLE else View.GONE
             }
     }
 
@@ -153,8 +204,17 @@ class ChatActivity : AppCompatActivity() {
         val rId = receiverId ?: return
 
         val batch = db.batch()
+        val now = System.currentTimeMillis()
 
-        // 1. Save Message
+        // FIX: Always reset isLastMessageSeen to false when sending.
+        // It stays false until the receiver's app updates it.
+        batch.update(db.collection("bookings").document(bId), mapOf(
+            "lastMessage" to text,
+            "lastActivityTimestamp" to now,
+            "lastMessageSenderId" to currentUserId,
+            "isLastMessageSeen" to false 
+        ))
+
         val messageRef = db.collection("messages").document()
         val newMessage = Message(
             messageId = messageRef.id,
@@ -162,13 +222,12 @@ class ChatActivity : AppCompatActivity() {
             senderId = currentUserId,
             receiverId = rId,
             message = text,
-            timestamp = System.currentTimeMillis(),
+            timestamp = now,
             status = "SENT",
             type = "NORMAL"
         )
         batch.set(messageRef, newMessage)
 
-        // 2. Send Notification to Receiver
         val notifId = db.collection("notifications").document().id
         val notification = Notification(
             notificationId = notifId,
@@ -179,7 +238,7 @@ class ChatActivity : AppCompatActivity() {
             message = text.take(50) + if (text.length > 50) "..." else "",
             type = "NEW_MESSAGE",
             referenceId = bId,
-            createdAt = System.currentTimeMillis()
+            createdAt = now
         )
         batch.set(db.collection("notifications").document(notifId), notification)
 
@@ -191,7 +250,6 @@ class ChatActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        updateMyPresence(false)
         receiverListener?.remove()
         bookingListener?.remove()
     }

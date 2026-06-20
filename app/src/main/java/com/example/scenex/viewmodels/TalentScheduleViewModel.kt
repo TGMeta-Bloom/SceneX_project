@@ -103,7 +103,15 @@ class TalentScheduleViewModel : ViewModel() {
         
         // Filter by Status if selected
         if (currentStatusFilter != "ALL") {
-            filtered = filtered.filter { it.status.trim().uppercase() == currentStatusFilter.uppercase() }
+            if (currentStatusFilter == "CANCELLED") {
+                // "Cancelled" filter includes both CANCELLED and REJECTED statuses
+                filtered = filtered.filter { 
+                    val s = it.status.trim().uppercase()
+                    s == "CANCELLED" || s == "REJECTED"
+                }
+            } else {
+                filtered = filtered.filter { it.status.trim().uppercase() == currentStatusFilter.uppercase() }
+            }
         }
 
         // Logic: Show Upcoming bookings (Soonest first) at the top,
@@ -113,7 +121,7 @@ class TalentScheduleViewModel : ViewModel() {
 
         _bookings.value = upcoming + past
         
-        Log.d("TalentScheduleVM", "Bookings updated. Upcoming: ${upcoming.size}, Past: ${past.size}")
+        Log.d("TalentScheduleVM", "Bookings updated. Filter: $currentStatusFilter, Count: ${filtered.size}")
     }
 
     fun setStatusFilter(status: String) {

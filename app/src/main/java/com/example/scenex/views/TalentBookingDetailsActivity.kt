@@ -221,7 +221,18 @@ class TalentBookingDetailsActivity : AppCompatActivity() {
         }
 
         val batch = db.batch()
-        batch.update(db.collection("bookings").document(booking.id), "status", "RESCHEDULE_REQUESTED")
+        val now = System.currentTimeMillis()
+        val rescheduleMsg = "I love this project, but I have a time clash. Can we move the schedule?"
+        
+        // SYNC WITH INBOX: Correctly mark as unread and set sender ID
+        batch.update(db.collection("bookings").document(booking.id), mapOf(
+            "status" to "RESCHEDULE_REQUESTED",
+            "lastActivityTimestamp" to now,
+            "lastMessage" to rescheduleMsg,
+            "lastMessageSenderId" to booking.talentId,
+            "isRescheduleSeen" to false,
+            "isLastMessageSeen" to false
+        ))
 
         val notifId = db.collection("notifications").document().id
         val notification = Notification(
@@ -233,7 +244,7 @@ class TalentBookingDetailsActivity : AppCompatActivity() {
             message = "${booking.name} requested to reschedule the booking for ${booking.castingTitle}.",
             type = "RESCHEDULE_REQUEST",
             referenceId = booking.id,
-            createdAt = System.currentTimeMillis()
+            createdAt = now
         ).apply { read = false }
         batch.set(db.collection("notifications").document(notifId), notification)
 
@@ -243,8 +254,8 @@ class TalentBookingDetailsActivity : AppCompatActivity() {
             bookingId = booking.id,
             senderId = booking.talentId,
             receiverId = booking.recruiterId,
-            message = "I love this project, but I have a time clash. Can we move the schedule?",
-            timestamp = System.currentTimeMillis(),
+            message = rescheduleMsg,
+            timestamp = now,
             status = "SENT",
             type = "RESCHEDULE"
         )
@@ -258,9 +269,8 @@ class TalentBookingDetailsActivity : AppCompatActivity() {
             .setTitle("Request Sent!")
             .setMessage("The reschedule request has been sent. Open your Inbox to negotiate with the recruiter.")
             .setPositiveButton("Go to Inbox") { _, _ -> 
-                val intent = Intent(this, MainActivity::class.java)
-                intent.putExtra("OPEN_TAB", "INBOX")
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                val intent = Intent(this, ChatActivity::class.java)
+                intent.putExtra("BOOKING_ID", bookingId)
                 startActivity(intent)
                 finish() 
             }
@@ -274,12 +284,20 @@ class TalentBookingDetailsActivity : AppCompatActivity() {
             return
         }
 
-        // Fetch the recruiter's actual fullName from the userprofile collection
-        db.collection("userprofile").document(booking.recruiterId).get().addOnSuccessListener { profileDoc ->
+        db.collection("profiles").document(booking.recruiterId).get().addOnSuccessListener { profileDoc ->
             val recruiterName = profileDoc.getString("fullName") ?: booking.recruiterName.ifEmpty { "Official Recruiter" }
 
             val batch = db.batch()
-            batch.update(db.collection("bookings").document(booking.id), "status", "CONFIRMED")
+            val now = System.currentTimeMillis()
+            
+            // SYNC WITH INBOX
+            batch.update(db.collection("bookings").document(booking.id), mapOf(
+                "status" to "CONFIRMED",
+                "lastActivityTimestamp" to now,
+                "lastMessage" to "Booking Accepted ✅",
+                "lastMessageSenderId" to booking.talentId,
+                "isLastMessageSeen" to false
+            ))
             
             val scheduleRef = db.collection("schedules").document()
             val schedule = Schedule(
@@ -288,7 +306,7 @@ class TalentBookingDetailsActivity : AppCompatActivity() {
                 castingCallId = booking.castingCallId,
                 castingTitle = booking.castingTitle,
                 recruiterId = booking.recruiterId,
-                recruiterName = recruiterName, // Updated with fullName from userprofile
+                recruiterName = recruiterName,
                 userId = booking.talentId,
                 name = booking.name,
                 role = booking.role,
@@ -298,11 +316,10 @@ class TalentBookingDetailsActivity : AppCompatActivity() {
                 location = booking.location,
                 status = "CONFIRMED",
                 notes = booking.notes,
-                createdAt = System.currentTimeMillis()
+                createdAt = now
             )
             batch.set(scheduleRef, schedule)
 
-            // Notification to Recruiter
             val recNotifId = db.collection("notifications").document().id
             val recNotification = Notification(
                 notificationId = recNotifId,
@@ -313,11 +330,10 @@ class TalentBookingDetailsActivity : AppCompatActivity() {
                 message = "${booking.name} accepted your booking request for ${booking.castingTitle}.",
                 type = "BOOKING_ACCEPTED",
                 referenceId = booking.id,
-                createdAt = System.currentTimeMillis()
+                createdAt = now
             ).apply { read = false }
             batch.set(db.collection("notifications").document(recNotifId), recNotification)
 
-            // Notification to Talent (Self)
             val talNotifId = db.collection("notifications").document().id
             val talNotification = Notification(
                 notificationId = talNotifId,
@@ -328,7 +344,7 @@ class TalentBookingDetailsActivity : AppCompatActivity() {
                 message = "Your interview has been scheduled for ${booking.castingTitle}.",
                 type = "SCHEDULE_CONFIRMED",
                 referenceId = booking.id,
-                createdAt = System.currentTimeMillis()
+                createdAt = now
             ).apply { read = false }
             batch.set(db.collection("notifications").document(talNotifId), talNotification)
 
@@ -341,13 +357,21 @@ class TalentBookingDetailsActivity : AppCompatActivity() {
     private fun rejectBooking() {
         val booking = currentBooking ?: return
         if (booking.recruiterId.isEmpty()) {
-            Log.e("RejectBooking", "RecruiterId is missing in Booking document!")
             Toast.makeText(this, "Cannot notify recruiter (Missing ID)", Toast.LENGTH_SHORT).show()
             return
         }
 
         val batch = db.batch()
-        batch.update(db.collection("bookings").document(booking.id), "status", "REJECTED")
+        val now = System.currentTimeMillis()
+
+        // SYNC WITH INBOX
+        batch.update(db.collection("bookings").document(booking.id), mapOf(
+            "status" to "REJECTED",
+            "lastActivityTimestamp" to now,
+            "lastMessage" to "Booking Rejected ❌",
+            "lastMessageSenderId" to booking.talentId,
+            "isLastMessageSeen" to false
+        ))
 
         val notifId = db.collection("notifications").document().id
         val notification = Notification(
@@ -359,15 +383,13 @@ class TalentBookingDetailsActivity : AppCompatActivity() {
             message = "${booking.name} rejected your booking request for ${booking.castingTitle}.",
             type = "BOOKING_REJECTED",
             referenceId = booking.id,
-            createdAt = System.currentTimeMillis()
+            createdAt = now
         ).apply { read = false }
         batch.set(db.collection("notifications").document(notifId), notification)
 
         batch.commit().addOnSuccessListener {
             Toast.makeText(this, "Booking Rejected & Recruiter Notified", Toast.LENGTH_SHORT).show()
             finish()
-        }.addOnFailureListener { e ->
-            Log.e("RejectBooking", "Batch failed: ${e.message}")
         }
     }
 

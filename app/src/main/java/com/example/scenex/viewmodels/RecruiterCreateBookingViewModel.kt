@@ -35,14 +35,12 @@ class RecruiterCreateBookingViewModel(private val state: SavedStateHandle) : Vie
         .build()
     private val imgBBService = retrofit.create(ImgBBService::class.java)
 
-    // Persistent data using SavedStateHandle to prevent loss after picking image
     val selectedDate = state.getLiveData<Long>("selectedDate", 0L)
     val startTime = state.getLiveData<String>("startTime", "")
     val endTime = state.getLiveData<String>("endTime", "")
     val location = state.getLiveData<String>("location", "")
     val notes = state.getLiveData<String>("notes", "")
     
-    // For Edit Mode
     private val _existingBooking = MutableLiveData<Booking?>()
     val existingBooking: LiveData<Booking?> = _existingBooking
 
@@ -137,7 +135,6 @@ class RecruiterCreateBookingViewModel(private val state: SavedStateHandle) : Vie
             .whereEqualTo("date", normalizedDate)
             .get()
             .addOnSuccessListener { scheduleSnapshot ->
-                // Filter out the schedule that might be linked to the booking we are currently editing
                 val confirmedSlots = scheduleSnapshot.toObjects(Schedule::class.java)
                     .filter { it.bookingId != currentBookingId }
                     .map { TimeSlot(it.startTime, it.endTime) }
@@ -186,13 +183,17 @@ class RecruiterCreateBookingViewModel(private val state: SavedStateHandle) : Vie
 
         val normalizedDate = normalizeDate(date)
         val docId = db.collection("bookings").document().id
+        val now = System.currentTimeMillis()
+        
         val booking = Booking(
             id = docId, castingCallId = castingCallId, castingTitle = castingTitle,
             recruiterId = recruiterId, recruiterName = recruiterName, talentId = talentId,
             name = talentName, role = spotlightCategory, projectImageUrl = bannerUrl,
             date = normalizedDate, startTime = start, endTime = end,
             location = loc, status = "PENDING", notes = nts,
-            hasConflict = false, createdAt = System.currentTimeMillis()
+            hasConflict = false, createdAt = now, 
+            lastActivityTimestamp = now, isRescheduleSeen = true,
+            lastMessageSenderId = "", isLastMessageSeen = true
         )
 
         val batch = db.batch()
@@ -202,7 +203,7 @@ class RecruiterCreateBookingViewModel(private val state: SavedStateHandle) : Vie
         val notification = Notification(
             notificationId = notifId, receiverId = talentId, senderId = recruiterId, senderName = recruiterName,
             title = "New Booking Request", message = "$recruiterName invited you for $castingTitle",
-            type = "BOOKING_REQUEST", referenceId = docId, createdAt = System.currentTimeMillis()
+            type = "BOOKING_REQUEST", referenceId = docId, createdAt = now
         )
         batch.set(db.collection("notifications").document(notifId), notification)
 
@@ -222,6 +223,7 @@ class RecruiterCreateBookingViewModel(private val state: SavedStateHandle) : Vie
 
         if (date == 0L || start.isEmpty() || end.isEmpty()) return
         val normalizedDate = normalizeDate(date)
+        val now = System.currentTimeMillis()
 
         val batch = db.batch()
         val bookingRef = db.collection("bookings").document(bookingId)
@@ -233,11 +235,13 @@ class RecruiterCreateBookingViewModel(private val state: SavedStateHandle) : Vie
             "location" to loc,
             "notes" to nts,
             "projectImageUrl" to bannerUrl,
-            "status" to "PENDING" // Move back to PENDING so Talent can accept/reject new time
+            "status" to "PENDING",
+            "lastActivityTimestamp" to now,
+            "isRescheduleSeen" to true,
+            "isLastMessageSeen" to true
         )
         batch.update(bookingRef, updates)
 
-        // Fetch booking to get talent details for notification
         db.collection("bookings").document(bookingId).get().addOnSuccessListener { doc ->
             val b = doc.toObject(Booking::class.java) ?: return@addOnSuccessListener
             
@@ -251,7 +255,7 @@ class RecruiterCreateBookingViewModel(private val state: SavedStateHandle) : Vie
                 message = "${b.recruiterName} has updated the schedule for ${b.castingTitle}. Please review.",
                 type = "BOOKING_UPDATED",
                 referenceId = bookingId,
-                createdAt = System.currentTimeMillis()
+                createdAt = now
             )
             batch.set(db.collection("notifications").document(notifId), notification)
 
