@@ -1,20 +1,21 @@
 package com.example.scenex.views
 
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.scenex.databinding.FragmentTalentSchedulingBinding
 import com.example.scenex.viewmodels.TalentScheduleViewModel
-import com.example.scenex.views.adapter.ScheduleAdapter
+import com.example.scenex.views.adapter.BookingAdapter
 import com.example.scenex.views.adapter.TimelineAdapter
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.tabs.TabLayout
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class TalentSchedulingFragment : Fragment() {
 
@@ -22,8 +23,10 @@ class TalentSchedulingFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: TalentScheduleViewModel by viewModels()
-    private lateinit var scheduleAdapter: ScheduleAdapter
+    private lateinit var bookingAdapter: BookingAdapter
     private lateinit var timelineAdapter: TimelineAdapter
+    private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,107 +40,113 @@ class TalentSchedulingFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerViews()
-        setupTabs()
-        setupToggle()
+        setupToggles()
+        setupStatusFilter()
         setupListeners()
         observeViewModel()
+        setupNotificationBadge()
 
-        // 1. Initial State: Show Calendar View
-        updateToggleUI(isCalendar = true)
-        
-        // 2. Start real-time Firestore listener
+        updateToggleUI(isTimeline = true)
         viewModel.startListening()
-        
-        // 3. Apply default filter
-        viewModel.applyFilter("UPCOMING")
+    }
+
+    private fun setupNotificationBadge() {
+        val currentUserId = auth.currentUser?.uid ?: return
+        db.collection("notifications")
+            .whereEqualTo("receiverId", currentUserId)
+            .whereEqualTo("read", false)
+            .addSnapshotListener { snapshot, _ ->
+                if (_binding == null) return@addSnapshotListener
+                val count = snapshot?.size() ?: 0
+                if (count > 0) {
+                    binding.txtNotifCount.visibility = View.VISIBLE
+                    binding.txtNotifCount.text = if (count > 9) "9+" else count.toString()
+                } else {
+                    binding.txtNotifCount.visibility = View.GONE
+                }
+            }
     }
 
     private fun setupRecyclerViews() {
-        scheduleAdapter = ScheduleAdapter(
-            onEditClick = { schedule ->
-                val intent = Intent(requireContext(), AddScheduleActivity::class.java)
-                intent.putExtra("SCHEDULE_ID", schedule.id)
-                startActivity(intent)
-            },
-            onCancelClick = { schedule ->
-                showDeleteConfirmationDialog(schedule.id)
-            }
-        )
-        binding.rvBookings.apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = scheduleAdapter
+        bookingAdapter = BookingAdapter { booking ->
+            val intent = Intent(requireContext(), TalentBookingDetailsActivity::class.java)
+            intent.putExtra("BOOKING_ID", booking.id)
+            startActivity(intent)
+        }
+        binding.rvRecruiterBookings.apply {
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+            adapter = bookingAdapter
+            isNestedScrollingEnabled = false
         }
 
-        timelineAdapter = TimelineAdapter()
+        // IMPORTANT: Passing isRecruiterView = false for Talent Dashboard
+        timelineAdapter = TimelineAdapter(isRecruiterView = false)
         binding.rvTimeline.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = timelineAdapter
+            isNestedScrollingEnabled = false
         }
     }
 
-    private fun showDeleteConfirmationDialog(scheduleId: String) {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Cancel Schedule")
-            .setMessage("Are you sure you want to cancel this schedule? This action cannot be undone.")
-            .setNegativeButton("No") { dialog, _ ->
-                dialog.dismiss()
+    private fun setupStatusFilter() {
+        val statuses = arrayOf("All Status", "Pending", "Confirmed", "Cancelled")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, statuses)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerStatusFilter.adapter = adapter
+
+        binding.spinnerStatusFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selected = when (position) {
+                    0 -> "ALL"
+                    1 -> "PENDING"
+                    2 -> "CONFIRMED"
+                    3 -> "CANCELLED"
+                    else -> "ALL"
+                }
+                viewModel.setStatusFilter(selected)
             }
-            .setPositiveButton("Yes, Cancel") { dialog, _ ->
-                viewModel.deleteSchedule(scheduleId)
-                dialog.dismiss()
-            }
-            .show()
-    }
-
-    private fun setupToggle() {
-        binding.btnCalendarView.setOnClickListener {
-            updateToggleUI(isCalendar = true)
-        }
-
-        binding.btnListView.setOnClickListener {
-            updateToggleUI(isCalendar = false)
-        }
-    }
-
-    private fun updateToggleUI(isCalendar: Boolean) {
-        binding.btnCalendarView.isSelected = isCalendar
-        binding.btnListView.isSelected = !isCalendar
-
-        binding.btnCalendarView.setTextColor(if (isCalendar) Color.WHITE else Color.BLACK)
-        binding.btnListView.setTextColor(if (!isCalendar) Color.WHITE else Color.BLACK)
-
-        if (isCalendar) {
-            binding.layoutCalendarMode.visibility = View.VISIBLE
-            binding.rvBookings.visibility = View.GONE
-        } else {
-            binding.layoutCalendarMode.visibility = View.GONE
-            binding.rvBookings.visibility = View.VISIBLE
-        }
-    }
-
-    private fun setupTabs() {
-        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                val type = if (tab?.position == 0) "UPCOMING" else "PAST"
-                // Switching filter now happens instantly in the ViewModel
-                viewModel.applyFilter(type)
-            }
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
-        })
-    }
-
-    private fun setupListeners() {
-        binding.btnNewSchedule.setOnClickListener {
-            val intent = Intent(requireContext(), AddScheduleActivity::class.java)
-            startActivity(intent)
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
 
     private fun observeViewModel() {
-        viewModel.schedules.observe(viewLifecycleOwner) { schedules ->
-            scheduleAdapter.submitList(schedules)
-            timelineAdapter.submitList(schedules)
+        viewModel.schedules.observe(viewLifecycleOwner) { list ->
+            timelineAdapter.submitList(list)
+        }
+
+        viewModel.bookings.observe(viewLifecycleOwner) { list ->
+            bookingAdapter.submitList(list)
+            if (list.isNullOrEmpty()) {
+                binding.rvRecruiterBookings.visibility = View.GONE
+                binding.layoutEmptyBookings.visibility = View.VISIBLE
+            } else {
+                binding.layoutEmptyBookings.visibility = View.GONE
+                binding.rvRecruiterBookings.visibility = View.VISIBLE
+            }
+        }
+        
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            binding.pbLoading.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+    }
+
+    private fun setupToggles() {
+        binding.btnTimelineView.setOnClickListener { updateToggleUI(isTimeline = true) }
+        binding.btnBookingView.setOnClickListener { updateToggleUI(isTimeline = false) }
+    }
+
+    private fun updateToggleUI(isTimeline: Boolean) {
+        binding.btnTimelineView.isSelected = isTimeline
+        binding.btnBookingView.isSelected = !isTimeline
+        binding.layoutTimelineMode.visibility = if (isTimeline) View.VISIBLE else View.GONE
+        binding.layoutBookingMode.visibility = if (isTimeline) View.GONE else View.VISIBLE
+        binding.txtHeaderSubtitle.text = "Manage your upcoming project bookings"
+    }
+
+    private fun setupListeners() {
+        binding.btnNotification.setOnClickListener {
+            val intent = Intent(requireContext(), NotificationsActivity::class.java)
+            startActivity(intent)
         }
     }
 

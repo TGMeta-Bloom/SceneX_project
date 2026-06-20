@@ -13,19 +13,20 @@
         android:layout_width="70dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:textColor="#666666"
-        android:textSize="12sp"
+        android:textColor="#1A1C1E"
+        android:textSize="13sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="08.00 a.m" />
+        tools:text="08.00 AM" />
 
-    <!-- Timeline Dot - Aligned with the Time Label -->
+    <!-- Timeline Dot -->
     <View
         android:id="@+id/timelineDot"
-        android:layout_width="14dp"
-        android:layout_height="14dp"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
         android:layout_marginStart="8dp"
-        android:background="@android:drawable/presence_online"
+        android:background="@drawable/ic_check_circle_green"
         android:backgroundTint="#880E4F"
         app:layout_constraintBottom_toBottomOf="@id/txtTime"
         app:layout_constraintStart_toEndOf="@id/txtTime"
@@ -36,7 +37,7 @@
         android:id="@+id/timelineLine"
         android:layout_width="2dp"
         android:layout_height="0dp"
-        android:background="#E0E0E0"
+        android:background="#EEEEEE"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/timelineDot"
         app:layout_constraintStart_toStartOf="@id/timelineDot"
@@ -60,19 +61,29 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#1A1C1E"
-            android:textSize="15sp"
+            android:textSize="16sp"
             android:textStyle="bold"
-            tools:text="Costume Fitting" />
+            tools:text="Echoes of Tomorrow" />
+
+        <TextView
+            android:id="@+id/txtTalentName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="#880E4F"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:text="Talent: Lahiruka" />
 
         <TextView
             android:id="@+id/txtDetails"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:lineSpacingExtra="4dp"
+            android:lineSpacingExtra="2dp"
             android:textColor="#757575"
             android:textSize="13sp"
-            tools:text="Sihina Genena Kumariye\nKandy\n08.00 a.m - 9.30 a.m" />
+            tools:text="20 Jun 2026\nActor\nColombo" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

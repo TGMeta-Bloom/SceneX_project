@@ -1,5 +1,6 @@
 package com.example.scenex.views
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Shader
@@ -7,14 +8,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
 import com.example.scenex.R
+import com.example.scenex.utils.SessionManager
 import com.example.scenex.viewmodels.TalentHomeViewModel
 import com.google.android.material.imageview.ShapeableImageView
+import com.google.firebase.auth.FirebaseAuth
 
 class TalentHomeFragment : Fragment() {
 
@@ -35,6 +39,7 @@ class TalentHomeFragment : Fragment() {
         val tvUserName = view.findViewById<TextView>(R.id.tvUserName)
         val pbProfileStrength = view.findViewById<ProgressBar>(R.id.pbProfileStrength)
         val tvStrengthPercent = view.findViewById<TextView>(R.id.tvStrengthPercent)
+        val ivLogoutTest = view.findViewById<ImageView>(R.id.ivLogoutTest)
 
         // Apply Primary Gradient to branding elements matching button_rounded_magenta
         applyTextGradient(tvAppName)
@@ -56,6 +61,15 @@ class TalentHomeFragment : Fragment() {
                 pbProfileStrength.progress = score
                 tvStrengthPercent.text = "$score%"
             }
+        }
+
+        // TEMPORARY LOGOUT FOR TESTING
+        ivLogoutTest.setOnClickListener {
+            FirebaseAuth.getInstance().signOut()
+            SessionManager.clearSession(requireContext())
+            val intent = Intent(requireContext(), RoleSelectActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
         }
 
         viewModel.fetchProfileData()

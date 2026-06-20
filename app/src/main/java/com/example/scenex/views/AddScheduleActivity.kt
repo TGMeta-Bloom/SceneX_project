@@ -3,7 +3,7 @@ package com.example.scenex.views
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
-import android.widget.ArrayAdapter
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.scenex.databinding.ActivityAddScheduleBinding
@@ -18,21 +18,18 @@ class AddScheduleActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddScheduleBinding
     private val calendar = Calendar.getInstance()
     private val db = FirebaseFirestore.getInstance()
-    private var scheduleId: String? = null // For Edit mode
+    private var scheduleId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddScheduleBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Clear seconds/ms for consistent comparison
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.MILLISECOND, 0)
 
-        setupTypeDropdown()
         setupPickers()
 
-        // Check for Edit Mode
         scheduleId = intent.getStringExtra("SCHEDULE_ID")
         if (scheduleId != null) {
             loadExistingSchedule(scheduleId!!)
@@ -50,39 +47,29 @@ class AddScheduleActivity : AppCompatActivity() {
 
     private fun loadExistingSchedule(id: String) {
         db.collection("schedules").document(id).get().addOnSuccessListener { doc ->
-            val schedule = doc.toObject(Schedule::class.java)
-            if (schedule != null) {
-                binding.etTitle.setText(schedule.title)
-                
-                // Set dropdown value: "SHOOT" -> "Shoot"
-                val displayType = schedule.type.lowercase().replace("_", " ")
-                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-                binding.spinnerEventType.setText(displayType, false)
-                
-                binding.etLocation.setText(schedule.location)
-                binding.etDescription.setText(schedule.description)
-                binding.etNotes.setText(schedule.notes)
-                binding.switchAllDay.isChecked = schedule.isAllDay
-                
-                // Sync calendar and update UI
-                calendar.timeInMillis = schedule.date
-                val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-                binding.txtSelectedDate.text = dateFormat.format(calendar.time)
-                binding.txtStartTime.text = schedule.startTime
-                binding.txtEndTime.text = schedule.endTime
+            try {
+                val schedule = doc.toObject(Schedule::class.java)
+                if (schedule != null) {
+                    binding.etTitle.setText(schedule.castingTitle)
+                    binding.etRole.setText(schedule.role)
+                    binding.etLocation.setText(schedule.location)
+                    binding.etNotes.setText(schedule.notes)
+                    
+                    calendar.timeInMillis = schedule.date
+                    val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.US)
+                    binding.txtSelectedDate.text = dateFormat.format(calendar.time)
+                    binding.txtStartTime.text = schedule.startTime
+                    binding.txtEndTime.text = schedule.endTime
+                }
+            } catch (e: Exception) {
+                Log.e("SceneX_Debug", "Error loading data: ${e.message}")
             }
         }
     }
 
-    private fun setupTypeDropdown() {
-        val types = arrayOf("Personal Event", "Shoot", "Meeting", "Travel", "Rehearsal", "Other")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, types)
-        binding.spinnerEventType.setAdapter(adapter)
-    }
-
     private fun setupPickers() {
-        val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-        val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.US)
+        val timeFormat = SimpleDateFormat("hh:mm a", Locale.US)
         
         binding.txtSelectedDate.text = dateFormat.format(calendar.time)
         binding.txtStartTime.text = timeFormat.format(calendar.time)
@@ -98,57 +85,57 @@ class AddScheduleActivity : AppCompatActivity() {
 
         binding.btnPickStartTime.setOnClickListener {
             TimePickerDialog(this, { _, h, min ->
-                calendar.set(Calendar.HOUR_OF_DAY, h)
-                calendar.set(Calendar.MINUTE, min)
-                binding.txtStartTime.text = timeFormat.format(calendar.time)
+                val tempCal = Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, h); set(Calendar.MINUTE, min) }
+                binding.txtStartTime.text = timeFormat.format(tempCal.time)
             }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
         }
 
         binding.btnPickEndTime.setOnClickListener {
             TimePickerDialog(this, { _, h, min ->
-                val tempCal = Calendar.getInstance()
-                tempCal.set(Calendar.HOUR_OF_DAY, h)
-                tempCal.set(Calendar.MINUTE, min)
+                val tempCal = Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, h); set(Calendar.MINUTE, min) }
                 binding.txtEndTime.text = timeFormat.format(tempCal.time)
             }, calendar.get(Calendar.HOUR_OF_DAY) + 1, calendar.get(Calendar.MINUTE), false).show()
         }
     }
 
     private fun saveSchedule() {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            Toast.makeText(this, "Please log in to save schedules", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val userId = currentUser.uid
         val title = binding.etTitle.text.toString().trim()
-        val typeStr = binding.spinnerEventType.text.toString()
+        val role = binding.etRole.text.toString().trim()
         
         if (title.isEmpty()) {
             Toast.makeText(this, "Title is required", Toast.LENGTH_SHORT).show()
             return
         }
 
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
+        val saveCalendar = Calendar.getInstance()
+        saveCalendar.timeInMillis = calendar.timeInMillis
+        saveCalendar.set(Calendar.HOUR_OF_DAY, 0); saveCalendar.set(Calendar.MINUTE, 0)
+        saveCalendar.set(Calendar.SECOND, 0); saveCalendar.set(Calendar.MILLISECOND, 0)
 
-        // Reuse ID if updating, otherwise generate new
-        val docRef = if (scheduleId != null) {
-            db.collection("schedules").document(scheduleId!!)
-        } else {
-            db.collection("schedules").document()
-        }
+        val docRef = if (scheduleId != null) db.collection("schedules").document(scheduleId!!) else db.collection("schedules").document()
 
         val schedule = Schedule(
             id = docRef.id,
-            userId = FirebaseAuth.getInstance().currentUser?.uid ?: "test_user_123",
-            title = title,
-            type = typeStr.uppercase().replace(" ", "_"),
+            userId = userId,
+            castingTitle = title,
+            role = role,
             location = binding.etLocation.text.toString(),
-            date = calendar.timeInMillis, 
+            date = saveCalendar.timeInMillis, 
             startTime = binding.txtStartTime.text.toString(),
             endTime = binding.txtEndTime.text.toString(),
-            isAllDay = binding.switchAllDay.isChecked,
-            description = binding.etDescription.text.toString(),
-            notes = binding.etNotes.text.toString()
+            notes = binding.etNotes.text.toString(),
+            status = "CONFIRMED"
         )
 
         docRef.set(schedule).addOnSuccessListener {
-            Toast.makeText(this, if (scheduleId != null) "Schedule updated" else "Schedule saved", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Schedule Saved", Toast.LENGTH_SHORT).show()
             finish()
         }.addOnFailureListener { e ->
             Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()

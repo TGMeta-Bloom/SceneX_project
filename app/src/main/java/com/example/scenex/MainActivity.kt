@@ -1,5 +1,6 @@
 package com.example.scenex
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -15,44 +16,51 @@ import com.google.firebase.firestore.FirebaseFirestore
  */
 class MainActivity : AppCompatActivity() {
 
-    // Default fallback to talent, updated dynamically from the database
     private var userRole: String = "talent"
+    private lateinit var bottomNavigation: BottomNavigationView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
+        bottomNavigation = findViewById(R.id.bottomNavigation)
 
-        // 1. The Bulletproof Fetch: Ask Firestore directly who this is!
+        // Restore user role from state
+        if (savedInstanceState != null) {
+            userRole = savedInstanceState.getString("SAVED_USER_ROLE", "talent")
+        }
+
+        // 1. The Bulletproof Fetch
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         if (userId != null) {
             FirebaseFirestore.getInstance().collection("profiles").document(userId)
                 .get()
                 .addOnSuccessListener { document ->
                     if (document != null && document.exists()) {
-                        // Grab the role exactly as it is spelled in the database
-                        // Checking both 'role' and 'userRole' for bulletproof compatibility
                         val dbRole = document.getString("userRole") ?: document.getString("role")
                         userRole = dbRole?.lowercase() ?: "talent"
                         
                         Log.d("SceneX_Main", "User Role Confirmed: $userRole")
                         
-                        // 2. NOW load the home fragment, because we know their real role
-                        loadAppropriateHomeFragment()
+                        // Only navigate if this is NOT a recreation AND no fragment is loaded
+                        if (savedInstanceState == null && supportFragmentManager.findFragmentById(R.id.nav_host_fragment) == null) {
+                            handleNavigation(intent)
+                        }
                     }
                 }
                 .addOnFailureListener {
-                    // Fallback to talent if there is a sync issue
                     Log.e("SceneX_Main", "Firestore sync failed, defaulting to Talent view")
-                    loadAppropriateHomeFragment()
+                    if (savedInstanceState == null && supportFragmentManager.findFragmentById(R.id.nav_host_fragment) == null) {
+                        handleNavigation(intent)
+                    }
                 }
         } else {
-            // No user session, load default
-            loadAppropriateHomeFragment()
+            if (savedInstanceState == null && supportFragmentManager.findFragmentById(R.id.nav_host_fragment) == null) {
+                handleNavigation(intent)
+            }
         }
 
-        // 3. The Smart Switchboard for Tab Navigation
+        // 3. Bottom Navigation Setup
         bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
@@ -60,16 +68,15 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_search -> {
-                    // Switchboard ready for separate Talent/Job search modules
-                    if (userRole == "recruiter") {
-                        loadFragment(SearchFragment()) // Destination: Search Talent
-                    } else {
-                        loadFragment(SearchFragment()) // Destination: Search Opportunities
-                    }
+                    loadFragment(SearchFragment())
                     true
                 }
                 R.id.nav_calendar -> {
-                    loadFragment(CalendarFragment())
+                    if (userRole == "recruiter") {
+                        loadFragment(RecruiterBookingFragment())
+                    } else {
+                        loadFragment(TalentSchedulingFragment())
+                    }
                     true
                 }
                 R.id.nav_inbox -> {
@@ -85,9 +92,31 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Resolves the Home dashboard context based on the confirmed role.
-     */
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("SAVED_USER_ROLE", userRole)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleNavigation(intent)
+    }
+
+    private fun handleNavigation(intent: Intent?) {
+        val openTab = intent?.getStringExtra("OPEN_TAB")
+        when (openTab) {
+            "INBOX" -> {
+                bottomNavigation.selectedItemId = R.id.nav_inbox
+            }
+            "TIMELINE" -> {
+                bottomNavigation.selectedItemId = R.id.nav_calendar
+            }
+            else -> {
+                loadAppropriateHomeFragment()
+            }
+        }
+    }
+
     private fun loadAppropriateHomeFragment() {
         if (userRole == "recruiter") {
             loadFragment(RecruiterHomeFragment()) 
@@ -96,9 +125,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Standard Swapper to replace the navigation host container.
-     */
     private fun loadFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
             .replace(R.id.nav_host_fragment, fragment)

@@ -1,5 +1,6 @@
 package com.example.scenex.views
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Shader
@@ -12,6 +13,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.scenex.R
+import com.example.scenex.utils.SessionManager
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -26,6 +28,7 @@ class RecruiterHomeFragment : Fragment() {
     private lateinit var tvRecruiterName: TextView
     private lateinit var tvAppName: TextView
     private lateinit var ivNotification: ImageView
+    private lateinit var ivLogoutTest: ImageView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,12 +45,22 @@ class RecruiterHomeFragment : Fragment() {
         tvRecruiterName = view.findViewById(R.id.tvRecruiterName)
         tvAppName = view.findViewById(R.id.tvAppName)
         ivNotification = view.findViewById(R.id.ivNotification)
+        ivLogoutTest = view.findViewById(R.id.ivLogoutTest)
 
         // 1. Sync Branding Colors: Apply primary gradient to App Name
         applyTextGradient(tvAppName)
 
         // 2. Load Dashboard Handshake Data
         loadRecruiterData()
+
+        // TEMPORARY LOGOUT FOR TESTING
+        ivLogoutTest.setOnClickListener {
+            FirebaseAuth.getInstance().signOut()
+            SessionManager.clearSession(requireContext())
+            val intent = Intent(requireContext(), RoleSelectActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+        }
     }
 
     private fun loadRecruiterData() {

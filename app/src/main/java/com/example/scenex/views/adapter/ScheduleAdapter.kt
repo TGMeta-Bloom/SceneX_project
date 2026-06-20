@@ -6,6 +6,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.scenex.databinding.ItemScheduleCardBinding
 import com.example.scenex.models.Schedule
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ScheduleAdapter(
     private val onEditClick: (Schedule) -> Unit,
@@ -34,17 +36,16 @@ class ScheduleAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(schedule: Schedule) {
-            binding.txtTitle.text = schedule.title
-            binding.txtProject.text = schedule.description
-            binding.txtLocation.text = schedule.location
+            // Using castingTitle as the primary display title
+            binding.txtTitle.text = schedule.castingTitle
+            binding.txtLocation.text = schedule.location.ifEmpty { "No location" }
             binding.txtTime.text = "${schedule.startTime} - ${schedule.endTime}"
+            
+            val sdf = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+            binding.txtDate.text = sdf.format(Date(schedule.date))
 
-            val color = when (schedule.type.uppercase()) {
-                "AUDITION" -> "#2196F3"
-                "SHOOT" -> "#FF5722"
-                else -> "#4CAF50"
-            }
-            binding.sideBar.setBackgroundColor(Color.parseColor(color))
+            // Removed 'type' specific color logic; using consistent primary color
+            binding.sideBar.setBackgroundColor(Color.parseColor("#880E4F"))
 
             binding.btnEdit.setOnClickListener { onEditClick(schedule) }
             binding.btnCancel.setOnClickListener { onCancelClick(schedule) }

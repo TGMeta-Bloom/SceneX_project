@@ -13,6 +13,15 @@
     <!-- The missing style required by AndroidManifest.xml -->
     <style name="Theme.SceneX.NoActionBar" parent="Theme.SceneX" />
 
+    <!-- Shape Appearance for Booking Card Banner (Top Corners Only) -->
+    <style name="ShapeAppearance.Material3.Corner.Top.Large" parent="">
+        <item name="cornerSizeTopLeft">16dp</item>
+        <item name="cornerSizeTopRight">16dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+        <item name="cornerFamily">rounded</item>
+    </style>
+
     <!-- Specific style for pure magenta radio buttons -->
     <style name="PureMagentaRadioButton" parent="Widget.Material3.CompoundButton.RadioButton">
         <item name="useMaterialThemeColors">false</item>
@@ -83,6 +92,11 @@
     <style name="AppTextStyle_Caption">
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@color/gray</item>
+    </style>
+
+    <!-- Custom Style for Image Picker Dialog -->
+    <style name="CustomPickerDialog" parent="Theme.Material3.DayNight.Dialog">
+        <item name="android:windowBackground">@drawable/custom_dialog_bg</item>
     </style>
 
 </resources>

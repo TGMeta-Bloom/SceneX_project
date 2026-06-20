@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="8dp"
+    app:cardBackgroundColor="@color/white"
     app:cardCornerRadius="16dp"
-    app:cardElevation="2dp"
+    app:cardElevation="3dp"
     app:strokeWidth="0dp">
 
     <LinearLayout
@@ -14,86 +16,173 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Banner Image -->
+        <!-- 1. Project Banner Image -->
         <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/imgProject"
+            android:id="@+id/imgProjectBanner"
             android:layout_width="match_parent"
             android:layout_height="140dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_launcher_foreground"
-            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" />
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Top.Large" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:padding="16dp">
 
-            <TextView
-                android:id="@+id/txtProjectTitle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="Project Title"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@+id/statusChip"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            <!-- Header: Title and Status Badge -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/statusChip"
-                style="@style/Widget.Material3.Chip.Assist"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="PENDING"
-                android:textSize="10sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                <TextView
+                    android:id="@+id/txtProjectTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_toStartOf="@id/txtStatusBadge"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Project Title"
+                    android:textColor="#1A1C1E"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/txtRecruiterName"
-                android:layout_width="wrap_content"
+                <!-- Status Badge -->
+                <TextView
+                    android:id="@+id/txtStatusBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/bg_status_badge_stroke"
+                    android:backgroundTint="#FFB300"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:text="PENDING"
+                    android:textColor="@android:color/white"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <!-- 2. Recruiter Name -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="by Recruiter Name"
-                android:textSize="13sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/txtProjectTitle" />
+                android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/txtDateTime"
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_profile"
+                    app:tint="#880E4F" />
+
+                <TextView
+                    android:id="@+id/txtTalentName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Recruiter: Name"
+                    android:textColor="#424242"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- 3. Date Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@android:drawable/ic_menu_my_calendar"
+                    app:tint="#880E4F" />
+
+                <TextView
+                    android:id="@+id/txtBookingDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Jun 20, 2026"
+                    android:textColor="#424242"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- 4. Time Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@android:drawable/ic_menu_recent_history"
+                    app:tint="#880E4F" />
+
+                <TextView
+                    android:id="@+id/txtBookingTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="02:00 pm - 05:00 pm"
+                    android:textColor="#424242"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- 5. Professional Conflict Badge (REFINED) -->
+            <LinearLayout
+                android:id="@+id/layoutConflict"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="Oct 24 • 09:00 AM"
-                android:textColor="#E91E63"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/txtRecruiterName" />
-
-            <!-- CONFLICT CHIP -->
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipConflict"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="⚠ Schedule Conflict"
-                android:textColor="#D32F2F"
+                android:background="@drawable/bg_conflict_badge_modern"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="6dp"
                 android:visibility="gone"
-                app:chipBackgroundColor="#FDEDEC"
-                app:chipStrokeWidth="0dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/txtDateTime" />
+                tools:visibility="visible">
 
-            <Button
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:src="@android:drawable/ic_dialog_alert"
+                    app:tint="#B91C1C" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="Schedule Conflict Detected"
+                    android:textColor="#B91C1C"
+                    android:textSize="11sp"
+                    android:letterSpacing="0.02" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="16dp"
+                android:background="#F5F5F5" />
+
+            <!-- 6. View Details Button -->
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnViewDetails"
                 style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="View Details"
-                app:layout_constraintTop_toBottomOf="@id/chipConflict" />
+                android:layout_height="48dp"
+                android:text="View Booking Details"
+                android:textAllCaps="false"
+                android:textColor="#880E4F"
+                android:textStyle="bold"
+                app:backgroundTint="#FCE4EC"
+                app:cornerRadius="12dp" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

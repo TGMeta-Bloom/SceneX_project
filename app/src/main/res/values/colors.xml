@@ -16,6 +16,9 @@
     <color name="primary_dark">#4A0038</color>
     <color name="input_outline">#E1BEE7</color>
     <color name="magenta_stroke">#D81B60</color>
+    
+    <!-- Added for search suggestion bor recruiter Booking screen-->
+    <color name="suggestion_pink_light">#FFF5F8</color>
 
     <!-- Gothami's Styles -->
     <color name="scenex_primary">#720056</color>

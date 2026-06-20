@@ -8,7 +8,7 @@ data class UserProfile(
     val role: String = "", // "TALENT" or "RECRUITER"
     val profileImage: String = "",
     val phoneNumber: String = "",
-    val age: Int = 0,
+    val age: Int=0 , // Changed from Int to String to prevent deserialization crash
     val gender: String = "",
     val province: String = "",
     val city: String = "",
@@ -21,7 +21,6 @@ data class UserProfile(
     val experience: String = "",
     val portfolioLink: String = "",
     val socialMediaLinks: String = "",
-    // Recruiter localized proof system (Updated)
     val companyName: String = "",
     val industryType: String = "",
     val industryProofLinks: List<String> = emptyList(),

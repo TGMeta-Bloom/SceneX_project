@@ -31,6 +31,18 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:tint="@color/black" />
 
+            <!-- TEMPORARY LOGOUT BUTTON FOR TESTING -->
+            <ImageView
+                android:id="@+id/ivLogoutTest"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="16dp"
+                android:src="@android:drawable/ic_lock_power_off"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ivNotification"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="#D32F2F" />
+
             <TextView
                 android:id="@+id/tvAppName"
                 android:layout_width="wrap_content"
