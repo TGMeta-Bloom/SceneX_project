@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.net.URLEncoder
 
 sealed class TalentResultsState {
     object Loading : TalentResultsState()
@@ -23,10 +22,10 @@ sealed class TalentResultsState {
     data class Error(val message: String) : TalentResultsState()
 }
 
-// Simple navigation events
 sealed class TalentNavEvent {
     data class OpenProfile(val talent: UserProfile) : TalentNavEvent()
     data class OpenWhatsApp(val url: String) : TalentNavEvent()
+    data class OpenHireForm(val talent: UserProfile) : TalentNavEvent()
 }
 
 class TalentResultsViewModel : ViewModel() {
@@ -47,41 +46,11 @@ class TalentResultsViewModel : ViewModel() {
 
     fun initiateHire(talent: UserProfile, recruiterId: String) {
         viewModelScope.launch {
-            try {
-                // 1. Log the Hire Request in Firestore (Audit Trail for SceneX)
-                val requestId = "${recruiterId}_${talent.userId}"
-                val requestData = mapOf(
-                    "recruiterId" to recruiterId,
-                    "talentId" to talent.userId,
-                    "talentName" to talent.fullName,
-                    "status" to "INTERESTED",
-                    "timestamp" to System.currentTimeMillis()
-                )
-
-                db.collection("hiring_requests")
-                    .document(requestId)
-                    .set(requestData)
-                    .await()
-
-                // 2. Generate WhatsApp Bridge (The "Closure" step)
-                // SL Context: Convert 077... to 9477... if necessary
-                val rawPhone = talent.phoneNumber.filter { it.isDigit() }
-                val cleanPhone = if (rawPhone.startsWith("0")) "94${rawPhone.substring(1)}" else rawPhone
-
-                val message = "Hello ${talent.fullName}, I found your profile on SceneX and I'm interested in hiring you for a project. Let's discuss!"
-                val encodedMsg = URLEncoder.encode(message, "UTF-8")
-                val whatsappUrl = "https://wa.me/$cleanPhone?text=$encodedMsg"
-
-                _navEvent.emit(TalentNavEvent.OpenWhatsApp(whatsappUrl))
-
-            } catch (e: Exception) {
-                Log.e("SceneX_Hire", "Hire logic failed: ${e.message}")
-            }
+            _navEvent.emit(TalentNavEvent.OpenHireForm(talent))
         }
     }
 
     fun performSearch(criteria: SearchCriteria) {
-        // ... (Existing performSearch logic remains exactly as it is) ...
         viewModelScope.launch {
             _uiState.value = TalentResultsState.Loading
             try {
@@ -140,10 +109,19 @@ class TalentResultsViewModel : ViewModel() {
                         matchPoints += 1.5
                     }
 
-                    val score = if (totalPossible > 0) (matchPoints / totalPossible) else 0.5
-                    talent.copy(calculated_score = score)
+                    // 🎯 HYBRID MATCHING: Combine Search Relevancy with Friend's Calculated Score (Profile Quality)
+                    val searchRelevancy = if (totalPossible > 0) (matchPoints / totalPossible) else 0.5
+                    
+                    // Friend's score is in talent.calculated_score (loaded from Firestore)
+                    // We normalize friend's score if it's 0-100 (assuming completeness/ranking logic)
+                    val profileQuality = if (talent.calculated_score > 1.0) talent.calculated_score / 100.0 else talent.calculated_score
+                    
+                    // Final Hybrid Score: 70% Relevancy, 30% Profile Quality
+                    val finalScore = (searchRelevancy * 0.7) + (profileQuality * 0.3)
+                    
+                    talent.copy(calculated_score = finalScore)
                 }
-                    .filter { it.calculated_score > 0.1 }
+                    .filter { it.calculated_score > 0.05 }
                     .sortedByDescending { it.calculated_score }
 
                 if (results.isEmpty()) {

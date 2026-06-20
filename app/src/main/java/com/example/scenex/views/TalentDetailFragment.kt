@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -92,11 +91,21 @@ class TalentDetailFragment : Fragment() {
             viewModel.initiateHire(talent, recruiterId)
         }
 
-        // Observe WhatsApp Bridge
+        // Observe Navigation Events
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.navEvent.collectLatest { event ->
-                if (event is TalentNavEvent.OpenWhatsApp) {
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(event.url)))
+                when (event) {
+                    is TalentNavEvent.OpenWhatsApp -> {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(event.url)))
+                    }
+                    is TalentNavEvent.OpenHireForm -> {
+                        val hireFragment = HireRequestFragment.newInstance(event.talent)
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.nav_host_fragment, hireFragment)
+                            .addToBackStack(null)
+                            .commit()
+                    }
+                    else -> {}
                 }
             }
         }
