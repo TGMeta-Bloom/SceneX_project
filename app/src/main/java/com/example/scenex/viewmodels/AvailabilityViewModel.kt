@@ -69,10 +69,10 @@ class AvailabilityViewModel : ViewModel() {
                             set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
                             set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
                         }.timeInMillis
-                        
+
                         val (bookings, schedules, castings) = repository.getDailyEvents(userId, today)
-                        val allEvents = bookings + schedules + castings.filter { 
-                            (it.getString("recruiterId") ?: it.getString("userId")) == userId 
+                        val allEvents = bookings + schedules + castings.filter {
+                            (it.getString("recruiterId") ?: it.getString("userId")) == userId
                         }
 
                         val calendarStatus = engine.calculateCurrentStatus(allEvents)
@@ -116,16 +116,16 @@ class AvailabilityViewModel : ViewModel() {
             timeZone = TimeZone.getTimeZone("UTC")
         }
         val dateFields = arrayOf("auditionDate", "date", "audition_date", "Date", "audition_day")
-        
+
         for (field in dateFields) {
             val ts = getSafeTimestamp(doc, field)
             if (ts != null && ts > 0) return targetFormat.format(Date(ts))
-            
+
             val raw = doc.getString(field)?.trim() ?: continue
             if (raw.isBlank()) continue
-            
+
             val clean = raw.replace("\u00A0", " ").replace(Regex("\\s+"), " ")
-            
+
             // Handle ISO/Slash formats (yyyy-MM-dd) even with single digits
             if (clean.matches(Regex("\\d{4}[\\-/]\\d{1,2}[\\-/]\\d{1,2}"))) {
                 val p = clean.split(Regex("[\\-/]"))
@@ -201,17 +201,17 @@ class AvailabilityViewModel : ViewModel() {
         castingCalls: List<DocumentSnapshot>
     ): Map<String, Pair<Set<DayStatus>, List<CalendarEvent>>> {
         val dataMap = mutableMapOf<String, Pair<MutableSet<DayStatus>, MutableList<CalendarEvent>>>()
-        
+
         fun getEntry(date: String) = dataMap.getOrPut(date) { mutableSetOf<DayStatus>() to mutableListOf<CalendarEvent>() }
 
         // 1. Casting Calls Processing
         castingCalls.forEach { doc ->
             getFormattedDate(doc)?.let { dateStr ->
-                val rId = doc.getString("recruiterId") ?: doc.getString("recruiterid") ?: 
-                          doc.getString("recruiter_id") ?: doc.getString("userId") ?: ""
-                
+                val rId = doc.getString("recruiterId") ?: doc.getString("recruiterid") ?:
+                doc.getString("recruiter_id") ?: doc.getString("userId") ?: ""
+
                 val isOwner = rId == viewedUserId
-                
+
                 if (isOwner) {
                     val project = doc.getString("projectTitle") ?: "Casting Audition"
                     val role = doc.getString("characterName") ?: doc.getString("category") ?: "Audition"
@@ -226,7 +226,7 @@ class AvailabilityViewModel : ViewModel() {
                         type = DayStatus.CASTING_CALL,
                         description = "Casting Call | Role: $role | Loc: $loc"
                     ))
-                    
+
                     statuses.add(DayStatus.BUSY)
                     events.add(CalendarEvent(
                         title = "Audition Commitment: $project",
@@ -245,11 +245,11 @@ class AvailabilityViewModel : ViewModel() {
                 if (statusStr == "REJECTED" || statusStr == "CANCELLED") return@forEach
 
                 val statusType = if (statusStr == "CONFIRMED" || statusStr == "ACCEPTED") DayStatus.BUSY else DayStatus.PENDING
-                
+
                 val project = doc.getString("castingTitle") ?: "Project: ${doc.getString("role") ?: "Booking"}"
                 val time = "${doc.getString("startTime") ?: "TBA"} - ${doc.getString("endTime") ?: "TBA"}"
                 val location = doc.getString("location") ?: "TBA"
-                
+
                 val docRecruiterId = doc.getString("recruiterId") ?: doc.getString("recruiterid") ?: doc.getString("recruiter_id") ?: ""
                 val partner = if (viewedUserId == docRecruiterId) {
                     "With Talent: ${doc.getString("name") ?: "N/A"}"
@@ -274,7 +274,7 @@ class AvailabilityViewModel : ViewModel() {
                 val project = doc.getString("castingTitle") ?: "Confirmed Session"
                 val time = "${doc.getString("startTime") ?: "TBA"} - ${doc.getString("endTime") ?: "TBA"}"
                 val location = doc.getString("location") ?: "TBA"
-                
+
                 val docRecruiterId = doc.getString("recruiterId") ?: doc.getString("recruiterid") ?: doc.getString("recruiter_id") ?: ""
                 val partner = if (viewedUserId == docRecruiterId) {
                     "With Talent: ${doc.getString("name") ?: "N/A"}"
@@ -292,7 +292,7 @@ class AvailabilityViewModel : ViewModel() {
                 ))
             }
         }
-        
+
         return dataMap.mapValues { it.value.first to it.value.second }
     }
 
@@ -311,7 +311,7 @@ class AvailabilityViewModel : ViewModel() {
         val days = mutableListOf<CalendarDay>()
         val cal = calendar.clone() as Calendar
         cal.set(Calendar.DAY_OF_MONTH, 1)
-        
+
         val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
             timeZone = TimeZone.getTimeZone("UTC")
         }
@@ -343,13 +343,13 @@ class AvailabilityViewModel : ViewModel() {
                     timeZone = TimeZone.getTimeZone("UTC")
                 }.format(Date(timestamp))
                 val (bookings, schedules, castingCalls) = repository.getDailyEvents(userId, timestamp)
-                
-                val hardBlocks = (bookings + schedules).filter { 
+
+                val hardBlocks = (bookings + schedules).filter {
                     val status = it.getString("status")?.uppercase() ?: "CONFIRMED"
                     getFormattedDate(it) == targetDateStr && (status == "CONFIRMED" || status == "ACCEPTED")
                 } + castingCalls.filter {
-                    val rId = it.getString("recruiterId") ?: it.getString("recruiterid") ?: 
-                              it.getString("recruiter_id") ?: it.getString("userId") ?: ""
+                    val rId = it.getString("recruiterId") ?: it.getString("recruiterid") ?:
+                    it.getString("recruiter_id") ?: it.getString("userId") ?: ""
                     rId == userId && getFormattedDate(it) == targetDateStr
                 }
                 onResult(engine.checkSlotAvailability(hardBlocks, startTime, endTime))

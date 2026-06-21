@@ -29,36 +29,36 @@ class AvailabilityRepository {
         val isRecruiter = role.equals("Recruiter", ignoreCase = true)
 
         // 🚀 Range queries for Bookings and Schedules (efficient use of indexes)
-        val asTalentB = async { 
+        val asTalentB = async {
             db.collection("bookings")
                 .whereEqualTo("talentId", userId)
                 .whereGreaterThanOrEqualTo("date", start)
                 .whereLessThanOrEqualTo("date", end)
-                .get().await() 
+                .get().await()
         }
-        val asRecruiterB = async { 
+        val asRecruiterB = async {
             db.collection("bookings")
                 .whereEqualTo("recruiterId", userId)
                 .whereGreaterThanOrEqualTo("date", start)
                 .whereLessThanOrEqualTo("date", end)
-                .get().await() 
+                .get().await()
         }
-        
-        val asTalentS = async { 
+
+        val asTalentS = async {
             db.collection("schedules")
-                .whereEqualTo("userId", userId) 
+                .whereEqualTo("userId", userId)
                 .whereGreaterThanOrEqualTo("date", start)
                 .whereLessThanOrEqualTo("date", end)
-                .get().await() 
+                .get().await()
         }
-        val asRecruiterS = async { 
+        val asRecruiterS = async {
             db.collection("schedules")
                 .whereEqualTo("recruiterId", userId)
                 .whereGreaterThanOrEqualTo("date", start)
                 .whereLessThanOrEqualTo("date", end)
-                .get().await() 
+                .get().await()
         }
-        
+
         // 🎯 FIX: Fetch all to allow casing-resilient filtering in the ViewModel
         val castingCalls = async {
             db.collection("CastingCalls").get().await()
@@ -66,7 +66,7 @@ class AvailabilityRepository {
 
         val allBookings = asTalentB.await().documents + asRecruiterB.await().documents
         val allSchedules = asTalentS.await().documents + asRecruiterS.await().documents
-        
+
         RoleContext(allBookings, allSchedules, castingCalls.await().documents, role)
     }
 
