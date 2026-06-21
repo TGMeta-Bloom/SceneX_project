@@ -32,6 +32,7 @@ data class UserProfile(
     val spotlightCategory: String = "",
     val qualification: String = "",
     val languages: String = "",
+    val skills: List<String> = emptyList(), // Added for Discovery Hub
     val experience: String = "",
     val portfolioLink: String = "",
     val showreelUrl: String = "",
@@ -46,6 +47,7 @@ data class UserProfile(
     val calculated_score: Double = 0.0, 
     val rankingScore: Double = 0.0,      
     val completenessScore: Double = 0.0, 
+    val rating: Float = 0f, // Added for Discovery Hub
     
     val visibility_tier: String = "NORMAL",
     val status: String = "draft",   
@@ -61,12 +63,9 @@ data class UserProfile(
     val effectiveAvatarUrl: String
         get() {
             return when {
-                // 🎯 IDENTITY FIRST: Use account-level profile images
                 profileImage.isNotBlank() -> profileImage
                 profileImageUrl.isNotBlank() -> profileImageUrl
                 mediaAssets["profileImage"] != null -> mediaAssets["profileImage"]!!
-                
-                // FINAL FALLBACK: Initials (Never use professional headshots for identity circles)
                 else -> "https://ui-avatars.com/api/?name=${fullName.replace(" ", "+")}&background=B0006D&color=fff"
             }
         }

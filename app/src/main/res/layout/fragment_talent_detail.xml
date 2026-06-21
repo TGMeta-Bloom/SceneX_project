@@ -1,377 +1,248 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView
+<androidx.coordinatorlayout.widget.CoordinatorLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA"
-    android:fillViewport="true">
+    android:background="@color/white">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBar"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsingToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:contentScrim="@color/primary_magenta"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:titleEnabled="false">
+
+            <ImageView
+                android:id="@+id/ivHeaderImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="Talent Header"
+                app:layout_collapseMode="parallax" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/gradient_black_overlay" />
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin">
+
+                <ImageView
+                    android:id="@+id/btnBack"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_arrow_back"
+                    android:contentDescription="Back"
+                    app:tint="@color/white" />
+
+            </androidx.appcompat.widget.Toolbar>
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="-40dp"
+        android:background="@drawable/bg_profile_content_rounded"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:id="@+id/tvDetailName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-black"
+                android:textColor="#111827"
+                android:textSize="28sp"
+                tools:text="Thamasha Nethmini" />
+
+            <TextView
+                android:id="@+id/tvDetailRole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="#B0006D"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1"
+                tools:text="PREMIUM ACTRESS" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/chipLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/spotlight_chip_bg"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:textColor="#B0006D"
+                    android:textSize="12sp"
+                    tools:text="📍 Colombo" />
+                <TextView
+                    android:id="@+id/chipAge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/spotlight_chip_bg"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:textColor="#B0006D"
+                    android:textSize="12sp"
+                    tools:text="🎂 22 Years" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="BIOGRAPHY"
+                android:textColor="#9CA3AF"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvDetailBio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:lineSpacingExtra="4dp"
+                android:textColor="#4B5563"
+                tools:text="Passionate performance artist with over 3 years of experience in commercial cinema..." />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="PHYSICAL SPECS"
+                android:textColor="#9CA3AF"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_stats_light"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <LinearLayout 
+                    android:layout_width="0dp" 
+                    android:layout_height="wrap_content" 
+                    android:layout_weight="1" 
+                    android:orientation="vertical">
+                    <TextView 
+                        android:layout_width="wrap_content" 
+                        android:layout_height="wrap_content" 
+                        android:text="HEIGHT" 
+                        android:textSize="10sp" 
+                        android:textColor="#999"/>
+                    <TextView 
+                        android:id="@+id/tvStatHeight" 
+                        android:layout_width="wrap_content" 
+                        android:layout_height="wrap_content" 
+                        android:textStyle="bold" 
+                        android:textColor="#111" 
+                        tools:text="165 cm"/>
+                </LinearLayout>
+
+                <LinearLayout 
+                    android:layout_width="0dp" 
+                    android:layout_height="wrap_content" 
+                    android:layout_weight="1" 
+                    android:orientation="vertical">
+                    <TextView 
+                        android:layout_width="wrap_content" 
+                        android:layout_height="wrap_content" 
+                        android:text="GENDER" 
+                        android:textSize="10sp" 
+                        android:textColor="#999"/>
+                    <TextView 
+                        android:id="@+id/tvStatWeight" 
+                        android:layout_width="wrap_content" 
+                        android:layout_height="wrap_content" 
+                        android:textStyle="bold" 
+                        android:textColor="#111" 
+                        tools:text="FEMALE"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="PORTFOLIO IMAGES"
+                android:textColor="#9CA3AF"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivPortfolio1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="Portfolio 1"
+                    app:shapeAppearanceOverlay="@style/RoundedImageView8" />
+                <View android:layout_width="12dp" android:layout_height="match_parent"/>
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivPortfolio2"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="Portfolio 2"
+                    app:shapeAppearanceOverlay="@style/RoundedImageView8" />
+            </LinearLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="120dp"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="20dp">
-
-        <ImageView
-            android:id="@+id/btnBack"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:src="@drawable/ic_arrow_back"
-            android:contentDescription="Navigate Back"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/primary_magenta" />
-
-        <TextView
-            android:id="@+id/tvDetailTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
-            android:fontFamily="sans-serif-medium"
-            android:text="Talent Analytical Profile"
-            android:textColor="#111827"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@id/btnBack"
-            app:layout_constraintStart_toEndOf="@id/btnBack"
-            app:layout_constraintTop_toTopOf="@id/btnBack" />
-
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/ivDetailAvatar"
-            android:layout_width="110dp"
-            android:layout_height="110dp"
-            android:layout_marginTop="28dp"
-            android:scaleType="centerCrop"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvDetailTitle"
-            app:shapeAppearanceOverlay="@style/CircleImageView"
-            app:strokeWidth="2dp" />
-
-        <TextView
-            android:id="@+id/tvDetailName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:fontFamily="sans-serif-black"
-            android:textColor="#111827"
-            android:textSize="22sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ivDetailAvatar"
-            tools:text="Thamasha Samaranayaka" />
-
-        <TextView
-            android:id="@+id/tvDetailRole"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:fontFamily="sans-serif-medium"
-            android:textColor="@color/primary_magenta"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.05"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvDetailName"
-            tools:text="ACTOR / PERFORMER" />
-
-        <TextView
-            android:id="@+id/tvDetailLocation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:fontFamily="sans-serif"
-            android:textColor="#4B5563"
-            android:textSize="13sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvDetailRole"
-            tools:text="📍 Colombo, Western Province" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardMetrics"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            app:cardBackgroundColor="@color/white"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeWidth="0dp"
-            app:layout_constraintTop_toBottomOf="@id/tvDetailLocation">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:baselineAligned="false">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-                    <TextView
-                        android:id="@+id/tvDetailRanking"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/primary_magenta"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        tools:text="⚡ 79" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="System Rank Index"
-                        android:textColor="#6B7280"
-                        android:textSize="11sp"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:background="#E5E7EB" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-                    <TextView
-                        android:id="@+id/tvDetailYield"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-medium"
-                        android:textColor="#111827"
-                        android:textSize="22sp"
-                        android:textStyle="bold"
-                        tools:text="90%" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Profile Density Yield"
-                        android:textColor="#6B7280"
-                        android:textSize="11sp"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardDataDetails"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/white"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeWidth="0dp"
-            app:layout_constraintTop_toBottomOf="@id/cardMetrics">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="BIOGRAPHY"
-                    android:textColor="#9CA3AF"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.05" />
-
-                <TextView
-                    android:id="@+id/tvDetailBio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:fontFamily="sans-serif"
-                    android:textColor="#374151"
-                    android:textSize="14sp"
-                    android:lineSpacingMultiplier="1.2"
-                    tools:text="Passionate performance artist with verified credentials tracking 3 years of industry execution experience under various studio contexts." />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#F3F4F6"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginBottom="14dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="PHYSICAL SPECS MATRIX"
-                    android:textColor="#9CA3AF"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.05" />
-
-                <TextView
-                    android:id="@+id/tvDetailSpecs"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:fontFamily="sans-serif-medium"
-                    android:textColor="#111827"
-                    android:textSize="13sp"
-                    tools:text="Height: 145 cm  |  Build: Petite  |  Gender: Female" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#F3F4F6"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginBottom="14dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="CORE PROFESSIONAL CRITERIA"
-                    android:textColor="#9CA3AF"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.05" />
-
-                <TextView
-                    android:id="@+id/tvDetailPro"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:fontFamily="sans-serif"
-                    android:textColor="#374151"
-                    android:textSize="13sp"
-                    android:lineSpacingMultiplier="1.3"
-                    tools:text="🎓 Qualification: Bachelor's Degree\n⏱️ Experience Tenure: 1-3 years\n🗣️ Languages: Sinhala, Spanish" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <TextView
-            android:id="@+id/labelMedia"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="VERIFIED PORTFOLIO IMAGES"
-            android:textColor="#6B7280"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.05"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/cardDataDetails" />
-
-        <LinearLayout
-            android:id="@+id/llMediaImages"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal"
-            app:layout_constraintTop_toBottomOf="@id/labelMedia">
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
-                android:layout_height="160dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="6dp"
-                app:cardCornerRadius="12dp"
-                app:strokeColor="#E5E7EB"
-                app:strokeWidth="1dp">
-                <ImageView
-                    android:id="@+id/ivDetailHeadshot"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:contentDescription="Headshot Render" />
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
-                android:layout_height="160dp"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                app:cardCornerRadius="12dp"
-                app:strokeColor="#E5E7EB"
-                app:strokeWidth="1dp">
-                <ImageView
-                    android:id="@+id/ivDetailFullBody"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:contentDescription="Full-Body Profile Render" />
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/llDetailLinks"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:orientation="vertical"
-            app:layout_constraintTop_toBottomOf="@id/llMediaImages">
-
-            <TextView
-                android:id="@+id/tvDetailPortfolio"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/talent_card_border"
-                android:padding="14dp"
-                android:text="🔗 Open Production Portfolio Link"
-                android:textColor="@color/primary_magenta"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:clickable="true"
-                android:focusable="true" />
-
-            <TextView
-                android:id="@+id/tvDetailShowreel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/talent_card_border"
-                android:padding="14dp"
-                android:text="🎬 Stream Performance Showreel"
-                android:textColor="@color/primary_magenta"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:clickable="true"
-                android:focusable="true" />
-
-            <TextView
-                android:id="@+id/tvDetailSocial"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/talent_card_border"
-                android:padding="14dp"
-                android:text="🌐 Inspect Verification Social Matrix"
-                android:textColor="@color/primary_magenta"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:clickable="true"
-                android:focusable="true" />
-        </LinearLayout>
-
+        android:layout_gravity="bottom"
+        app:cardElevation="24dp"
+        app:cardCornerRadius="0dp">
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnHireTalent"
             android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:layout_marginTop="28dp"
-            android:layout_marginBottom="20dp"
-            android:background="@drawable/button_rounded_magenta"
-            android:text="Initiate Corporate Acquisition (Hire)"
-            android:textAllCaps="false"
+            android:layout_height="60dp"
+            android:layout_margin="16dp"
+            android:background="@drawable/button_primary"
+            android:text="INITIATE HIRE REQUEST"
             android:textColor="@color/white"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/llDetailLinks" />
+            android:textStyle="bold" />
+    </com.google.android.material.card.MaterialCardView>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
