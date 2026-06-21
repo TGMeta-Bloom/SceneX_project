@@ -10,23 +10,26 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.example.scenex.R
 import com.example.scenex.models.UserProfile
+import com.example.scenex.viewmodels.AvailabilityViewModel
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.gson.Gson
 
 /**
  * Senior Technical Implementation: Talent Analytical Profile.
- * Features: High-Speed Image Delivery and Blur-Thumbnail Feedback.
  */
 class TalentDetailFragment : Fragment() {
 
     private lateinit var talent: UserProfile
+    private val availabilityViewModel: AvailabilityViewModel by viewModels()
 
     companion object {
         private const val ARG_TALENT_JSON = "arg_talent_json"
@@ -70,6 +73,9 @@ class TalentDetailFragment : Fragment() {
         val tvDetailSpecs = view.findViewById<TextView>(R.id.tvDetailSpecs)
         val tvDetailPro = view.findViewById<TextView>(R.id.tvDetailPro)
         
+        // 🎯 Manual Availability display area
+        val tvDetailTitle = view.findViewById<TextView>(R.id.tvDetailTitle)
+        
         val ivDetailHeadshot = view.findViewById<ImageView>(R.id.ivDetailHeadshot)
         val ivDetailFullBody = view.findViewById<ImageView>(R.id.ivDetailFullBody)
         
@@ -82,7 +88,7 @@ class TalentDetailFragment : Fragment() {
         tvDetailName.text = talent.fullName
         tvDetailRole.text = (talent.spotlightCategory.ifEmpty { "Performer" }).uppercase()
         tvDetailLocation.text = "📍 ${talent.city}, ${talent.province}"
-        tvDetailRanking.text = "${talent.rankingScore.toInt()} Pts"
+        tvDetailRanking.text = "⚡ ${talent.rankingScore.toInt()}"
         tvDetailYield.text = "${talent.completenessScore.toInt()}%"
         tvDetailBio.text = talent.bio.ifEmpty { "Professional artist with verified portfolio assets." }
         tvDetailSpecs.text = talent.physicalSpecs.ifEmpty { "Physical specifications verified." }
@@ -92,48 +98,43 @@ class TalentDetailFragment : Fragment() {
                      "🗣️ Languages: ${talent.languages.ifEmpty { "Sinhala / English" }}"
         tvDetailPro.text = matrix
 
-        // 3. EXTREME SPEED ASSET SYNC (Blur-Thumbnail Logic)
+        // 🎯 3. Availability Intelligence Integration
+        availabilityViewModel.calculatedStatus.observe(viewLifecycleOwner) { status ->
+            tvDetailTitle.text = status
+            when {
+                status.contains("Available") -> tvDetailTitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.calendar_green))
+                status.contains("Busy") -> tvDetailTitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.calendar_orange))
+                else -> tvDetailTitle.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_dark))
+            }
+        }
+        availabilityViewModel.resolveCombinedStatus(talent.userId)
+
+        // 4. Asset Rendering
         loadProfessionalImage(talent.effectiveAvatarUrl, ivDetailAvatar, isCircle = true)
         loadProfessionalImage(talent.headshotUrl, ivDetailHeadshot, isCircle = false)
         loadProfessionalImage(talent.fullBodyUrl, ivDetailFullBody, isCircle = false)
-
-        // 4. Click Listeners for Inspection
-        ivDetailAvatar.setOnClickListener { openInspector(talent.effectiveAvatarUrl) }
-        ivDetailHeadshot.setOnClickListener { openInspector(talent.headshotUrl) }
-        ivDetailFullBody.setOnClickListener { openInspector(talent.fullBodyUrl) }
 
         // 5. Matrix Link Routing
         setupLink(tvDetailPortfolio, talent.portfolioLink)
         setupLink(tvDetailShowreel, talent.showreelUrl)
         setupLink(tvDetailSocial, talent.socialMediaLinks)
 
-        // 6. Navigation
         btnBack.setOnClickListener { parentFragmentManager.popBackStack() }
         btnHireTalent.setOnClickListener {
-            Toast.makeText(requireContext(), "Initiating contract acquisition protocol...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Initiating hire protocol...", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun loadProfessionalImage(url: String, imageView: ImageView, isCircle: Boolean) {
         val request = Glide.with(this)
             .load(url)
-            .thumbnail(0.1f) // ⚡ Shows blurry image instantly while loading high-res
-            .diskCacheStrategy(DiskCacheStrategy.ALL) // Aggressive caching
-            .transition(DrawableTransitionOptions.withCrossFade()) // Smooth pop-in
+            .thumbnail(0.1f)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .transition(DrawableTransitionOptions.withCrossFade())
             .priority(Priority.HIGH)
             
         if (isCircle) request.circleCrop().into(imageView) 
         else request.into(imageView)
-    }
-
-    private fun openInspector(imageUrl: String) {
-        if (imageUrl.isBlank()) return
-        val viewer = FullImageViewerFragment.newInstance(imageUrl)
-        parentFragmentManager.beginTransaction()
-            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-            .add(R.id.nav_host_fragment, viewer)
-            .addToBackStack(null)
-            .commit()
     }
 
     private fun setupLink(textView: TextView, url: String) {

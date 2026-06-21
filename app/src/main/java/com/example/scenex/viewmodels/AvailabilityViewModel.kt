@@ -17,7 +17,7 @@ import java.util.*
 
 /**
  * Member 1 Implementation: SceneX Availability Intelligence (MVVM).
- * Updated: Manual Override integration.
+ * Updated: Manual Override integration with Priority Logic.
  */
 class AvailabilityViewModel : ViewModel() {
 
@@ -35,8 +35,8 @@ class AvailabilityViewModel : ViewModel() {
     private val _syncError = MutableLiveData<String?>()
     val syncError: LiveData<String?> = _syncError
 
-    // 🎯 NEW: Combined Availability Logic
-    private val _calculatedStatus = MutableLiveData<String>("Available Now")
+    // 🎯 NEW: Combined Availability Logic (Manual + Calendar)
+    private val _calculatedStatus = MutableLiveData<String>("🟢 Available Now")
     val calculatedStatus: LiveData<String> = _calculatedStatus
 
     private val _manualStatusPreference = MutableLiveData<String>("AVAILABLE")
@@ -46,11 +46,10 @@ class AvailabilityViewModel : ViewModel() {
     private var currentMonth = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
 
     /**
-     * 🎯 INTELLIGENCE ENGINE: Combines Manual Override with Calendar Events.
-     * Priority: 
-     * 1. UNAVAILABLE (Manual Override)
-     * 2. BUSY NOW (Calendar/Bookings)
-     * 3. AVAILABLE NOW (Default)
+     * 🎯 INTELLIGENCE SYNC: Resolves final status based on Priority:
+     * 1. MANUALLY_UNAVAILABLE (🔴 Unavailable)
+     * 2. BUSY_NOW via Engine (🟠 Busy Now)
+     * 3. AVAILABLE (🟢 Available Now)
      */
     fun resolveCombinedStatus(userId: String) {
         viewModelScope.launch {
@@ -64,7 +63,7 @@ class AvailabilityViewModel : ViewModel() {
                         return@getProfileData
                     }
 
-                    // If manually available, check if currently Busy in Calendar
+                    // Priority 2: Check Calendar Busy status
                     viewModelScope.launch {
                         val today = Calendar.getInstance().apply {
                             set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
@@ -72,21 +71,17 @@ class AvailabilityViewModel : ViewModel() {
                         }.timeInMillis
                         
                         val (bookings, schedules, castings) = repository.getDailyEvents(userId, today)
-                        val relevantEvents = bookings + schedules + castings.filter { 
+                        val allEvents = bookings + schedules + castings.filter { 
                             (it.getString("recruiterId") ?: it.getString("userId")) == userId 
                         }
 
-                        val calendarStatus = engine.calculateCurrentStatus(relevantEvents)
-                        
-                        val finalResult = when (calendarStatus) {
-                            AvailabilityStatus.BUSY_NOW -> "🟠 Busy Now"
-                            else -> "🟢 Available Now"
-                        }
-                        _calculatedStatus.postValue(finalResult)
+                        val calendarStatus = engine.calculateCurrentStatus(allEvents)
+                        val result = if (calendarStatus == AvailabilityStatus.BUSY_NOW) "🟠 Busy Now" else "🟢 Available Now"
+                        _calculatedStatus.postValue(result)
                     }
                 }
             } catch (e: Exception) {
-                Log.e("SceneX_Intel", "Status resolution failed", e)
+                Log.e("SceneX_Intel", "Status resolve failed", e)
             }
         }
     }
@@ -96,7 +91,7 @@ class AvailabilityViewModel : ViewModel() {
         userRepository.updateManualAvailability(status) { success ->
             if (success) {
                 _manualStatusPreference.postValue(status)
-                resolveCombinedStatus(uid)
+                resolveCombinedStatus(uid) // Instant Refresh
             }
         }
     }
