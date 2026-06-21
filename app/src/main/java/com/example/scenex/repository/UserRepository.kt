@@ -7,6 +7,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
+import kotlinx.coroutines.tasks.await
 
 /**
  * Senior Technical Implementation: SceneX Data Bridge.
@@ -121,6 +122,30 @@ class UserRepository {
     fun saveMediaAssets(assets: Map<String, Any>, onComplete: (Boolean) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onComplete(false)
         db.collection("media_assets").document(userId).set(assets, SetOptions.merge()).addOnSuccessListener { onComplete(true) }
+    }
+
+    /**
+     * 🗑️ NEW: Perfect Account Deletion.
+     * Wipes all multi-node data and the Auth user identity.
+     */
+    suspend fun deleteUserAccount(): Boolean {
+        val user = auth.currentUser ?: return false
+        val userId = user.uid
+
+        return try {
+            val batch = db.batch()
+            batch.delete(db.collection("users").document(userId))
+            batch.delete(db.collection("profiles").document(userId))
+            batch.delete(db.collection("media_assets").document(userId))
+            batch.delete(db.collection("talent_specs").document(userId))
+
+            batch.commit().await()
+            user.delete().await()
+            true
+        } catch (e: Exception) {
+            Log.e("SceneX_Repo", "Deletion Wipe Error", e)
+            false
+        }
     }
 
     fun signOut() = auth.signOut()
