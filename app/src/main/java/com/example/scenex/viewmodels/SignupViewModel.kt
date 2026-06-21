@@ -63,7 +63,7 @@ class SignupViewModel : ViewModel() {
         }
     }
 
-    // Location Data logic preserved...
+    // Location Data for Sri Lankan context
     val provinces = listOf("Western Province", "Central Province", "Southern Province", "Northern Province", "Eastern Province", "North Western Province", "North Central Province", "Uva Province", "Sabaragamuwa Province")
     private val citiesMap = mapOf(
         "Western Province" to listOf("Colombo", "Dehiwala", "Moratuwa", "Sri Jayawardenepura Kotte", "Negombo", "Panadura", "Kalutara", "Horana", "Gampaha", "Wattala", "Kelaniya"),
@@ -73,7 +73,7 @@ class SignupViewModel : ViewModel() {
         "Eastern Province" to listOf("Trincomalee", "Batticaloa", "Kalmunai", "Ampara"),
         "North Western Province" to listOf("Kurunegala", "Puttalam", "Chilaw", "Kuliyapitiya"),
         "North Central Province" to listOf("Anuradhapura", "Polonnaruwa", "Kekirawa"),
-        "Uva Province" to listOf("Badulla", "Bandarawela", "Monaragala", "Ella"),
+        "Uva Province" to listOf("Badulla", "Bandarawela", "Ella"),
         "Sabaragamuwa Province" to listOf("Ratnapura", "Kegalle", "Balangoda", "Embilipitiya")
     )
 
@@ -208,7 +208,6 @@ class SignupViewModel : ViewModel() {
             "updatedAt" to Timestamp.now()
         )
 
-        // 🎯 SINGLE IDENTITY FIELD: Root 'profileImage' is the source of truth for all avatars
         if (accountProfilePicture.isNotEmpty()) {
             profilePayload["profileImage"] = accountProfilePicture
         }
@@ -221,17 +220,36 @@ class SignupViewModel : ViewModel() {
             profilePayload["physicalSpecs"] = "Height: $height | Build: $bodyType | Gender: $gender"
             profilePayload["showreelUrl"] = videoUrl
             profilePayload["spotlightCategory"] = spotlightCategory
-            // 🎯 FLAT HIERARCHY: Portfolio links stored strictly at root to avoid 'mediaAssets' duplication
             profilePayload["headshotUrl"] = headshotUrl 
             profilePayload["fullBodyUrl"] = fullBodyUrl 
         }
 
         FirebaseFirestore.getInstance().collection("profiles").document(userId)
             .set(profilePayload, SetOptions.merge())
-            .addOnSuccessListener { Log.d("SceneX_Engine", "✅ Flat Hierarchy Sync successful: Duplicates Removed") }
+            .addOnSuccessListener { Log.d("SceneX_Engine", "✅ Profile Sync successful") }
     }
 
-    // --- PRESERVED METHODS ---
+    /**
+     * UNIFIED FINALIZATION LOGIC: Fixes 'Unresolved reference finalizeRegistration'
+     */
+    fun finalizeRegistration() {
+        val score = calculateWeightedCompletion()
+        
+        if (userRole == "RECRUITER") {
+            if (score < 70) {
+                _errorMessage.value = "Recruiter profile strength: $score%. Minimum 70% required."
+                return
+            }
+        } else {
+            if (score < 40) {
+                _errorMessage.value = "Talent profile strength: $score%. Minimum 40% required."
+                return
+            }
+        }
+
+        syncProfileLifecycle(isFinalSubmit = true)
+        _navigateToNextStep.value = "FINISH"
+    }
 
     fun uploadProfilePicture(file: File) {
         _isUploading.value = true
@@ -256,6 +274,25 @@ class SignupViewModel : ViewModel() {
             if (it) {
                 syncProfileLifecycle(false)
                 _navigateToNextStep.value = if (spotlightCategory == "Actor" || spotlightCategory == "Model") "ACTOR_SPECS" else "STEP5" 
+            }
+        }
+    }
+
+    fun saveActorSpecsAndNavigate() {
+        val updates = hashMapOf<String, Any>(
+            "height" to height,
+            "hairColor" to hairColor,
+            "eyeColor" to eyeColor,
+            "bodyType" to bodyType,
+            "accents" to accents,
+            "otherSkills" to otherSkills,
+            "videoUrl" to videoUrl,
+            "audioUrl" to audioUrl
+        )
+        repository.saveProfessionalProfile(updates) { 
+            if (it) {
+                syncProfileLifecycle(false)
+                _navigateToNextStep.value = "STEP5" 
             }
         }
     }
@@ -299,12 +336,6 @@ class SignupViewModel : ViewModel() {
         }
     }
 
-    fun finalizeRecruiterSignup() {
-        val score = calculateWeightedCompletion()
-        if (score < 70) { _errorMessage.value = "Profile strength: $score%. Admin Review requires 70%."; return }
-        syncProfileLifecycle(isFinalSubmit = true); _navigateToNextStep.value = "FINISH"
-    }
-
     fun uploadMedia(file: File, type: String) {
         val status = if (type == "HEADSHOT") headshotStatus else fullBodyStatus
         status.value = "Uploading..."
@@ -326,34 +357,26 @@ class SignupViewModel : ViewModel() {
     fun uploadVerificationDoc(file: File) {
         verificationDocStatus.value = "Uploading..."
         _isUploading.value = true
-        imgBBService.uploadImage(IMGBB_API_KEY, MultipartBody.Part.createFormData("image", file.name, file.asRequestBody("image/*".toMediaTypeOrNull()))).enqueue(object : Callback<ImgBBResponse> {
+        val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+        imgBBService.uploadImage(IMGBB_API_KEY, MultipartBody.Part.createFormData("image", file.name, requestFile)).enqueue(object : Callback<ImgBBResponse> {
             override fun onResponse(call: Call<ImgBBResponse>, response: Response<ImgBBResponse>) {
                 _isUploading.value = false
                 if (response.isSuccessful && response.body()?.success == true) {
                     nicImageUrl = response.body()?.data?.url ?: ""
-                    verificationDocStatus.value = "Uploaded ✅"; syncProfileLifecycle(false) 
-                } else verificationDocStatus.value = "Failed ❌"
+                    verificationDocStatus.value = "Verified ✅"
+                    syncProfileLifecycle(false)
+                } else {
+                    verificationDocStatus.value = "Failed ❌"
+                }
             }
-            override fun onFailure(call: Call<ImgBBResponse>, t: Throwable) { _isUploading.value = false; verificationDocStatus.value = "Error ❌" }
+            override fun onFailure(call: Call<ImgBBResponse>, t: Throwable) {
+                _isUploading.value = false
+                verificationDocStatus.value = "Error ❌"
+            }
         })
     }
 
-    fun saveActorSpecsAndNavigate() {
-        val h = height.replace(Regex("[^0-9]"), "").toIntOrNull() ?: 0
-        repository.saveTalentSpecs(mapOf("height_cm" to h, "build_enum" to bodyType, "accents" to accents, "otherSkills" to otherSkills)) { 
-            if (it) repository.saveMediaAssets(mapOf("headshotUrl" to headshotUrl, "fullBodyUrl" to fullBodyUrl, "videoUrl" to videoUrl)) { 
-                syncProfileLifecycle(false); _navigateToNextStep.value = "STEP5" 
-            } 
-        }
+    fun clearNavigation() {
+        _navigateToNextStep.value = null
     }
-
-    fun finalizeRegistration() {
-        val score = calculateWeightedCompletion()
-        if (score < 70) { _errorMessage.value = "Strength is $score%. Minimum 70% required."; return }
-        repository.saveMediaAssets(mapOf("portfolioImages" to (_portfolioImages.value ?: emptyList<String>()))) { 
-            syncProfileLifecycle(true); _navigateToNextStep.value = "FINISH" 
-        } 
-    }
-
-    fun clearNavigation() { _navigateToNextStep.value = null }
 }
