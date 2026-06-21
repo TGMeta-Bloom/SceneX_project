@@ -11,7 +11,7 @@ import kotlinx.coroutines.tasks.await
 
 /**
  * Senior Technical Implementation: SceneX Data Bridge.
- * Restored with full project-critical methods to fix 13 build errors.
+ * Unified with security handshake for Admin approval enforcement.
  */
 class UserRepository {
     private val db = FirebaseFirestore.getInstance()
@@ -32,8 +32,6 @@ class UserRepository {
 
     /**
      * 🎯 NEW: Manual Availability status override persistence.
-     * Stored at root for querying and inside mediaAssets map for
-     * visibility within the UserProfile model without code changes.
      */
     fun updateManualAvailability(status: String, onComplete: (Boolean) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onComplete(false)
@@ -46,18 +44,24 @@ class UserRepository {
             .addOnFailureListener { onComplete(false) }
     }
 
-    /** RESTORED: Required by LoginActivity & SplashActivity */
-    fun getUserRoutingData(userId: String, onResult: (String?, String?, Exception?) -> Unit) {
+    /** 
+     * HANDSHAKE PROTOCOL: 
+     * Provides role, status, and verificationStatus for secure app routing.
+     * Signature includes Exception for detailed error handling in UI.
+     */
+    fun getUserRoutingData(userId: String, onResult: (String?, String?, String?, Exception?) -> Unit) {
         db.collection("users").document(userId).get()
             .addOnSuccessListener { userDoc ->
                 val role = userDoc.getString("role")
                 db.collection("profiles").document(userId).get()
                     .addOnSuccessListener { profileDoc ->
-                        onResult(role, profileDoc.getString("status"), null)
+                        val status = profileDoc.getString("status")
+                        val vStatus = profileDoc.getString("verificationStatus")
+                        onResult(role, status, vStatus, null)
                     }
-                    .addOnFailureListener { onResult(role, null, it) }
+                    .addOnFailureListener { onResult(role, null, null, it) }
             }
-            .addOnFailureListener { onResult(null, null, it) }
+            .addOnFailureListener { onResult(null, null, null, it) }
     }
 
     /** RESTORED: Required by RoleSelectViewModel */
@@ -79,7 +83,7 @@ class UserRepository {
             }
     }
 
-    /** RESTORED: Required by Signup Process */
+    /** signup logic */
     fun signupUser(profile: UserProfile, password: String, onComplete: (Boolean, String?) -> Unit) {
         auth.createUserWithEmailAndPassword(profile.email, password)
             .addOnSuccessListener { result ->
@@ -124,26 +128,20 @@ class UserRepository {
         db.collection("media_assets").document(userId).set(assets, SetOptions.merge()).addOnSuccessListener { onComplete(true) }
     }
 
-    /**
-     * 🗑️ NEW: Perfect Account Deletion.
-     * Wipes all multi-node data and the Auth user identity.
-     */
     suspend fun deleteUserAccount(): Boolean {
         val user = auth.currentUser ?: return false
         val userId = user.uid
-
         return try {
             val batch = db.batch()
             batch.delete(db.collection("users").document(userId))
             batch.delete(db.collection("profiles").document(userId))
             batch.delete(db.collection("media_assets").document(userId))
             batch.delete(db.collection("talent_specs").document(userId))
-
             batch.commit().await()
             user.delete().await()
             true
         } catch (e: Exception) {
-            Log.e("SceneX_Repo", "Deletion Wipe Error", e)
+            Log.e("SceneX_Repo", "Deletion Error", e)
             false
         }
     }
