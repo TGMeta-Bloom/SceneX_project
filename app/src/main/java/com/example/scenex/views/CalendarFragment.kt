@@ -6,9 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.TransitionManager
 import com.example.scenex.R
 import com.example.scenex.adapters.CalendarAdapter
 import com.example.scenex.models.CalendarDay
@@ -16,10 +20,6 @@ import com.example.scenex.viewmodels.AvailabilityViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 
-/**
- * Member 1 Implementation: SceneX Dynamic Availability Grid (MVVM).
- * Now supports multi-event discovery via bottom sheet.
- */
 class CalendarFragment : Fragment() {
 
     private lateinit var calendarAdapter: CalendarAdapter
@@ -27,6 +27,20 @@ class CalendarFragment : Fragment() {
     private val auth = FirebaseAuth.getInstance()
     
     private var targetTalentId: String = ""
+
+    // UI Components
+    private lateinit var btnCalendarView: TextView
+    private lateinit var btnListView: TextView
+    private lateinit var toggleContainer: ConstraintLayout
+    private lateinit var vToggleSelector: View
+    private lateinit var cardCalendar: View
+    private lateinit var legendContainer: View
+    private lateinit var listViewContainer: View
+    private lateinit var calendarScrollView: View
+    
+    // Header Components
+    private lateinit var ivHeaderCalendar: View
+    private lateinit var tvScheduleHeader: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,12 +54,16 @@ class CalendarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupUI(view)
+        setupToggle(view)
         setupObservers()
         viewModel.refreshAvailabilityGrid(targetTalentId)
     }
 
     private fun setupUI(view: View) {
         val rvCalendar = view.findViewById<RecyclerView>(R.id.rvCalendar)
+        ivHeaderCalendar = view.findViewById(R.id.ivHeaderCalendar)
+        tvScheduleHeader = view.findViewById(R.id.tvScheduleHeader)
+        calendarScrollView = view.findViewById(R.id.calendarScrollView)
 
         calendarAdapter = CalendarAdapter(emptyList()) { day ->
             if (day.events.isNotEmpty()) {
@@ -59,6 +77,61 @@ class CalendarFragment : Fragment() {
         }
         view.findViewById<View>(R.id.btnNextMonth).setOnClickListener { 
             viewModel.navigateMonth(1, targetTalentId) 
+        }
+    }
+
+    private fun setupToggle(view: View) {
+        btnCalendarView = view.findViewById(R.id.btnCalendarView)
+        btnListView = view.findViewById(R.id.btnListView)
+        toggleContainer = view.findViewById(R.id.toggleContainer)
+        vToggleSelector = view.findViewById(R.id.vToggleSelector)
+        cardCalendar = view.findViewById(R.id.cardCalendar)
+        legendContainer = view.findViewById(R.id.legendContainer)
+        listViewContainer = view.findViewById(R.id.listViewContainer)
+
+        btnCalendarView.setOnClickListener {
+            updateToggleState(isCalendar = true)
+        }
+
+        btnListView.setOnClickListener {
+            updateToggleState(isCalendar = false)
+            
+            // Load the Dashboard Router
+            if (childFragmentManager.findFragmentByTag("LIST_VIEW_CONTAINER") == null) {
+                childFragmentManager.beginTransaction()
+                    .replace(R.id.listViewContainer, ListViewContainerFragment(), "LIST_VIEW_CONTAINER")
+                    .commit()
+            }
+        }
+    }
+
+    private fun updateToggleState(isCalendar: Boolean) {
+        if (isCalendar) {
+            // Restore Calendar View
+            ivHeaderCalendar.visibility = View.VISIBLE
+            tvScheduleHeader.visibility = View.VISIBLE
+            toggleContainer.visibility = View.VISIBLE
+            calendarScrollView.visibility = View.VISIBLE
+            listViewContainer.visibility = View.GONE
+            
+            // Reset toggle selector position
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(toggleContainer)
+            constraintSet.connect(R.id.vToggleSelector, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+            constraintSet.clear(R.id.vToggleSelector, ConstraintSet.END)
+            TransitionManager.beginDelayedTransition(toggleContainer)
+            constraintSet.applyTo(toggleContainer)
+            
+            btnCalendarView.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+            btnListView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+        } else {
+            // FULL REDIRECT to Dashboard (Hide everything else)
+            ivHeaderCalendar.visibility = View.GONE
+            tvScheduleHeader.visibility = View.GONE
+            toggleContainer.visibility = View.GONE 
+            calendarScrollView.visibility = View.GONE
+            
+            listViewContainer.visibility = View.VISIBLE
         }
     }
 

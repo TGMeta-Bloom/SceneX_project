@@ -1,34 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Base Gradient Background -->
     <item>
         <shape android:shape="rectangle">
             <gradient
-                android:startColor="#B00020"
-                android:endColor="#4A0038"
+                android:startColor="#4A0038"
+                android:centerColor="#8E0058"
+                android:endColor="#B0006D"
                 android:angle="45"
                 android:type="linear" />
         </shape>
     </item>
-    
-    <!-- Pattern Overlays (You should ideally use the actual SVG icons as drawables) -->
-    <!-- For now using placeholder shapes to mimic the figma pattern look -->
-    <item android:gravity="top|right" android:top="20dp" android:right="20dp">
-        <rotate android:fromDegrees="15">
-            <shape android:shape="rectangle">
-                <solid android:color="#33FFFFFF" />
-                <size android:width="40dp" android:height="30dp" />
-                <corners android:radius="4dp" />
-            </shape>
-        </rotate>
+
+    <item android:gravity="top|left" android:top="-20dp" android:left="-20dp">
+        <rotate
+            android:fromDegrees="-15"
+            android:drawable="@drawable/ic_header_film_reel" />
     </item>
 
-    <item android:gravity="bottom|left" android:bottom="60dp" android:left="30dp">
-        <rotate android:fromDegrees="-20">
-            <shape android:shape="oval">
-                <solid android:color="#22FFFFFF" />
-                <size android:width="50dp" android:height="50dp" />
-            </shape>
-        </rotate>
+    <item android:gravity="top|right" android:top="20dp" android:right="-10dp">
+        <rotate
+            android:fromDegrees="20"
+            android:drawable="@drawable/ic_header_clapperboard" />
     </item>
+
+    <item
+        android:gravity="center|left"
+        android:left="40dp"
+        android:drawable="@drawable/ic_figma_film_strip" />
 </layer-list>
