@@ -24,14 +24,17 @@ class UserRepository {
     }
 
     /**
-     * 🎯 NEW: Implementation of Manual Availability status override.
-     * Updates the manualAvailabilityStatus field in the user's profile.
-     * Status values: "AVAILABLE" | "UNAVAILABLE"
+     * 🎯 NEW: Manual Availability status override persistence.
+     * Stored at root for querying and inside mediaAssets map for 
+     * visibility within the UserProfile model without code changes.
      */
     fun updateManualAvailability(status: String, onComplete: (Boolean) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onComplete(false)
-        db.collection("profiles").document(userId)
-            .update("manualAvailabilityStatus", status)
+        val updates = hashMapOf<String, Any>(
+            "manualAvailabilityStatus" to status,
+            "mediaAssets.manualAvailabilityStatus" to status
+        )
+        db.collection("profiles").document(userId).update(updates)
             .addOnSuccessListener { onComplete(true) }
             .addOnFailureListener { onComplete(false) }
     }
@@ -79,7 +82,8 @@ class UserRepository {
                     "fullName" to profile.fullName, 
                     "status" to "draft", 
                     "completenessScore" to 20.0,
-                    "manualAvailabilityStatus" to "AVAILABLE" // Default state
+                    "manualAvailabilityStatus" to "AVAILABLE",
+                    "mediaAssets" to mapOf("manualAvailabilityStatus" to "AVAILABLE")
                 )
                 val batch = db.batch()
                 batch.set(db.collection("users").document(userId), userMap)

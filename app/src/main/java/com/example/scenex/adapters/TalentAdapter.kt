@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -31,6 +32,7 @@ class TalentAdapter(
         val tvYieldMeter: TextView = view.findViewById(R.id.tvYieldMeter)
         val tvRankingPoints: TextView = view.findViewById(R.id.tvRankingPoints)
         val tvLocation: TextView = view.findViewById(R.id.tvLocation)
+        val tvStatus: TextView = view.findViewById(R.id.tvStatus)
         
         val tvPortfolioLink: TextView = view.findViewById(R.id.tvPortfolioLink)
         val tvShowreelLink: TextView = view.findViewById(R.id.tvShowreelLink)
@@ -51,7 +53,18 @@ class TalentAdapter(
         holder.tvTalentRole.text = talent.spotlightCategory.ifEmpty { "Actor" }
         holder.tvLocation.text = "Location : ${talent.city.ifEmpty { "Colombo" }}"
 
-        // 2. IMAGE SYNC
+        // 🎯 2. AVAILABILITY OVERRIDE SYNC
+        // Using mediaAssets map to retrieve manual status without changing UserProfile.kt
+        val manualStatus = talent.mediaAssets["manualAvailabilityStatus"] ?: "AVAILABLE"
+        if (manualStatus == "UNAVAILABLE") {
+            holder.tvStatus.text = "🔴 Unavailable"
+            holder.tvStatus.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.primary_dark))
+        } else {
+            holder.tvStatus.text = "🟢 Available Now"
+            holder.tvStatus.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.calendar_green))
+        }
+
+        // 3. IMAGE SYNC
         Glide.with(holder.itemView.context)
             .load(talent.effectiveAvatarUrl)
             .placeholder(R.drawable.ic_profile_placeholder)
@@ -60,7 +73,7 @@ class TalentAdapter(
             .circleCrop()
             .into(holder.ivTalentPhoto)
 
-        // 3. SYSTEM INTELLIGENCE SYNC
+        // 4. SYSTEM INTELLIGENCE SYNC
         val points = talent.rankingScore.toInt()
         val yield = talent.completenessScore.toInt()
         
@@ -74,12 +87,12 @@ class TalentAdapter(
             holder.tvVisibilityTier.visibility = View.GONE
         }
 
-        // 4. INTERACTIVE MEDIA MATRIX
+        // 5. INTERACTIVE MEDIA MATRIX
         setupLink(holder.tvPortfolioLink, talent.portfolioLink)
         setupLink(holder.tvShowreelLink, talent.showreelUrl)
         setupLink(holder.tvSocialMatrix, talent.socialMediaLinks)
 
-        // 5. NAVIGATION TRIGGER
+        // 6. NAVIGATION TRIGGER
         holder.itemView.setOnClickListener {
             onItemClicked(talent)
         }
