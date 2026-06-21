@@ -1,17 +1,11 @@
 package com.example.scenex.repository
 
-import android.util.Log
 import com.example.scenex.models.UserProfile
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
 
-/**
- * Senior Technical Implementation: SceneX Data Bridge.
- * Restored with full project-critical methods to fix 13 build errors.
- */
 class UserRepository {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
@@ -19,7 +13,7 @@ class UserRepository {
     fun getCurrentUserId(): String? = auth.currentUser?.uid
 
     /**
-     * REAL-TIME SYNC: Listens for Admin-side weight/score changes.
+     * RESTORED: Required for real-time scoring updates.
      */
     fun listenToProfileData(userId: String, onUpdate: (Map<String, Any>?) -> Unit): ListenerRegistration {
         return db.collection("profiles").document(userId)
@@ -46,36 +40,35 @@ class UserRepository {
     fun getUserRoutingData(userId: String, onResult: (String?, String?, Exception?) -> Unit) {
         db.collection("users").document(userId).get()
             .addOnSuccessListener { userDoc ->
-                val role = userDoc.getString("role")
+                val role = userDoc.getString("role") ?: userDoc.getString("userRole")
                 db.collection("profiles").document(userId).get()
                     .addOnSuccessListener { profileDoc ->
-                        onResult(role, profileDoc.getString("status"), null)
+                        val profileRole = profileDoc.getString("userRole") ?: profileDoc.getString("role")
+                        onResult(profileRole ?: role, profileDoc.getString("status"), null)
                     }
-                    .addOnFailureListener { onResult(role, null, it) }
+                    .addOnFailureListener { onResult(role, null, null) }
             }
             .addOnFailureListener { onResult(null, null, it) }
     }
 
-    /** RESTORED: Required by RoleSelectViewModel */
+    /**
+     * RESTORED: Required for Search Flow scoring logic.
+     */
+    fun getRankingCalibration(onComplete: (Map<String, Any>?) -> Unit) {
+        db.collection("ranking_calibration").document("weights").get()
+            .addOnSuccessListener { onComplete(it.data) }
+            .addOnFailureListener { onComplete(null) }
+    }
+
     fun saveUserRole(role: String, onComplete: (Boolean) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onComplete(false)
-        val userMap = hashMapOf("userId" to userId, "role" to role, "createdAt" to System.currentTimeMillis())
-        db.collection("users").document(userId).set(userMap, SetOptions.merge())
-            .addOnSuccessListener { onComplete(true) }
-            .addOnFailureListener { onComplete(false) }
+        val data = hashMapOf("userId" to userId, "role" to role, "userRole" to role, "updatedAt" to System.currentTimeMillis())
+        val batch = db.batch()
+        batch.set(db.collection("users").document(userId), data, SetOptions.merge())
+        batch.set(db.collection("profiles").document(userId), hashMapOf("userRole" to role), SetOptions.merge())
+        batch.commit().addOnSuccessListener { onComplete(true) }.addOnFailureListener { onComplete(false) }
     }
 
-    /** RESTORED: Required by WaitingRoomActivity */
-    fun listenToProfileStatus(userId: String, onStatusChange: (String?) -> Unit): ListenerRegistration {
-        return db.collection("profiles").document(userId)
-            .addSnapshotListener { snapshot, _ ->
-                if (snapshot != null && snapshot.exists()) {
-                    onStatusChange(snapshot.getString("status"))
-                }
-            }
-    }
-
-    /** RESTORED: Required by Signup Process */
     fun signupUser(profile: UserProfile, password: String, onComplete: (Boolean, String?) -> Unit) {
         auth.createUserWithEmailAndPassword(profile.email, password)
             .addOnSuccessListener { result ->
@@ -96,27 +89,21 @@ class UserRepository {
             .addOnFailureListener { onComplete(false, it.message) }
     }
 
-    fun getProfileData(userId: String, onComplete: (Map<String, Any>?) -> Unit) {
-        db.collection("profiles").document(userId).get().addOnSuccessListener { onComplete(it.data) }
-    }
-
-    fun getRankingCalibration(onComplete: (Map<String, Any>?) -> Unit) {
-        db.collection("ranking_calibration").document("weights").get().addOnSuccessListener { onComplete(it.data) }
-    }
-
+    /**
+     * RESTORED: Fragment-specific profile update methods.
+     */
     fun saveProfessionalProfile(updates: Map<String, Any>, onComplete: (Boolean) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onComplete(false)
-        db.collection("profiles").document(userId).set(updates, SetOptions.merge()).addOnSuccessListener { onComplete(true) }
-    }
-
-    fun saveTalentSpecs(specs: Map<String, Any>, onComplete: (Boolean) -> Unit) {
-        val userId = auth.currentUser?.uid ?: return onComplete(false)
-        db.collection("talent_specs").document(userId).set(specs, SetOptions.merge()).addOnSuccessListener { onComplete(true) }
+        db.collection("profiles").document(userId).set(updates, SetOptions.merge())
+            .addOnSuccessListener { onComplete(true) }
+            .addOnFailureListener { onComplete(false) }
     }
 
     fun saveMediaAssets(assets: Map<String, Any>, onComplete: (Boolean) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onComplete(false)
-        db.collection("media_assets").document(userId).set(assets, SetOptions.merge()).addOnSuccessListener { onComplete(true) }
+        db.collection("media_assets").document(userId).set(assets, SetOptions.merge())
+            .addOnSuccessListener { onComplete(true) }
+            .addOnFailureListener { onComplete(false) }
     }
 
     fun signOut() = auth.signOut()

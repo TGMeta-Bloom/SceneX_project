@@ -18,6 +18,10 @@
     <color name="input_outline">#E1BEE7</color>
     <color name="magenta_stroke">#D81B60</color>
 
+    <!-- Missing Gradient Colors -->
+    <color name="gradient_start">#B0006D</color>
+    <color name="gradient_end">#4A0038</color>
+
 
     <!-- Gothami's Styles -->
     <color name="scenex_primary">#720056</color>
