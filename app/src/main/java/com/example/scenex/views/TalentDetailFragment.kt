@@ -72,13 +72,13 @@ class TalentDetailFragment : Fragment() {
         val tvDetailBio = view.findViewById<TextView>(R.id.tvDetailBio)
         val tvDetailSpecs = view.findViewById<TextView>(R.id.tvDetailSpecs)
         val tvDetailPro = view.findViewById<TextView>(R.id.tvDetailPro)
-        
+
         // 🎯 Manual Availability display area
         val tvDetailTitle = view.findViewById<TextView>(R.id.tvDetailTitle)
-        
+
         val ivDetailHeadshot = view.findViewById<ImageView>(R.id.ivDetailHeadshot)
         val ivDetailFullBody = view.findViewById<ImageView>(R.id.ivDetailFullBody)
-        
+
         val tvDetailPortfolio = view.findViewById<TextView>(R.id.tvDetailPortfolio)
         val tvDetailShowreel = view.findViewById<TextView>(R.id.tvDetailShowreel)
         val tvDetailSocial = view.findViewById<TextView>(R.id.tvDetailSocial)
@@ -92,10 +92,10 @@ class TalentDetailFragment : Fragment() {
         tvDetailYield.text = "${talent.completenessScore.toInt()}%"
         tvDetailBio.text = talent.bio.ifEmpty { "Professional artist with verified portfolio assets." }
         tvDetailSpecs.text = talent.physicalSpecs.ifEmpty { "Physical specifications verified." }
-        
+
         val matrix = "🎓 Qualification: ${talent.qualification.ifEmpty { "Not Disclosed" }}\n" +
-                     "⏱️ Experience: ${talent.experience.ifEmpty { "1-3 Years" }}\n" +
-                     "🗣️ Languages: ${talent.languages.ifEmpty { "Sinhala / English" }}"
+                "⏱️ Experience: ${talent.experience.ifEmpty { "1-3 Years" }}\n" +
+                "🗣️ Languages: ${talent.languages.ifEmpty { "Sinhala / English" }}"
         tvDetailPro.text = matrix
 
         // 🎯 3. Availability Intelligence Integration
@@ -132,8 +132,8 @@ class TalentDetailFragment : Fragment() {
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .transition(DrawableTransitionOptions.withCrossFade())
             .priority(Priority.HIGH)
-            
-        if (isCircle) request.circleCrop().into(imageView) 
+
+        if (isCircle) request.circleCrop().into(imageView)
         else request.into(imageView)
     }
 
