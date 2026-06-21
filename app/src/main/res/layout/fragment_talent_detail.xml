@@ -330,6 +330,7 @@
                 android:clickable="true"
                 android:focusable="true" />
 
+
             <TextView
                 android:id="@+id/tvDetailShowreel"
                 android:layout_width="match_parent"
@@ -365,7 +366,7 @@
             android:layout_marginTop="28dp"
             android:layout_marginBottom="20dp"
             android:background="@drawable/button_rounded_magenta"
-            android:text="Initiate Corporate Acquisition (Hire)"
+            android:text="Hire Now"
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="15sp"
