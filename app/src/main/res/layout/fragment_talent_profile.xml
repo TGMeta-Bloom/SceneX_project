@@ -164,6 +164,7 @@
                 android:orientation="horizontal"
                 android:paddingStart="24dp"
                 android:paddingEnd="24dp">
+                <!-- Headshot and Full Body go here first -->
                 <ImageView
                     android:id="@+id/ivHeadshotPhoto"
                     android:layout_width="120dp"
@@ -327,6 +328,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:text="Sign Out Account"
+                android:textColor="#666666" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDeleteAccount"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Permanently Delete Account"
                 android:textColor="#FF4444" />
         </LinearLayout>
 

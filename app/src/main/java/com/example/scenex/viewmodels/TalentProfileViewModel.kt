@@ -3,6 +3,7 @@ package com.example.scenex.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.scenex.models.UserProfile
+import com.example.scenex.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FieldValue
@@ -16,6 +17,7 @@ import kotlinx.coroutines.tasks.await
 class TalentProfileViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private val repository = UserRepository()
 
     private val _userProfile = MutableStateFlow<UserProfile?>(null)
     val userProfile: StateFlow<UserProfile?> = _userProfile.asStateFlow()
@@ -71,6 +73,18 @@ class TalentProfileViewModel : ViewModel() {
             } finally {
                 _isLoading.value = false
             }
+        }
+    }
+
+    /**
+     * 🗑️ NEW: Permanent removal of the talent account and data.
+     */
+    fun deleteAccount(onComplete: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val success = repository.deleteUserAccount()
+            onComplete(success)
+            _isLoading.value = false
         }
     }
 
