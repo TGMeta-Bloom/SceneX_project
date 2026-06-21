@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.scenex.models.*
 import com.example.scenex.repository.AvailabilityRepository
+import com.example.scenex.repository.UserRepository
 import com.example.scenex.utils.AvailabilityEngine
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
@@ -16,11 +17,12 @@ import java.util.*
 
 /**
  * Member 1 Implementation: SceneX Availability Intelligence (MVVM).
- * Logic: Detailed multi-event discovery with identity-aware descriptions and timezone protection.
+ * Updated: Manual Override integration.
  */
 class AvailabilityViewModel : ViewModel() {
 
     private val repository = AvailabilityRepository()
+    private val userRepository = UserRepository()
     private val auth = FirebaseAuth.getInstance()
     private val engine = AvailabilityEngine()
 
@@ -33,8 +35,71 @@ class AvailabilityViewModel : ViewModel() {
     private val _syncError = MutableLiveData<String?>()
     val syncError: LiveData<String?> = _syncError
 
+    // 🎯 NEW: Combined Availability Logic
+    private val _calculatedStatus = MutableLiveData<String>("Available Now")
+    val calculatedStatus: LiveData<String> = _calculatedStatus
+
+    private val _manualStatusPreference = MutableLiveData<String>("AVAILABLE")
+    val manualStatusPreference: LiveData<String> = _manualStatusPreference
+
     // Use UTC for internal calendar state to prevent date shifting
     private var currentMonth = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+
+    /**
+     * 🎯 INTELLIGENCE ENGINE: Combines Manual Override with Calendar Events.
+     * Priority: 
+     * 1. UNAVAILABLE (Manual Override)
+     * 2. BUSY NOW (Calendar/Bookings)
+     * 3. AVAILABLE NOW (Default)
+     */
+    fun resolveCombinedStatus(userId: String) {
+        viewModelScope.launch {
+            try {
+                userRepository.getProfileData(userId) { profile ->
+                    val manual = profile?.get("manualAvailabilityStatus") as? String ?: "AVAILABLE"
+                    _manualStatusPreference.postValue(manual)
+
+                    if (manual == "UNAVAILABLE") {
+                        _calculatedStatus.postValue("🔴 Unavailable")
+                        return@getProfileData
+                    }
+
+                    // If manually available, check if currently Busy in Calendar
+                    viewModelScope.launch {
+                        val today = Calendar.getInstance().apply {
+                            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+                            set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+                        }.timeInMillis
+                        
+                        val (bookings, schedules, castings) = repository.getDailyEvents(userId, today)
+                        val relevantEvents = bookings + schedules + castings.filter { 
+                            (it.getString("recruiterId") ?: it.getString("userId")) == userId 
+                        }
+
+                        val calendarStatus = engine.calculateCurrentStatus(relevantEvents)
+                        
+                        val finalResult = when (calendarStatus) {
+                            AvailabilityStatus.BUSY_NOW -> "🟠 Busy Now"
+                            else -> "🟢 Available Now"
+                        }
+                        _calculatedStatus.postValue(finalResult)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("SceneX_Intel", "Status resolution failed", e)
+            }
+        }
+    }
+
+    fun updateManualOverride(status: String) {
+        val uid = auth.currentUser?.uid ?: return
+        userRepository.updateManualAvailability(status) { success ->
+            if (success) {
+                _manualStatusPreference.postValue(status)
+                resolveCombinedStatus(uid)
+            }
+        }
+    }
 
     private fun getSafeTimestamp(doc: DocumentSnapshot, field: String): Long? {
         return try {
@@ -147,12 +212,9 @@ class AvailabilityViewModel : ViewModel() {
         // 1. Casting Calls Processing
         castingCalls.forEach { doc ->
             getFormattedDate(doc)?.let { dateStr ->
-                // Check all ID field variations
                 val rId = doc.getString("recruiterId") ?: doc.getString("recruiterid") ?: 
                           doc.getString("recruiter_id") ?: doc.getString("userId") ?: ""
                 
-                // 🎯 FIX: Only show Casting Call on the calendar IF the viewed user is the OWNER (Recruiter).
-                // Talents should not see all public auditions as personal calendar commitments.
                 val isOwner = rId == viewedUserId
                 
                 if (isOwner) {
@@ -162,8 +224,6 @@ class AvailabilityViewModel : ViewModel() {
                     val loc = doc.getString("auditionLocation") ?: "TBA"
 
                     val (statuses, events) = getEntry(dateStr)
-                    
-                    // Add visual guide dot (Blue) and details
                     statuses.add(DayStatus.CASTING_CALL)
                     events.add(CalendarEvent(
                         title = project,
@@ -172,7 +232,6 @@ class AvailabilityViewModel : ViewModel() {
                         description = "Casting Call | Role: $role | Loc: $loc"
                     ))
                     
-                    // Recruiters are "BUSY" during their own audition sessions
                     statuses.add(DayStatus.BUSY)
                     events.add(CalendarEvent(
                         title = "Audition Commitment: $project",
@@ -188,8 +247,6 @@ class AvailabilityViewModel : ViewModel() {
         bookings.forEach { doc ->
             getFormattedDate(doc)?.let { dateStr ->
                 val statusStr = doc.getString("status")?.uppercase() ?: "PENDING"
-                
-                // Skip REJECTED or CANCELLED bookings as they don't consume time
                 if (statusStr == "REJECTED" || statusStr == "CANCELLED") return@forEach
 
                 val statusType = if (statusStr == "CONFIRMED" || statusStr == "ACCEPTED") DayStatus.BUSY else DayStatus.PENDING
@@ -198,7 +255,6 @@ class AvailabilityViewModel : ViewModel() {
                 val time = "${doc.getString("startTime") ?: "TBA"} - ${doc.getString("endTime") ?: "TBA"}"
                 val location = doc.getString("location") ?: "TBA"
                 
-                // Identify "With Whom" (case-resilient)
                 val docRecruiterId = doc.getString("recruiterId") ?: doc.getString("recruiterid") ?: doc.getString("recruiter_id") ?: ""
                 val partner = if (viewedUserId == docRecruiterId) {
                     "With Talent: ${doc.getString("name") ?: "N/A"}"

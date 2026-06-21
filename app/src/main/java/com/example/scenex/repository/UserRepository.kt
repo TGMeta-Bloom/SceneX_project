@@ -29,6 +29,19 @@ class UserRepository {
             }
     }
 
+    /**
+     * 🎯 NEW: Implementation of Manual Availability status override.
+     * Updates the manualAvailabilityStatus field in the user's profile.
+     * Status values: "AVAILABLE" | "UNAVAILABLE"
+     */
+    fun updateManualAvailability(status: String, onComplete: (Boolean) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onComplete(false)
+        db.collection("profiles").document(userId)
+            .update("manualAvailabilityStatus", status)
+            .addOnSuccessListener { onComplete(true) }
+            .addOnFailureListener { onComplete(false) }
+    }
+
     /** RESTORED: Required by LoginActivity & SplashActivity */
     fun getUserRoutingData(userId: String, onResult: (String?, String?, Exception?) -> Unit) {
         db.collection("users").document(userId).get()
@@ -68,7 +81,13 @@ class UserRepository {
             .addOnSuccessListener { result ->
                 val userId = result.user?.uid ?: ""
                 val userMap = hashMapOf("userId" to userId, "role" to profile.role, "email" to profile.email)
-                val profileMap = hashMapOf("userId" to userId, "fullName" to profile.fullName, "status" to "draft", "completenessScore" to 20.0)
+                val profileMap = hashMapOf(
+                    "userId" to userId, 
+                    "fullName" to profile.fullName, 
+                    "status" to "draft", 
+                    "completenessScore" to 20.0,
+                    "manualAvailabilityStatus" to "AVAILABLE" // Default state
+                )
                 val batch = db.batch()
                 batch.set(db.collection("users").document(userId), userMap)
                 batch.set(db.collection("profiles").document(userId), profileMap)
