@@ -24,20 +24,19 @@ class UserRepository {
     }
 
     /**
-     * Real-time listener for profile status changes.
+     * 🎯 NEW: Implementation of Manual Availability status override.
+     * Updates the manualAvailabilityStatus field in the user's profile.
+     * Status values: "AVAILABLE" | "UNAVAILABLE"
      */
-    fun listenToProfileStatus(userId: String, onStatusUpdate: (String?) -> Unit): ListenerRegistration {
-        return db.collection("profiles").document(userId)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) return@addSnapshotListener
-                val status = snapshot?.getString("status")
-                onStatusUpdate(status)
-            }
+    fun updateManualAvailability(status: String, onComplete: (Boolean) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onComplete(false)
+        db.collection("profiles").document(userId)
+            .update("manualAvailabilityStatus", status)
+            .addOnSuccessListener { onComplete(true) }
+            .addOnFailureListener { onComplete(false) }
     }
 
-    /**
-     * BULLETPROOF ROUTING: Checks both 'users' and 'profiles' for identity resolution.
-     */
+    /** RESTORED: Required by LoginActivity & SplashActivity */
     fun getUserRoutingData(userId: String, onResult: (String?, String?, Exception?) -> Unit) {
         db.collection("users").document(userId).get()
             .addOnSuccessListener { userDoc ->
@@ -74,9 +73,18 @@ class UserRepository {
         auth.createUserWithEmailAndPassword(profile.email, password)
             .addOnSuccessListener { result ->
                 val userId = result.user?.uid ?: ""
-                val profileMap = hashMapOf("userId" to userId, "email" to profile.email, "userRole" to profile.role, "status" to "draft")
-                db.collection("profiles").document(userId).set(profileMap)
-                    .addOnSuccessListener { onComplete(true, null) }
+                val userMap = hashMapOf("userId" to userId, "role" to profile.role, "email" to profile.email)
+                val profileMap = hashMapOf(
+                    "userId" to userId, 
+                    "fullName" to profile.fullName, 
+                    "status" to "draft", 
+                    "completenessScore" to 20.0,
+                    "manualAvailabilityStatus" to "AVAILABLE" // Default state
+                )
+                val batch = db.batch()
+                batch.set(db.collection("users").document(userId), userMap)
+                batch.set(db.collection("profiles").document(userId), profileMap)
+                batch.commit().addOnSuccessListener { onComplete(true, null) }
             }
             .addOnFailureListener { onComplete(false, it.message) }
     }

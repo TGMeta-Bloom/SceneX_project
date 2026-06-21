@@ -58,7 +58,7 @@ class TalentProfileFragment : Fragment() {
         val view = view ?: return
 
         view.findViewById<TextView>(R.id.tvTalentFullName).text = profile.fullName
-        view.findViewById<TextView>(R.id.tvStageName).text = "aka '${profile.stageName}'"
+        view.findViewById<TextView>(R.id.tvStageName).text = "'${profile.stageName}'"
         view.findViewById<TextView>(R.id.tvSpotlightCategory).text = profile.spotlightCategory
         view.findViewById<TextView>(R.id.tvTalentRegion).text = "${profile.city}, ${profile.province}"
 
@@ -88,7 +88,7 @@ class TalentProfileFragment : Fragment() {
 
     private fun updatePortfolioUI(images: List<String>) {
         val llPortfolio = view?.findViewById<LinearLayout>(R.id.llPortfolioImages) ?: return
-        
+
         // Keep the first two (Headshot/FullBody) if they are already there, or rebuild
         // For simplicity, let's just clear and rebuild the dynamic ones
         val childCount = llPortfolio.childCount
