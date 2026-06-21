@@ -106,4 +106,12 @@
         <item name="android:textColor">@color/gray</item>
     </style>
 
+    <!-- Premium Dialog Style -->
+    <style name="CustomAlertDialog" parent="Theme.Material3.DayNight.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowMinWidthMajor">90%</item>
+        <item name="android:windowMinWidthMinor">90%</item>
+        <item name="android:windowElevation">8dp</item>
+    </style>
+
 </resources>
