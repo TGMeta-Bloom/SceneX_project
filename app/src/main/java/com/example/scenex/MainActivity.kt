@@ -1,5 +1,6 @@
 package com.example.scenex
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +13,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 /**
  * Senior Architect Implementation: MainActivity as a Dynamic Fragment Router.
  * Uses a "Bulletproof" Firestore Handshake to resolve the user experience.
+ * Enhanced: Enforces strict Admin approval access-control.
  */
 class MainActivity : AppCompatActivity() {
 
@@ -31,8 +33,25 @@ class MainActivity : AppCompatActivity() {
                 .get()
                 .addOnSuccessListener { document ->
                     if (document != null && document.exists()) {
+                        
+                        // 🛡️ SECURITY GATE: Verify Approval status before allowing feature access
+                        val verificationStatus = document.getString("verificationStatus") ?: "pending"
+                        val status = document.getString("status") ?: "pending_review"
+                        
+                        if (verificationStatus == "pending" || status == "pending_review") {
+                            Log.w("SceneX_Security", "Access Blocked: Pending Approval. Redirecting to Waiting Room.")
+                            redirectToWaitingRoom()
+                            return@addOnSuccessListener
+                        }
+
+                        // Check for verified state
+                        if (verificationStatus != "verified" || status != "verified") {
+                            Log.w("SceneX_Security", "Access Blocked: Unverified Account.")
+                            redirectToWaitingRoom()
+                            return@addOnSuccessListener
+                        }
+
                         // Grab the role exactly as it is spelled in the database
-                        // Checking both 'role' and 'userRole' for bulletproof compatibility
                         val dbRole = document.getString("userRole") ?: document.getString("role")
                         userRole = dbRole?.lowercase() ?: "talent"
                         
@@ -40,16 +59,19 @@ class MainActivity : AppCompatActivity() {
                         
                         // 2. NOW load the home fragment, because we know their real role
                         loadAppropriateHomeFragment()
+                    } else {
+                        // No profile found, force login/splash
+                        startSplash()
                     }
                 }
                 .addOnFailureListener {
-                    // Fallback to talent if there is a sync issue
-                    Log.e("SceneX_Main", "Firestore sync failed, defaulting to Talent view")
-                    loadAppropriateHomeFragment()
+                    // Fallback to talent if there is a sync issue, but strictly restricted
+                    Log.e("SceneX_Main", "Firestore sync failed")
+                    startSplash()
                 }
         } else {
-            // No user session, load default
-            loadAppropriateHomeFragment()
+            // No user session, kick out
+            startSplash()
         }
 
         // 3. The Smart Switchboard for Tab Navigation
@@ -60,11 +82,10 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_search -> {
-                    // Switchboard ready for separate Talent/Job search modules
                     if (userRole == "recruiter") {
-                        loadFragment(SearchFragment()) // Destination: Search Talent
+                        loadFragment(SearchFragment()) 
                     } else {
-                        loadFragment(SearchFragment()) // Destination: Search Opportunities
+                        loadFragment(SearchFragment()) 
                     }
                     true
                 }
@@ -77,13 +98,25 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_profile -> {
-                    // UPDATED: Now points to the Dynamic Router
                     loadAppropriateProfileFragment()
                     true
                 }
                 else -> false
             }
         }
+    }
+
+    private fun redirectToWaitingRoom() {
+        val intent = Intent(this, WaitingRoomActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
+
+    private fun startSplash() {
+        val intent = Intent(this, SplashActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 
     /**
@@ -99,8 +132,6 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Resolves the Profile interface context based on the confirmed role.
-     * Recruiter -> RecruiterProfileFragment (Compose)
-     * Talent -> TalentProfileFragment (XML)
      */
     private fun loadAppropriateProfileFragment() {
         if (userRole == "recruiter") {
