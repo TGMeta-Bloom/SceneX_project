@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -31,6 +32,7 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        compose = true
         viewBinding = true
     }
 }
@@ -43,10 +45,20 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.fragment.ktx)
 
+    // Jetpack Compose
+    implementation(platform(libs.compose.bom))
+    implementation(libs.compose.ui)
+    implementation(libs.compose.material3)
+    implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.compose.runtime.livedata)
+    implementation(libs.coil.compose)
+
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
     implementation(libs.firebase.analytics)
 
     // Lifecycle

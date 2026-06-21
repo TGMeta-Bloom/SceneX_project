@@ -1,10 +1,13 @@
 package com.example.scenex.views
 
 import android.content.Intent
+import android.graphics.LinearGradient
+import android.graphics.Shader
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.example.scenex.R
 
 class RoleSelectActivity : AppCompatActivity() {
@@ -15,6 +18,14 @@ class RoleSelectActivity : AppCompatActivity() {
 
         val talentButton = findViewById<Button>(R.id.talentButton)
         val recruiterButton = findViewById<Button>(R.id.recruiterButton)
+        val talentLabel = findViewById<TextView>(R.id.talentLabel)
+        val recruiterLabel = findViewById<TextView>(R.id.recruiterLabel)
+
+        // Senior Fix: Apply Cinematic Brand Gradient to typography
+        applyTextGradient(talentButton)
+        applyTextGradient(recruiterButton)
+        applyTextGradient(talentLabel)
+        applyTextGradient(recruiterLabel)
 
         talentButton.setOnClickListener {
             navigateToSignup("TALENT")
@@ -22,6 +33,26 @@ class RoleSelectActivity : AppCompatActivity() {
 
         recruiterButton.setOnClickListener {
             navigateToSignup("RECRUITER")
+        }
+    }
+
+    /**
+     * Applies the SceneX Brand Gradient (#B0006D to #4A0038) to a TextView or Button.
+     */
+    private fun applyTextGradient(textView: TextView) {
+        textView.post {
+            val paint = textView.paint
+            val width = paint.measureText(textView.text.toString())
+            val textShader: Shader = LinearGradient(
+                0f, 0f, width, 0f,
+                intArrayOf(
+                    ContextCompat.getColor(this, R.color.primary_magenta),
+                    ContextCompat.getColor(this, R.color.primary_dark)
+                ),
+                null, Shader.TileMode.CLAMP
+            )
+            textView.paint.shader = textShader
+            textView.invalidate()
         }
     }
 

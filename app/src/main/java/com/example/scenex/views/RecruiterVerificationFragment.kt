@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
@@ -46,9 +47,13 @@ class RecruiterVerificationFragment : Fragment() {
 
     private val cameraLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            (result.data?.extras?.get("data") as? Bitmap)?.let { bitmap ->
-                uploadDocument(bitmap)
+            val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                result.data?.extras?.getParcelable("data", Bitmap::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                result.data?.extras?.get("data") as? Bitmap
             }
+            bitmap?.let { uploadDocument(it) }
         }
     }
 
@@ -84,7 +89,8 @@ class RecruiterVerificationFragment : Fragment() {
         }
 
         btnSubmit.setOnClickListener {
-            viewModel.finalizeRecruiterSignup()
+            // FIXED: Changed finalizeRecruiterSignup() to finalizeRegistration()
+            viewModel.finalizeRegistration()
         }
 
         // Navigation Observer for finalization

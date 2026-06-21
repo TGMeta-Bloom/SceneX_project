@@ -174,7 +174,7 @@
                     android:textColor="#1A1C1E" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Location Section (Editable for Edit Flow) -->
+            <!-- Location Section (Read-only) -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -200,7 +200,9 @@
                     android:id="@+id/etLocation"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:cursorVisible="false"
                     android:textColor="#1A1C1E" />
             </com.google.android.material.textfield.TextInputLayout>
 

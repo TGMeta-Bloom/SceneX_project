@@ -41,6 +41,11 @@
         <activity android:name=".MainActivity" android:exported="false" />
         
         <activity 
+            android:name=".views.CastingCallDetailsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SceneX.NoActionBar" />
+
+        <activity 
             android:name=".views.RecruiterBookingDetailsActivity"
             android:exported="false" />
 

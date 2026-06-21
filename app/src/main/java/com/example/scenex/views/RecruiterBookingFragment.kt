@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -71,19 +72,33 @@ class RecruiterBookingFragment : Fragment() {
     private fun setupRecyclerViews() {
         // Casting Calls Adapter
         castingAdapter = RecruiterCastingCallAdapter { castingCall ->
+            if (castingCall.id.isEmpty()) {
+                Toast.makeText(requireContext(), "Casting Call ID is missing", Toast.LENGTH_SHORT).show()
+                return@RecruiterCastingCallAdapter
+            }
+
             val fragment = RecruiterApplicantsFragment.newInstance(castingCall.id, castingCall.title)
-            parentFragmentManager.beginTransaction()
+            
+            // FIXED: Use requireActivity().supportFragmentManager and standard Android animations to avoid crash
+            requireActivity().supportFragmentManager.beginTransaction()
+                .setCustomAnimations(
+                    android.R.anim.fade_in, 
+                    android.R.anim.fade_out, 
+                    android.R.anim.fade_in, 
+                    android.R.anim.fade_out
+                )
                 .replace(R.id.nav_host_fragment, fragment)
                 .addToBackStack(null)
                 .commit()
         }
+        
         binding.rvCastingCalls.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = castingAdapter
             isNestedScrollingEnabled = false
         }
 
-        // Recruiter View: Show Talent name in timeline
+        // Timeline Adapter
         timelineAdapter = TimelineAdapter(isRecruiterView = true)
         binding.rvTimeline.apply {
             layoutManager = LinearLayoutManager(context)
@@ -121,7 +136,6 @@ class RecruiterBookingFragment : Fragment() {
             binding.pbLoading.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
 
-        // Observe Casting Calls
         castingViewModel.castingCalls.observe(viewLifecycleOwner) { calls ->
             if (calls.isNullOrEmpty()) {
                 binding.rvCastingCalls.visibility = View.GONE
@@ -133,7 +147,6 @@ class RecruiterBookingFragment : Fragment() {
             }
         }
 
-        // Observe Timeline Schedules
         castingViewModel.timelineSchedules.observe(viewLifecycleOwner) { schedules ->
             if (schedules.isNullOrEmpty()) {
                 binding.rvTimeline.visibility = View.GONE

@@ -11,8 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 /**
- * Senior Architect Implementation: MainActivity as a Dynamic Fragment Router.
- * Uses a "Bulletproof" Firestore Handshake to resolve the user experience.
+ * MainActivity as a Dynamic Fragment Router.
  */
 class MainActivity : AppCompatActivity() {
 
@@ -25,12 +24,10 @@ class MainActivity : AppCompatActivity() {
 
         bottomNavigation = findViewById(R.id.bottomNavigation)
 
-        // Restore user role from state
         if (savedInstanceState != null) {
             userRole = savedInstanceState.getString("SAVED_USER_ROLE", "talent")
         }
 
-        // 1. The Bulletproof Fetch
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         if (userId != null) {
             FirebaseFirestore.getInstance().collection("profiles").document(userId)
@@ -40,16 +37,12 @@ class MainActivity : AppCompatActivity() {
                         val dbRole = document.getString("userRole") ?: document.getString("role")
                         userRole = dbRole?.lowercase() ?: "talent"
                         
-                        Log.d("SceneX_Main", "User Role Confirmed: $userRole")
-                        
-                        // Only navigate if this is NOT a recreation AND no fragment is loaded
                         if (savedInstanceState == null && supportFragmentManager.findFragmentById(R.id.nav_host_fragment) == null) {
                             handleNavigation(intent)
                         }
                     }
                 }
                 .addOnFailureListener {
-                    Log.e("SceneX_Main", "Firestore sync failed, defaulting to Talent view")
                     if (savedInstanceState == null && supportFragmentManager.findFragmentById(R.id.nav_host_fragment) == null) {
                         handleNavigation(intent)
                     }
@@ -60,7 +53,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // 3. Bottom Navigation Setup
         bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
@@ -68,15 +60,12 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_search -> {
-                    loadFragment(SearchFragment())
+                    // FIXED: Now both roles redirect to the Filter screen as requested
+                    loadFragment(SearchFilterFragment()) 
                     true
                 }
                 R.id.nav_calendar -> {
-                    if (userRole == "recruiter") {
-                        loadFragment(RecruiterBookingFragment())
-                    } else {
-                        loadFragment(TalentSchedulingFragment())
-                    }
+                    loadFragment(CalendarFragment())
                     true
                 }
                 R.id.nav_inbox -> {
@@ -84,7 +73,7 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_profile -> {
-                    loadFragment(ProfileFragment())
+                    loadAppropriateProfileFragment()
                     true
                 }
                 else -> false
@@ -111,6 +100,9 @@ class MainActivity : AppCompatActivity() {
             "TIMELINE" -> {
                 bottomNavigation.selectedItemId = R.id.nav_calendar
             }
+            "SEARCH" -> {
+                bottomNavigation.selectedItemId = R.id.nav_search
+            }
             else -> {
                 loadAppropriateHomeFragment()
             }
@@ -122,6 +114,14 @@ class MainActivity : AppCompatActivity() {
             loadFragment(RecruiterHomeFragment()) 
         } else {
             loadFragment(TalentHomeFragment())    
+        }
+    }
+
+    private fun loadAppropriateProfileFragment() {
+        if (userRole == "recruiter") {
+            loadFragment(RecruiterProfileFragment())
+        } else {
+            loadFragment(TalentProfileFragment())
         }
     }
 

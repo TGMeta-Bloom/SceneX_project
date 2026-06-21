@@ -5,13 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.scenex.R
 import com.example.scenex.databinding.FragmentRecruiterApplicantsBinding
-import com.example.scenex.models.ApplicantTalent
 import com.example.scenex.viewmodels.RecruiterApplicantsViewModel
 import com.example.scenex.views.adapter.ApplicantTalentAdapter
 import com.google.firebase.auth.FirebaseAuth
@@ -76,17 +74,16 @@ class RecruiterApplicantsFragment : Fragment() {
     }
 
     private fun setupToolbar() {
-        // FIXED: Back button now correctly closes the fragment
+        // FIXED: Use popBackStack on activity to return to Dashboard correctly
         binding.btnBack.setOnClickListener { 
-            parentFragmentManager.popBackStack() 
+            requireActivity().supportFragmentManager.popBackStack()
         }
         
-        // Notification Bell Listener
         binding.btnNotifications.setOnClickListener {
             startActivity(Intent(requireContext(), NotificationsActivity::class.java))
         }
 
-        binding.tvProjectTitle.text = projectTitle ?: "Project Details"
+        binding.tvProjectTitle.text = projectTitle ?: "Casting Applicants"
     }
 
     private fun setupRecyclerView() {
@@ -98,7 +95,9 @@ class RecruiterApplicantsFragment : Fragment() {
                 castingCallId = castingCallId ?: "",
                 castingTitle = projectTitle ?: ""
             )
-            parentFragmentManager.beginTransaction()
+            
+            requireActivity().supportFragmentManager.beginTransaction()
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out)
                 .replace(R.id.nav_host_fragment, createBookingFragment)
                 .addToBackStack(null)
                 .commit()

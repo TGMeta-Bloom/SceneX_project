@@ -4,4 +4,6 @@
     <item android:state_selected="true" android:color="@android:color/white" />
     <!-- Black text when the button is not selected (inactive) -->
     <item android:color="@android:color/black" />
+    <item android:color="@color/white" android:state_selected="true" />
+    <item android:color="@color/primary_magenta" />
 </selector>
