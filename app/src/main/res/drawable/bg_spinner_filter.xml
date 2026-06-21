@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 1. The Gradient Stroke Layer -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#A8074D"
+                android:endColor="#720056"
+                android:angle="0" />
+            <corners android:radius="10dp" />
+        </shape>
+    </item>
+
+    <!-- 2. The Inner White Background -->
+    <item
+        android:bottom="1.2dp"
+        android:left="1.2dp"
+        android:right="1.2dp"
+        android:top="1.2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/white" />
+            <corners android:radius="9dp" />
+        </shape>
+    </item>
+
+    <!-- 3. Dropdown Icon (Chevron) -->
+    <item
+        android:width="20dp"
+        android:height="20dp"
+        android:gravity="end|center_vertical"
+        android:right="10dp">
+        <vector xmlns:android="http://schemas.android.com/apk/res/android"
+            android:width="24dp"
+            android:height="24dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24">
+            <path
+                android:fillColor="#1A1C1E"
+                android:pathData="M7,10l5,5 5,-5z"/>
+        </vector>
+    </item>
+</layer-list>

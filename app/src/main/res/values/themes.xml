@@ -1,25 +1,40 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
     <style name="Base.Theme.SceneX" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primary_magenta</item>
         <item name="android:statusBarColor">@color/white</item>
         <item name="android:windowLightStatusBar">true</item>
+        <!-- This forces the pure color globally for selectors -->
         <item name="colorControlActivated">@color/primary_magenta</item>
     </style>
 
     <style name="Theme.SceneX" parent="Base.Theme.SceneX" />
 
+    <!-- The missing style required by AndroidManifest.xml -->
     <style name="Theme.SceneX.NoActionBar" parent="Theme.SceneX" />
 
+    <!-- Shape Appearance for Booking Card Banner (Top Corners Only) -->
+    <style name="ShapeAppearance.Material3.Corner.Top.Large" parent="">
+        <item name="cornerSizeTopLeft">16dp</item>
+        <item name="cornerSizeTopRight">16dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+        <item name="cornerFamily">rounded</item>
+    </style>
+
+    <!-- Specific style for pure magenta radio buttons -->
     <style name="PureMagentaRadioButton" parent="Widget.Material3.CompoundButton.RadioButton">
         <item name="useMaterialThemeColors">false</item>
         <item name="buttonTint">@color/gender_radio_selector</item>
     </style>
 
+    <!-- Active indicator for Bottom Navigation -->
     <style name="CustomMagentaIndicator">
         <item name="android:color">#1AEC008C</item>
         <item name="shapeAppearance">@style/ShapeAppearance.Material3.Corner.Full</item>
     </style>
 
+    <!-- Shapeable Image Styles -->
     <style name="CircleImageView" parent="">
         <item name="cornerSize">50%</item>
     </style>
@@ -37,6 +52,7 @@
         <item name="android:textSize">14sp</item>
     </style>
 
+    <!-- Spotlight Chip Style (Selectable - Senior Fix) -->
     <style name="SpotlightChipStyle_Selectable" parent="Widget.Material3.Chip.Filter">
         <item name="chipBackgroundColor">@color/spotlight_chip_bg_selector</item>
         <item name="android:textColor">@color/spotlight_text_selector</item>
@@ -48,6 +64,7 @@
         <item name="hideMotionSpec">@null</item>
     </style>
 
+    <!-- Legacy styles (maintained for compatibility) -->
     <style name="SpotlightChipStyle" parent="Widget.Material3.Chip.Suggestion">
         <item name="chipBackgroundColor">@color/primary_magenta</item>
         <item name="android:textColor">@color/white</item>
@@ -62,6 +79,7 @@
         <item name="android:textSize">12sp</item>
     </style>
 
+    <!-- Text Styles -->
     <style name="AppTextStyle_H0_Hero">
         <item name="android:textSize">36sp</item>
         <item name="android:textStyle">bold</item>
@@ -98,6 +116,19 @@
     <style name="AppTextStyle_Caption">
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@color/gray</item>
+    </style>
+
+    <!-- Custom Style for Image Picker Dialog -->
+    <style name="CustomPickerDialog" parent="Theme.Material3.DayNight.Dialog">
+        <item name="android:windowBackground">@drawable/custom_dialog_bg</item>
+    </style>
+
+    <!-- Premium Dialog Style -->
+    <style name="CustomAlertDialog" parent="Theme.Material3.DayNight.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowMinWidthMajor">90%</item>
+        <item name="android:windowMinWidthMinor">90%</item>
+        <item name="android:windowElevation">8dp</item>
     </style>
 
 </resources>

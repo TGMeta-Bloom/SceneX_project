@@ -48,53 +48,58 @@ class LoginActivity : AppCompatActivity() {
                 .addOnSuccessListener { result ->
                     val userId = result.user?.uid ?: ""
                     
-                    repository.getUserRoutingData(userId) { role, status, error ->
+                    // 🛡️ SECURITY HANDSHAKE: Updated to match 4-parameter signature
+                    repository.getUserRoutingData(userId) { role, status, vStatus, error ->
                         progressBar.visibility = View.GONE
                         btnLogin.isEnabled = true
                         
                         if (error == null) {
-                            Log.d(TAG, "Login Success. User: $userId | Role: $role | Status: $status")
+                            Log.d(TAG, "Login Handshake: Role=$role | Status=$status | VStatus=$vStatus")
                             SessionManager.establishSession(this, userId, role, status)
-                            routeUser(role, status)
+                            routeUser(role, status, vStatus)
                         } else {
-                            Log.e(TAG, "Routing Data Fetch Failed", error)
-                            Toast.makeText(this, "Sync Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                            Log.e(TAG, "Database Handshake Failed", error)
+                            Toast.makeText(this, "Sync Error: ${error.localizedMessage}", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
                 .addOnFailureListener { e ->
                     progressBar.visibility = View.GONE
                     btnLogin.isEnabled = true
-                    Log.e(TAG, "Firebase Auth Failed", e)
+                    Log.e(TAG, "Auth Failed", e)
                     Toast.makeText(this, "Auth Failed: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         }
 
         tvSignupLink.setOnClickListener {
             startActivity(Intent(this, RoleSelectActivity::class.java))
-            finish()
         }
     }
 
-    private fun routeUser(role: String?, status: String?) {
+    /**
+     * 🛡️ SECURE ROUTING ENGINE:
+     * Enforces Admin Approval status before allowing access to app features.
+     */
+    private fun routeUser(role: String?, status: String?, vStatus: String?) {
         val normalizedRole = role?.uppercase()?.trim()
         val normalizedStatus = status?.lowercase()?.trim()
+        val normalizedVStatus = vStatus?.lowercase()?.trim()
+
+        val isApproved = normalizedStatus == "verified" && normalizedVStatus == "verified"
+        val isPending = normalizedStatus == "pending_review" || normalizedVStatus == "pending"
+        val isDraft = normalizedStatus == "draft" || normalizedStatus == null
 
         val intent = when {
-            normalizedRole == "TALENT" && normalizedStatus == "pending_review" -> 
-                Intent(this, WaitingRoomActivity::class.java)
-            
-            normalizedRole == "TALENT" && normalizedStatus == "verified" -> 
-                Intent(this, MainActivity::class.java)
-            
-            normalizedRole == "TALENT" && (normalizedStatus == "draft" || normalizedStatus == null) -> 
-                Intent(this, SignupActivity::class.java)
-            
-            normalizedRole == "RECRUITER" -> 
-                Intent(this, MainActivity::class.java)
-                
+            normalizedRole == "TALENT" || normalizedRole == "RECRUITER" -> {
+                when {
+                    isApproved -> Intent(this, MainActivity::class.java)
+                    isPending -> Intent(this, WaitingRoomActivity::class.java)
+                    isDraft -> Intent(this, SignupActivity::class.java).apply { putExtra("USER_ROLE", normalizedRole) }
+                    else -> Intent(this, WaitingRoomActivity::class.java)
+                }
+            }
             else -> {
-                Log.w(TAG, "Unrecognized Role/Status combo. Falling back to Role Selection.")
+                Log.w(TAG, "Identity not recognized. Falling back to Role Selection.")
                 Intent(this, RoleSelectActivity::class.java)
             }
         }

@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.scenex.models.*
 import com.example.scenex.repository.AvailabilityRepository
+import com.example.scenex.repository.UserRepository
 import com.example.scenex.utils.AvailabilityEngine
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
@@ -16,11 +17,12 @@ import java.util.*
 
 /**
  * Member 1 Implementation: SceneX Availability Intelligence (MVVM).
- * Logic: Detailed multi-event discovery with identity-aware descriptions and timezone protection.
+ * Updated: Manual Override integration with Priority Logic.
  */
 class AvailabilityViewModel : ViewModel() {
 
     private val repository = AvailabilityRepository()
+    private val userRepository = UserRepository()
     private val auth = FirebaseAuth.getInstance()
     private val engine = AvailabilityEngine()
 
@@ -33,8 +35,66 @@ class AvailabilityViewModel : ViewModel() {
     private val _syncError = MutableLiveData<String?>()
     val syncError: LiveData<String?> = _syncError
 
+    // 🎯 NEW: Combined Availability Logic (Manual + Calendar)
+    private val _calculatedStatus = MutableLiveData<String>("🟢 Available Now")
+    val calculatedStatus: LiveData<String> = _calculatedStatus
+
+    private val _manualStatusPreference = MutableLiveData<String>("AVAILABLE")
+    val manualStatusPreference: LiveData<String> = _manualStatusPreference
+
     // Use UTC for internal calendar state to prevent date shifting
     private var currentMonth = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+
+    /**
+     * 🎯 INTELLIGENCE SYNC: Resolves final status based on Priority:
+     * 1. MANUALLY_UNAVAILABLE (🔴 Unavailable)
+     * 2. BUSY_NOW via Engine (🟠 Busy Now)
+     * 3. AVAILABLE (🟢 Available Now)
+     */
+    fun resolveCombinedStatus(userId: String) {
+        viewModelScope.launch {
+            try {
+                userRepository.getProfileData(userId) { profile ->
+                    val manual = profile?.get("manualAvailabilityStatus") as? String ?: "AVAILABLE"
+                    _manualStatusPreference.postValue(manual)
+
+                    if (manual == "UNAVAILABLE") {
+                        _calculatedStatus.postValue("🔴 Unavailable")
+                        return@getProfileData
+                    }
+
+                    // Priority 2: Check Calendar Busy status
+                    viewModelScope.launch {
+                        val today = Calendar.getInstance().apply {
+                            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+                            set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+                        }.timeInMillis
+
+                        val (bookings, schedules, castings) = repository.getDailyEvents(userId, today)
+                        val allEvents = bookings + schedules + castings.filter {
+                            (it.getString("recruiterId") ?: it.getString("userId")) == userId
+                        }
+
+                        val calendarStatus = engine.calculateCurrentStatus(allEvents)
+                        val result = if (calendarStatus == AvailabilityStatus.BUSY_NOW) "🟠 Busy Now" else "🟢 Available Now"
+                        _calculatedStatus.postValue(result)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("SceneX_Intel", "Status resolve failed", e)
+            }
+        }
+    }
+
+    fun updateManualOverride(status: String) {
+        val uid = auth.currentUser?.uid ?: return
+        userRepository.updateManualAvailability(status) { success ->
+            if (success) {
+                _manualStatusPreference.postValue(status)
+                resolveCombinedStatus(uid) // Instant Refresh
+            }
+        }
+    }
 
     private fun getSafeTimestamp(doc: DocumentSnapshot, field: String): Long? {
         return try {
@@ -56,16 +116,16 @@ class AvailabilityViewModel : ViewModel() {
             timeZone = TimeZone.getTimeZone("UTC")
         }
         val dateFields = arrayOf("auditionDate", "date", "audition_date", "Date", "audition_day")
-        
+
         for (field in dateFields) {
             val ts = getSafeTimestamp(doc, field)
             if (ts != null && ts > 0) return targetFormat.format(Date(ts))
-            
+
             val raw = doc.getString(field)?.trim() ?: continue
             if (raw.isBlank()) continue
-            
+
             val clean = raw.replace("\u00A0", " ").replace(Regex("\\s+"), " ")
-            
+
             // Handle ISO/Slash formats (yyyy-MM-dd) even with single digits
             if (clean.matches(Regex("\\d{4}[\\-/]\\d{1,2}[\\-/]\\d{1,2}"))) {
                 val p = clean.split(Regex("[\\-/]"))
@@ -141,20 +201,17 @@ class AvailabilityViewModel : ViewModel() {
         castingCalls: List<DocumentSnapshot>
     ): Map<String, Pair<Set<DayStatus>, List<CalendarEvent>>> {
         val dataMap = mutableMapOf<String, Pair<MutableSet<DayStatus>, MutableList<CalendarEvent>>>()
-        
+
         fun getEntry(date: String) = dataMap.getOrPut(date) { mutableSetOf<DayStatus>() to mutableListOf<CalendarEvent>() }
 
         // 1. Casting Calls Processing
         castingCalls.forEach { doc ->
             getFormattedDate(doc)?.let { dateStr ->
-                // Check all ID field variations
-                val rId = doc.getString("recruiterId") ?: doc.getString("recruiterid") ?: 
-                          doc.getString("recruiter_id") ?: doc.getString("userId") ?: ""
-                
-                // 🎯 FIX: Only show Casting Call on the calendar IF the viewed user is the OWNER (Recruiter).
-                // Talents should not see all public auditions as personal calendar commitments.
+                val rId = doc.getString("recruiterId") ?: doc.getString("recruiterid") ?:
+                doc.getString("recruiter_id") ?: doc.getString("userId") ?: ""
+
                 val isOwner = rId == viewedUserId
-                
+
                 if (isOwner) {
                     val project = doc.getString("projectTitle") ?: "Casting Audition"
                     val role = doc.getString("characterName") ?: doc.getString("category") ?: "Audition"
@@ -162,8 +219,6 @@ class AvailabilityViewModel : ViewModel() {
                     val loc = doc.getString("auditionLocation") ?: "TBA"
 
                     val (statuses, events) = getEntry(dateStr)
-                    
-                    // Add visual guide dot (Blue) and details
                     statuses.add(DayStatus.CASTING_CALL)
                     events.add(CalendarEvent(
                         title = project,
@@ -171,8 +226,7 @@ class AvailabilityViewModel : ViewModel() {
                         type = DayStatus.CASTING_CALL,
                         description = "Casting Call | Role: $role | Loc: $loc"
                     ))
-                    
-                    // Recruiters are "BUSY" during their own audition sessions
+
                     statuses.add(DayStatus.BUSY)
                     events.add(CalendarEvent(
                         title = "Audition Commitment: $project",
@@ -188,17 +242,14 @@ class AvailabilityViewModel : ViewModel() {
         bookings.forEach { doc ->
             getFormattedDate(doc)?.let { dateStr ->
                 val statusStr = doc.getString("status")?.uppercase() ?: "PENDING"
-                
-                // Skip REJECTED or CANCELLED bookings as they don't consume time
                 if (statusStr == "REJECTED" || statusStr == "CANCELLED") return@forEach
 
                 val statusType = if (statusStr == "CONFIRMED" || statusStr == "ACCEPTED") DayStatus.BUSY else DayStatus.PENDING
-                
+
                 val project = doc.getString("castingTitle") ?: "Project: ${doc.getString("role") ?: "Booking"}"
                 val time = "${doc.getString("startTime") ?: "TBA"} - ${doc.getString("endTime") ?: "TBA"}"
                 val location = doc.getString("location") ?: "TBA"
-                
-                // Identify "With Whom" (case-resilient)
+
                 val docRecruiterId = doc.getString("recruiterId") ?: doc.getString("recruiterid") ?: doc.getString("recruiter_id") ?: ""
                 val partner = if (viewedUserId == docRecruiterId) {
                     "With Talent: ${doc.getString("name") ?: "N/A"}"
@@ -223,7 +274,7 @@ class AvailabilityViewModel : ViewModel() {
                 val project = doc.getString("castingTitle") ?: "Confirmed Session"
                 val time = "${doc.getString("startTime") ?: "TBA"} - ${doc.getString("endTime") ?: "TBA"}"
                 val location = doc.getString("location") ?: "TBA"
-                
+
                 val docRecruiterId = doc.getString("recruiterId") ?: doc.getString("recruiterid") ?: doc.getString("recruiter_id") ?: ""
                 val partner = if (viewedUserId == docRecruiterId) {
                     "With Talent: ${doc.getString("name") ?: "N/A"}"
@@ -241,7 +292,7 @@ class AvailabilityViewModel : ViewModel() {
                 ))
             }
         }
-        
+
         return dataMap.mapValues { it.value.first to it.value.second }
     }
 
@@ -260,7 +311,7 @@ class AvailabilityViewModel : ViewModel() {
         val days = mutableListOf<CalendarDay>()
         val cal = calendar.clone() as Calendar
         cal.set(Calendar.DAY_OF_MONTH, 1)
-        
+
         val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
             timeZone = TimeZone.getTimeZone("UTC")
         }
@@ -292,13 +343,13 @@ class AvailabilityViewModel : ViewModel() {
                     timeZone = TimeZone.getTimeZone("UTC")
                 }.format(Date(timestamp))
                 val (bookings, schedules, castingCalls) = repository.getDailyEvents(userId, timestamp)
-                
-                val hardBlocks = (bookings + schedules).filter { 
+
+                val hardBlocks = (bookings + schedules).filter {
                     val status = it.getString("status")?.uppercase() ?: "CONFIRMED"
                     getFormattedDate(it) == targetDateStr && (status == "CONFIRMED" || status == "ACCEPTED")
                 } + castingCalls.filter {
-                    val rId = it.getString("recruiterId") ?: it.getString("recruiterid") ?: 
-                              it.getString("recruiter_id") ?: it.getString("userId") ?: ""
+                    val rId = it.getString("recruiterId") ?: it.getString("recruiterid") ?:
+                    it.getString("recruiter_id") ?: it.getString("userId") ?: ""
                     rId == userId && getFormattedDate(it) == targetDateStr
                 }
                 onResult(engine.checkSlotAvailability(hardBlocks, startTime, endTime))

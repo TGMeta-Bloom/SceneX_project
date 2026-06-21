@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 
 /**
  * Senior Engineer implementation for Global Session Management.
- * Fixed: Role checks are now case-insensitive to prevent navigation loops.
+ * Fixed: Normalizes role/status to prevent case-sensitivity navigation loops.
  */
 object SessionManager {
     private const val PREF_NAME = "SceneX_Session"
@@ -21,8 +21,9 @@ object SessionManager {
     fun establishSession(context: Context, userId: String, role: String?, status: String?) {
         getPrefs(context).edit().apply {
             putString(KEY_USER_ID, userId)
-            putString(KEY_ROLE, role?.uppercase()?.trim()) // Normalize on save
-            putString(KEY_STATUS, status?.lowercase()?.trim()) // Normalize on save
+            // Normalize data on entry to ensure consistency across the app
+            putString(KEY_ROLE, role?.uppercase()?.trim())
+            putString(KEY_STATUS, status?.lowercase()?.trim())
             apply()
         }
     }
@@ -39,6 +40,7 @@ object SessionManager {
     fun getRole(context: Context): String? = getPrefs(context).getString(KEY_ROLE, null)
     fun getStatus(context: Context): String? = getPrefs(context).getString(KEY_STATUS, null)
     
+    // Case-insensitive checks for robust navigation
     fun isTalent(context: Context) = getRole(context).equals("TALENT", ignoreCase = true)
     fun isRecruiter(context: Context) = getRole(context).equals("RECRUITER", ignoreCase = true)
 
