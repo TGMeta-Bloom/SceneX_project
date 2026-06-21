@@ -32,7 +32,40 @@
         <activity android:name=".views.SignupActivity" android:exported="false" />
         <activity android:name=".views.LoginActivity" android:exported="false" />
         <activity android:name=".views.WaitingRoomActivity" android:exported="false" />
+        
+        <activity 
+            android:name=".views.AddScheduleActivity" 
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+            
         <activity android:name=".MainActivity" android:exported="false" />
+        
+        <activity 
+            android:name=".views.CastingCallDetailsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SceneX.NoActionBar" />
+
+        <activity 
+            android:name=".views.RecruiterBookingDetailsActivity"
+            android:exported="false" />
+
+        <activity 
+            android:name=".views.TalentBookingDetailsActivity"
+            android:exported="false" />
+
+        <activity 
+            android:name=".views.ChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity 
+            android:name=".views.NotificationsActivity"
+            android:exported="false" />
+
+        <activity 
+            android:name=".views.EditBookingActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

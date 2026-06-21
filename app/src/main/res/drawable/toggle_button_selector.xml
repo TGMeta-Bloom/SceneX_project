@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Active State: Selected -->
     <item android:state_selected="true">
-        <shape android:shape="rectangle">
-            <gradient
-                android:startColor="#B0006D"
-                android:endColor="#4A0038"
-                android:angle="0" />
-            <corners android:radius="30dp" />
-        </shape>
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <gradient
+                        android:startColor="#A8074D"
+                        android:centerColor="#720056"
+                        android:endColor="#720056"
+                        android:angle="0" />
+                    <corners android:radius="30dp" />
+                </shape>
+            </item>
+        </layer-list>
     </item>
+    <!-- Inactive State -->
     <item>
         <shape android:shape="rectangle">
             <solid android:color="@android:color/transparent" />

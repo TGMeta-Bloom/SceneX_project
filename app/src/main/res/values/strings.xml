@@ -9,6 +9,12 @@
     <string name="add_voice_clip_action">Add voice clip for 100%</string>
     <string name="casting_opportunities_feed_title">Casting opportunities feed</string>
 
+    <!-- Booking Details Formats -->
+    <string name="booking_ref_format">Booking Ref: #%1$s</string>
+    <string name="my_id_format">My ID: %1$s</string>
+    <string name="my_name_format">My name: %1$s</string>
+    <string name="time_range_format">%1$s - %2$s</string>
+
     <!-- Calendar & Availability (Member 1) -->
     <string name="schedule_title">Schedule</string>
     <string name="calendar_view">Calendar View</string>
