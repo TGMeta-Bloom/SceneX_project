@@ -1,5 +1,6 @@
 package com.example.scenex.views
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Shader
@@ -11,14 +12,19 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.scenex.R
+import com.example.scenex.adapters.CastingCallAdapter
 import com.example.scenex.viewmodels.TalentHomeViewModel
 import com.google.android.material.imageview.ShapeableImageView
+import com.google.gson.Gson
 
 class TalentHomeFragment : Fragment() {
 
     private val viewModel: TalentHomeViewModel by viewModels()
+    private lateinit var castingAdapter: CastingCallAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,13 +42,23 @@ class TalentHomeFragment : Fragment() {
         val pbProfileStrength = view.findViewById<ProgressBar>(R.id.pbProfileStrength)
         val tvStrengthPercent = view.findViewById<TextView>(R.id.tvStrengthPercent)
         val tvRankingStatus = view.findViewById<TextView>(R.id.tvRankingStatus)
+        val rvCastingFeed = view.findViewById<RecyclerView>(R.id.rvCastingFeed)
 
         applyTextGradient(tvAppName)
+
+        // Setup RecyclerView with Click Listener
+        castingAdapter = CastingCallAdapter(emptyList()) { castingCall ->
+            val intent = Intent(requireContext(), CastingCallDetailsActivity::class.java)
+            val json = Gson().toJson(castingCall)
+            intent.putExtra("CASTING_CALL_JSON", json)
+            startActivity(intent)
+        }
+        rvCastingFeed.layoutManager = LinearLayoutManager(requireContext())
+        rvCastingFeed.adapter = castingAdapter
 
         // REAL-TIME IDENTITY OBSERVATION
         viewModel.profileData.observe(viewLifecycleOwner) { data ->
             data?.let {
-                // ROBUST IMAGE LOOKUP: Checks multiple naming conventions for the avatar
                 val imageUrl = (it["profileImage"] as? String)?.takeIf { it.isNotEmpty() }
                     ?: (it["profileImageUrl"] as? String)?.takeIf { it.isNotEmpty() }
 
@@ -64,7 +80,15 @@ class TalentHomeFragment : Fragment() {
             }
         }
 
+        // Observe Casting Calls
+        viewModel.castingCalls.observe(viewLifecycleOwner) { calls ->
+            android.util.Log.d("SceneX_UI", "Received ${calls.size} casting calls in UI")
+            castingAdapter.updateData(calls)
+        }
+
+
         viewModel.fetchProfileData()
+        viewModel.fetchCastingCalls()
     }
 
     private fun applyTextGradient(textView: TextView) {

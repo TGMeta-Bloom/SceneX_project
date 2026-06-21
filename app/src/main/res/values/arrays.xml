@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="production_types">
+        <item>Feature Film</item>
+        <item>Short Film</item>
+        <item>TV Series</item>
+        <item>Commercial</item>
+        <item>Web Series</item>
+        <item>Documentary</item>
+        <item>Music Video</item>
+        <item>Theater</item>
+        <item>Live Event / Concert</item>
+        <item>Stage Show</item>
+    </string-array>
+
+    <string-array name="production_languages">
+        <item>Sinhala</item>
+        <item>Tamil</item>
+        <item>English</item>
+        <item>Other</item>
+    </string-array>
+
+    <string-array name="audition_types">
+        <item>In-Person Audition</item>
+        <item>Virtual / Self-Tape</item>
+        <item>Open Call</item>
+        <item>Dance Workshop Call</item>
+    </string-array>
+
+    <string-array name="gender_requirements">
+        <item>Male</item>
+        <item>Female</item>
+        <item>Any</item>
+        <item>Other</item>
+    </string-array>
+
+    <string-array name="role_types">
+        <item>Lead Role</item>
+        <item>Supporting Role</item>
+        <item>Background / Extra</item>
+        <item>Cameo</item>
+    </string-array>
+
+    <string-array name="dance_role_types">
+        <item>Principal Dancer</item>
+        <item>Soloist</item>
+        <item>Ensemble / Corps de Ballet</item>
+        <item>Background Dancer</item>
+        <item>Backup Dancer</item>
+        <item>Choreographer Assistant</item>
+    </string-array>
+
+    <string-array name="experience_levels">
+        <item>Beginner / Entry Level</item>
+        <item>Intermediate</item>
+        <item>Advanced / Professional</item>
+    </string-array>
+
+    <string-array name="compensation_options">
+        <item>Paid</item>
+        <item>Non-Paid</item>
+        <item>Negotiable</item>
+    </string-array>
+
+    <array name="initial_age_range">
+        <item>18</item>
+        <item>35</item>
+    </array>
+</resources>
