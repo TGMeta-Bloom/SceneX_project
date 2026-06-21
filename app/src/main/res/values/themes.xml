@@ -30,6 +30,8 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <style name="RoundedImageView8" parent="">
+        <item name="cornerSize">8dp</item>
     <!-- Calendar Day Style -->
     <style name="CalendarDay">
         <item name="android:layout_width">0dp</item>
