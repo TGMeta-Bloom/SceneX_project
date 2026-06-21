@@ -77,7 +77,8 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_profile -> {
-                    loadFragment(ProfileFragment())
+                    // UPDATED: Now points to the Dynamic Router
+                    loadAppropriateProfileFragment()
                     true
                 }
                 else -> false
@@ -93,6 +94,19 @@ class MainActivity : AppCompatActivity() {
             loadFragment(RecruiterHomeFragment()) 
         } else {
             loadFragment(TalentHomeFragment())    
+        }
+    }
+
+    /**
+     * Resolves the Profile interface context based on the confirmed role.
+     * Recruiter -> RecruiterProfileFragment (Compose)
+     * Talent -> TalentProfileFragment (XML)
+     */
+    private fun loadAppropriateProfileFragment() {
+        if (userRole == "recruiter") {
+            loadFragment(RecruiterProfileFragment())
+        } else {
+            loadFragment(TalentProfileFragment())
         }
     }
 
