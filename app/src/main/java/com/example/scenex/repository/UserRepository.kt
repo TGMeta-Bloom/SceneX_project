@@ -2,25 +2,18 @@ package com.example.scenex.repository
 
 import android.util.Log
 import com.example.scenex.models.UserProfile
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
 
-/**
- * Senior Technical Implementation: SceneX Data Bridge.
- * Restored with full project-critical methods to fix 13 build errors.
- */
 class UserRepository {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private val TAG = "SceneX_Repository"
 
     fun getCurrentUserId(): String? = auth.currentUser?.uid
 
-    /**
-     * REAL-TIME SYNC: Listens for Admin-side weight/score changes.
-     */
     fun listenToProfileData(userId: String, onUpdate: (Map<String, Any>?) -> Unit): ListenerRegistration {
         return db.collection("profiles").document(userId)
             .addSnapshotListener { snapshot, error ->
@@ -29,30 +22,46 @@ class UserRepository {
             }
     }
 
-    /** RESTORED: Required by LoginActivity & SplashActivity */
+    /**
+     * BULLETPROOF ROUTING: Checks both 'users' and 'profiles' collections.
+     * Checks both 'role' and 'userRole' field names.
+     */
     fun getUserRoutingData(userId: String, onResult: (String?, String?, Exception?) -> Unit) {
         db.collection("users").document(userId).get()
             .addOnSuccessListener { userDoc ->
-                val role = userDoc.getString("role")
+                var role = userDoc.getString("role") ?: userDoc.getString("userRole")
+                
                 db.collection("profiles").document(userId).get()
                     .addOnSuccessListener { profileDoc ->
-                        onResult(role, profileDoc.getString("status"), null)
+                        val profileRole = profileDoc.getString("userRole") ?: profileDoc.getString("role")
+                        val status = profileDoc.getString("status")
+                        
+                        // Use the role from either document, prioritizing profile if it exists
+                        val finalRole = profileRole ?: role
+                        onResult(finalRole, status, null)
                     }
-                    .addOnFailureListener { onResult(role, null, it) }
+                    .addOnFailureListener { 
+                        // If profile doesn't exist, we still have the role from 'users'
+                        onResult(role, null, null)
+                    }
             }
             .addOnFailureListener { onResult(null, null, it) }
     }
 
-    /** RESTORED: Required by RoleSelectViewModel */
     fun saveUserRole(role: String, onComplete: (Boolean) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onComplete(false)
-        val userMap = hashMapOf("userId" to userId, "role" to role, "createdAt" to System.currentTimeMillis())
-        db.collection("users").document(userId).set(userMap, SetOptions.merge())
+        val userMap = hashMapOf("userId" to userId, "role" to role, "userRole" to role, "createdAt" to System.currentTimeMillis())
+        
+        // Save to both for safety
+        val batch = db.batch()
+        batch.set(db.collection("users").document(userId), userMap, SetOptions.merge())
+        batch.set(db.collection("profiles").document(userId), hashMapOf("userRole" to role), SetOptions.merge())
+        
+        batch.commit()
             .addOnSuccessListener { onComplete(true) }
             .addOnFailureListener { onComplete(false) }
     }
 
-    /** RESTORED: Required by WaitingRoomActivity */
     fun listenToProfileStatus(userId: String, onStatusChange: (String?) -> Unit): ListenerRegistration {
         return db.collection("profiles").document(userId)
             .addSnapshotListener { snapshot, _ ->
@@ -62,13 +71,18 @@ class UserRepository {
             }
     }
 
-    /** RESTORED: Required by Signup Process */
     fun signupUser(profile: UserProfile, password: String, onComplete: (Boolean, String?) -> Unit) {
         auth.createUserWithEmailAndPassword(profile.email, password)
             .addOnSuccessListener { result ->
                 val userId = result.user?.uid ?: ""
-                val userMap = hashMapOf("userId" to userId, "role" to profile.role, "email" to profile.email)
-                val profileMap = hashMapOf("userId" to userId, "fullName" to profile.fullName, "status" to "draft", "completenessScore" to 20.0)
+                val userMap = hashMapOf("userId" to userId, "role" to profile.role, "userRole" to profile.role, "email" to profile.email)
+                val profileMap = hashMapOf(
+                    "userId" to userId, 
+                    "fullName" to profile.fullName, 
+                    "userRole" to profile.role,
+                    "status" to "draft", 
+                    "completenessScore" to 20.0
+                )
                 val batch = db.batch()
                 batch.set(db.collection("users").document(userId), userMap)
                 batch.set(db.collection("profiles").document(userId), profileMap)

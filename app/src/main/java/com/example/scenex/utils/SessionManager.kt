@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 
 /**
  * Senior Engineer implementation for Global Session Management.
- * Handles role-based permissions, profile state, and first-run flags.
+ * Fixed: Role checks are now case-insensitive to prevent navigation loops.
  */
 object SessionManager {
     private const val PREF_NAME = "SceneX_Session"
@@ -21,13 +21,12 @@ object SessionManager {
     fun establishSession(context: Context, userId: String, role: String?, status: String?) {
         getPrefs(context).edit().apply {
             putString(KEY_USER_ID, userId)
-            putString(KEY_ROLE, role)
-            putString(KEY_STATUS, status)
+            putString(KEY_ROLE, role?.uppercase()?.trim()) // Normalize on save
+            putString(KEY_STATUS, status?.lowercase()?.trim()) // Normalize on save
             apply()
         }
     }
 
-    // Handshake for Onboarding Completion
     fun setOnboardingSeen(context: Context) {
         getPrefs(context).edit().putBoolean(KEY_HAS_SEEN_ONBOARDING, true).apply()
     }
@@ -36,11 +35,12 @@ object SessionManager {
         return getPrefs(context).getBoolean(KEY_HAS_SEEN_ONBOARDING, false)
     }
 
+    fun getUserId(context: Context): String? = getPrefs(context).getString(KEY_USER_ID, null)
     fun getRole(context: Context): String? = getPrefs(context).getString(KEY_ROLE, null)
     fun getStatus(context: Context): String? = getPrefs(context).getString(KEY_STATUS, null)
     
-    fun isTalent(context: Context) = getRole(context) == "TALENT"
-    fun isRecruiter(context: Context) = getRole(context) == "RECRUITER"
+    fun isTalent(context: Context) = getRole(context).equals("TALENT", ignoreCase = true)
+    fun isRecruiter(context: Context) = getRole(context).equals("RECRUITER", ignoreCase = true)
 
     fun clearSession(context: Context) {
         getPrefs(context).edit().clear().apply()

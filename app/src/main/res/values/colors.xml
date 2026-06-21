@@ -5,8 +5,12 @@
     <color name="white">#FFFFFFFF</color>
     <color name="yellow">#FFEDA509</color>
     <color name="gray">#2E2E2E</color>
-    <color name="text_secondary">#FF424242</color> <!-- Fixed: Dark Gray for high legibility -->
-    
+    <color name="text_secondary">#FF424242</color>
+
+    <!-- Brand Gradients -->
+    <color name="gradient_start">#B0006D</color>
+    <color name="gradient_end">#4A0038</color>
+
     <!-- Calendar Status Colors -->
     <color name="calendar_green">#FF00D60E</color>
     <color name="calendar_blue">#FF0040FF</color>
@@ -17,7 +21,6 @@
     <color name="primary_dark">#4A0038</color>
     <color name="input_outline">#E1BEE7</color>
     <color name="magenta_stroke">#D81B60</color>
-
 
     <!-- Gothami's Styles -->
     <color name="scenex_primary">#720056</color>

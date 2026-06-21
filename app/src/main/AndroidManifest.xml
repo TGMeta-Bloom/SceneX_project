@@ -33,6 +33,14 @@
         <activity android:name=".views.LoginActivity" android:exported="false" />
         <activity android:name=".views.WaitingRoomActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="false" />
+        <activity
+            android:name=".views.CastingCallDetailsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SceneX.NoActionBar" />
+        <activity
+            android:name=".views.HireRequestDetailsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SceneX.NoActionBar" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

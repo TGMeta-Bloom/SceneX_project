@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_search -> {
                     // Switchboard ready for separate Talent/Job search modules
                     if (userRole == "recruiter") {
-                        loadFragment(SearchFragment()) // Destination: Search Talent
+                        loadFragment(RecruiterSearchFragment()) // Destination: Search Talent
                     } else {
                         loadFragment(SearchFragment()) // Destination: Search Opportunities
                     }

@@ -208,7 +208,6 @@ class SignupViewModel : ViewModel() {
             "updatedAt" to Timestamp.now()
         )
 
-        // 🎯 SINGLE IDENTITY FIELD: Root 'profileImage' is the source of truth for all avatars
         if (accountProfilePicture.isNotEmpty()) {
             profilePayload["profileImage"] = accountProfilePicture
         }
@@ -221,14 +220,26 @@ class SignupViewModel : ViewModel() {
             profilePayload["physicalSpecs"] = "Height: $height | Build: $bodyType | Gender: $gender"
             profilePayload["showreelUrl"] = videoUrl
             profilePayload["spotlightCategory"] = spotlightCategory
-            // 🎯 FLAT HIERARCHY: Portfolio links stored strictly at root to avoid 'mediaAssets' duplication
             profilePayload["headshotUrl"] = headshotUrl 
             profilePayload["fullBodyUrl"] = fullBodyUrl 
         }
 
-        FirebaseFirestore.getInstance().collection("profiles").document(userId)
+        val db = FirebaseFirestore.getInstance()
+        
+        // 1. Master Profile Write
+        db.collection("profiles").document(userId)
             .set(profilePayload, SetOptions.merge())
-            .addOnSuccessListener { Log.d("SceneX_Engine", "✅ Flat Hierarchy Sync successful: Duplicates Removed") }
+            .addOnSuccessListener { Log.d("SceneX_Engine", "✅ Profile Sync successful") }
+
+        // 2. Search Index Write (Option B): Only for Talent
+        if (userRole == "TALENT") {
+            val searchIndexFields = listOf("fullName", "spotlightCategory", "gender", "province", "city", "calculated_score", "userRole", "profileImage", "age")
+            val indexPayload = profilePayload.filterKeys { it in searchIndexFields }
+            
+            db.collection("search_index").document(userId)
+                .set(indexPayload, SetOptions.merge())
+                .addOnSuccessListener { Log.d("SceneX_Engine", "🎯 Search Index updated") }
+        }
     }
 
     // --- PRESERVED METHODS ---

@@ -6,7 +6,7 @@ data class CastingCall(
     val id: String = "",
     val recruiterId: String = "",
     val posterUrl: String = "",
-    val category: String = "Actor", // Added category (Actor/Dancer)
+    val category: String = "Actor",
     
     // 1. Production Information
     val projectTitle: String = "",
