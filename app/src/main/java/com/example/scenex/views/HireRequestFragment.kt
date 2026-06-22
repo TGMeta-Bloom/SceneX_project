@@ -1,14 +1,19 @@
 package com.example.scenex.views
 
 import android.app.DatePickerDialog
+import android.graphics.Color
+import android.graphics.LinearGradient
+import android.graphics.Shader
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -39,6 +44,7 @@ class HireRequestFragment : Fragment() {
     private lateinit var etMessage: EditText
     private lateinit var btnSubmitRequest: Button
     private lateinit var toolbar: Toolbar
+    private lateinit var tvHireTitle: TextView
 
     companion object {
         private const val ARG_TALENT_JSON = "arg_talent_json"
@@ -66,6 +72,7 @@ class HireRequestFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews(view)
+        applyBrandGradient()
         setupListeners()
         observeViewModel()
     }
@@ -81,6 +88,22 @@ class HireRequestFragment : Fragment() {
         etMessage = view.findViewById(R.id.etMessage)
         btnSubmitRequest = view.findViewById(R.id.btnSubmitRequest)
         toolbar = view.findViewById(R.id.toolbar)
+        tvHireTitle = view.findViewById(R.id.tvHireTitle)
+    }
+
+    private fun applyBrandGradient() {
+        tvHireTitle.post {
+            val width = tvHireTitle.paint.measureText(tvHireTitle.text.toString())
+            if (width > 0) {
+                val startColor = ContextCompat.getColor(requireContext(), R.color.gradient_start)
+                val endColor = ContextCompat.getColor(requireContext(), R.color.gradient_end)
+                val textShader: Shader = LinearGradient(0f, 0f, width, 0f,
+                    intArrayOf(startColor, endColor),
+                    null, Shader.TileMode.CLAMP)
+                tvHireTitle.paint.shader = textShader
+                tvHireTitle.invalidate()
+            }
+        }
     }
 
     private fun setupListeners() {
@@ -107,7 +130,6 @@ class HireRequestFragment : Fragment() {
 
         val recruiterId = SessionManager.getUserId(requireContext()) ?: "anon"
         
-        // Fetch recruiter name first for the notification
         db.collection("profiles").document(recruiterId).get().addOnSuccessListener { snapshot ->
             val recruiterName = snapshot.getString("fullName") ?: "Recruiter"
             

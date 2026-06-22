@@ -12,7 +12,8 @@ import com.google.android.material.imageview.ShapeableImageView
 
 class TalentMatchAdapter(
     private var talents: List<UserProfile>,
-    private val onTalentClick: (UserProfile) -> Unit
+    private val onProfileClick: (UserProfile) -> Unit,
+    private val onHireClick: (UserProfile) -> Unit
 ) : RecyclerView.Adapter<TalentMatchAdapter.TalentViewHolder>() {
 
     class TalentViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -34,7 +35,6 @@ class TalentMatchAdapter(
     override fun onBindViewHolder(holder: TalentViewHolder, position: Int) {
         val talent = talents[position]
 
-        // 1. Precise Data Binding (Matching Reference Image)
         holder.tvName.text = talent.fullName
         holder.tvRole.text = talent.spotlightCategory.ifEmpty { "Talent" }
         
@@ -49,16 +49,15 @@ class TalentMatchAdapter(
             else holder.itemView.context.getColor(android.R.color.holo_red_dark)
         )
 
-        // 2. Image Sync
         Glide.with(holder.itemView.context)
             .load(talent.effectiveAvatarUrl)
             .placeholder(R.drawable.ic_profile_placeholder)
             .circleCrop()
             .into(holder.ivProfile)
 
-        // 3. Navigation Triggers
-        holder.cardContainer.setOnClickListener { onTalentClick(talent) }
-        holder.btnHire.setOnClickListener { onTalentClick(talent) }
+        // 🎯 SEPARATE TRIGGERS
+        holder.cardContainer.setOnClickListener { onProfileClick(talent) }
+        holder.btnHire.setOnClickListener { onHireClick(talent) }
     }
 
     override fun getItemCount() = talents.size

@@ -8,6 +8,7 @@ import android.graphics.Shader
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -100,29 +101,27 @@ class CreateCastingFragment : Fragment() {
             tvActor.isSelected = category == "Actor"
             tvDancer.isSelected = category == "Dancer"
 
+            // 🎯 Clear current selection when switching
+            dropdownRoleType.setText("", false)
+
             if (category == "Actor") {
-                tvRoleTitleLabel.text = "Role Title / Character Name"
+                tvRoleTitleLabel.text = "Character Name *"
                 etRoleTitle.hint = "e.g. Lead Male"
                 tvSkillsLabel.text = "Required Skills"
                 etSkills.hint = "e.g. Singing, Dialects"
                 setupAdapter(dropdownRoleType, R.array.role_types)
-                dropdownRoleType.setText("", false)
-                dropdownRoleType.hint = "Select Role"
             } else {
-                tvRoleTitleLabel.text = "Dance Style / Role"
+                tvRoleTitleLabel.text = "Dance Style / Role *"
                 etRoleTitle.hint = "e.g. Ballet Soloist"
-                tvSkillsLabel.text = "Required Dance Techniques"
-                etSkills.hint = "e.g. Contemporary, Jazz, Acrobatics"
+                tvSkillsLabel.text = "Required Techniques"
+                etSkills.hint = "e.g. Contemporary, Jazz"
                 setupAdapter(dropdownRoleType, R.array.dance_role_types)
-                dropdownRoleType.setText("", false)
-                dropdownRoleType.hint = "Select Dance Role"
             }
         }
 
         tvActor.setOnClickListener { updateUI("Actor") }
         tvDancer.setOnClickListener { updateUI("Dancer") }
         
-        // Initial setup
         updateUI("Actor")
     }
 
@@ -133,6 +132,9 @@ class CreateCastingFragment : Fragment() {
         setupAdapter(view.findViewById(R.id.dropdownGender), R.array.gender_requirements)
         setupAdapter(view.findViewById(R.id.dropdownExperience), R.array.experience_levels)
         setupAdapter(view.findViewById(R.id.dropdownCompensation), R.array.compensation_options)
+        
+        // Initial setup for Role Type (defaults to Actor types)
+        setupAdapter(view.findViewById(R.id.dropdownRoleType), R.array.role_types)
     }
 
     private fun setupAdapter(autoCompleteTextView: AutoCompleteTextView?, arrayResId: Int) {
@@ -140,6 +142,8 @@ class CreateCastingFragment : Fragment() {
             val items = resources.getStringArray(arrayResId)
             val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, items)
             it.setAdapter(adapter)
+            
+            // Ensure dropdown shows on click even if inputType is "none"
             it.setOnClickListener { _ -> it.showDropDown() }
             it.setOnFocusChangeListener { _, hasFocus -> if (hasFocus) it.showDropDown() }
         }
@@ -175,11 +179,7 @@ class CreateCastingFragment : Fragment() {
     }
 
     private fun prepareAndSubmit(view: View) {
-        val title = view.findViewById<EditText>(R.id.etProjectTitle).text.toString().trim()
-        if (title.isEmpty()) {
-            Toast.makeText(context, "Project Title is required", Toast.LENGTH_SHORT).show()
-            return
-        }
+        if (!validateInputs(view)) return
 
         val btnPublish = view.findViewById<Button>(R.id.btnPublish)
         btnPublish.isEnabled = false
@@ -192,11 +192,58 @@ class CreateCastingFragment : Fragment() {
         }
     }
 
+    private fun validateInputs(view: View): Boolean {
+        val etTitle = view.findViewById<EditText>(R.id.etProjectTitle)
+        val etSynopsis = view.findViewById<EditText>(R.id.etSynopsis)
+        val etRoleTitle = view.findViewById<EditText>(R.id.etRoleTitle)
+        val etDeadline = view.findViewById<EditText>(R.id.etDeadline)
+        val etEmail = view.findViewById<EditText>(R.id.etContactEmail)
+        val etPhone = view.findViewById<EditText>(R.id.etContactPhone)
+
+        val title = etTitle.text.toString().trim()
+        val synopsis = etSynopsis.text.toString().trim()
+        val roleTitle = etRoleTitle.text.toString().trim()
+        val deadline = etDeadline.text.toString().trim()
+        val email = etEmail.text.toString().trim()
+        val phone = etPhone.text.toString().trim()
+
+        if (title.isEmpty()) {
+            etTitle.error = "Project Title is required"
+            etTitle.requestFocus()
+            return false
+        }
+        if (synopsis.isEmpty()) {
+            etSynopsis.error = "Synopsis is required"
+            etSynopsis.requestFocus()
+            return false
+        }
+        if (roleTitle.isEmpty()) {
+            etRoleTitle.error = "Character/Role Name is required"
+            etRoleTitle.requestFocus()
+            return false
+        }
+        if (deadline.isEmpty()) {
+            etDeadline.error = "Deadline is required"
+            etDeadline.requestFocus()
+            return false
+        }
+        if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            etEmail.error = "Enter a valid production email"
+            etEmail.requestFocus()
+            return false
+        }
+        if (phone.isEmpty() || !phone.matches(Regex("07[0-9]{8}"))) {
+            etPhone.error = "Enter a valid 10-digit phone number (e.g. 07XXXXXXXX)"
+            etPhone.requestFocus()
+            return false
+        }
+        return true
+    }
+
     private fun uploadPosterAndSubmit(view: View) {
         val file = uriToFile(selectedImageUri!!) ?: run {
             Toast.makeText(context, "Failed to process image", Toast.LENGTH_SHORT).show()
             view.findViewById<Button>(R.id.btnPublish).isEnabled = true
-            view.findViewById<Button>(R.id.btnPublish).text = "Publish Casting Call"
             return
         }
 
@@ -206,19 +253,16 @@ class CreateCastingFragment : Fragment() {
         imgBBService.uploadImage(IMGBB_API_KEY, body).enqueue(object : Callback<ImgBBResponse> {
             override fun onResponse(call: Call<ImgBBResponse>, response: Response<ImgBBResponse>) {
                 if (response.isSuccessful && response.body()?.success == true) {
-                    val url = response.body()?.data?.url ?: ""
-                    validateAndSubmit(view, url)
+                    validateAndSubmit(view, response.body()?.data?.url ?: "")
                 } else {
                     Toast.makeText(context, "Image upload failed", Toast.LENGTH_SHORT).show()
                     view.findViewById<Button>(R.id.btnPublish).isEnabled = true
-                    view.findViewById<Button>(R.id.btnPublish).text = "Publish Casting Call"
                 }
             }
 
             override fun onFailure(call: Call<ImgBBResponse>, t: Throwable) {
                 Toast.makeText(context, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
                 view.findViewById<Button>(R.id.btnPublish).isEnabled = true
-                view.findViewById<Button>(R.id.btnPublish).text = "Publish Casting Call"
             }
         })
     }
@@ -239,47 +283,55 @@ class CreateCastingFragment : Fragment() {
     }
 
     private fun validateAndSubmit(view: View, posterUrl: String) {
-        val title = view.findViewById<EditText>(R.id.etProjectTitle).text.toString().trim()
-        val minAge = view.findViewById<EditText>(R.id.etMinAge)?.text.toString().toIntOrNull() ?: 15
-        val maxAge = view.findViewById<EditText>(R.id.etMaxAge)?.text.toString().toIntOrNull() ?: 100
-
         val recruiterId = auth.currentUser?.uid ?: return
         val castingId = firestore.collection("CastingCalls").document().id
+
+        // Calculate expiryDate from deadline
+        val deadlineStr = view.findViewById<EditText>(R.id.etDeadline).text.toString()
+        val expiryDate = try {
+            val date = dateFormatter.parse(deadlineStr)
+            if (date != null) Timestamp(date) else null
+        } catch (e: Exception) { null }
 
         val castingCall = CastingCall(
             id = castingId,
             recruiterId = recruiterId,
             posterUrl = posterUrl,
             category = selectedCategory,
-            projectTitle = title,
-            productionType = view.findViewById<AutoCompleteTextView>(R.id.dropdownProductionType)?.text.toString(),
-            productionCompany = view.findViewById<EditText>(R.id.etProductionCompany)?.text.toString(),
-            directorName = view.findViewById<EditText>(R.id.etDirectorName)?.text.toString(),
-            projectSynopsis = view.findViewById<EditText>(R.id.etSynopsis)?.text.toString(),
-            productionLanguage = view.findViewById<AutoCompleteTextView>(R.id.dropdownLanguage)?.text.toString(),
             
-            auditionType = view.findViewById<AutoCompleteTextView>(R.id.dropdownAuditionType)?.text.toString(),
-            auditionDate = view.findViewById<EditText>(R.id.etAuditionDate)?.text.toString(),
-            startTime = view.findViewById<EditText>(R.id.etStartTime)?.text.toString(),
-            endTime = view.findViewById<EditText>(R.id.etEndTime)?.text.toString(),
-            auditionLocation = view.findViewById<EditText>(R.id.etAuditionLocation)?.text.toString(),
-            submissionDeadline = view.findViewById<EditText>(R.id.etDeadline)?.text.toString(),
+            projectTitle = view.findViewById<EditText>(R.id.etProjectTitle).text.toString(),
+            productionType = view.findViewById<AutoCompleteTextView>(R.id.dropdownProductionType).text.toString(),
+            productionCompany = view.findViewById<EditText>(R.id.etProductionCompany).text.toString(),
+            directorName = view.findViewById<EditText>(R.id.etDirectorName).text.toString(),
+            projectSynopsis = view.findViewById<EditText>(R.id.etSynopsis).text.toString(),
+            productionLanguage = view.findViewById<AutoCompleteTextView>(R.id.dropdownLanguage).text.toString(),
             
-            characterName = view.findViewById<EditText>(R.id.etRoleTitle)?.text.toString(),
-            minAge = minAge,
-            maxAge = maxAge,
-            genderRequirement = view.findViewById<AutoCompleteTextView>(R.id.dropdownGender)?.text.toString(),
-            roleType = view.findViewById<AutoCompleteTextView>(R.id.dropdownRoleType)?.text.toString(),
-            requiredSkills = view.findViewById<EditText>(R.id.etSkills)?.text.toString(),
-            experienceLevel = view.findViewById<AutoCompleteTextView>(R.id.dropdownExperience)?.text.toString(),
-            characterBreakdown = view.findViewById<EditText>(R.id.etRoleDescription)?.text.toString(),
+            auditionType = view.findViewById<AutoCompleteTextView>(R.id.dropdownAuditionType).text.toString(),
+            auditionDate = view.findViewById<EditText>(R.id.etAuditionDate).text.toString(),
+            startTime = view.findViewById<EditText>(R.id.etStartTime).text.toString(),
+            endTime = view.findViewById<EditText>(R.id.etEndTime).text.toString(),
+            auditionLocation = view.findViewById<EditText>(R.id.etAuditionLocation).text.toString(),
+            submissionDeadline = deadlineStr,
+            expiryDate = expiryDate,
             
-            compensation = view.findViewById<AutoCompleteTextView>(R.id.dropdownCompensation)?.text.toString(),
-            shootLocation = view.findViewById<EditText>(R.id.etShootLocation)?.text.toString(),
-            firstDayOfShoot = view.findViewById<EditText>(R.id.etShootDate)?.text.toString(),
+            characterName = view.findViewById<EditText>(R.id.etRoleTitle).text.toString(),
+            genderRequirement = view.findViewById<AutoCompleteTextView>(R.id.dropdownGender).text.toString(),
+            roleType = view.findViewById<AutoCompleteTextView>(R.id.dropdownRoleType).text.toString(),
+            minAge = view.findViewById<EditText>(R.id.etMinAge).text.toString().toIntOrNull() ?: 15,
+            maxAge = view.findViewById<EditText>(R.id.etMaxAge).text.toString().toIntOrNull() ?: 100,
+            requiredSkills = view.findViewById<EditText>(R.id.etSkills).text.toString(),
+            experienceLevel = view.findViewById<AutoCompleteTextView>(R.id.dropdownExperience).text.toString(),
+            characterBreakdown = view.findViewById<EditText>(R.id.etRoleDescription).text.toString(),
             
-            contactEmail = view.findViewById<EditText>(R.id.etContactEmail)?.text.toString(),
-            phoneNumber = view.findViewById<EditText>(R.id.etContactPhone)?.text.toString()
+            compensation = view.findViewById<AutoCompleteTextView>(R.id.dropdownCompensation).text.toString(),
+            shootLocation = view.findViewById<EditText>(R.id.etShootLocation).text.toString(),
+            firstDayOfShoot = view.findViewById<EditText>(R.id.etShootDate).text.toString(),
+            
+            contactEmail = view.findViewById<EditText>(R.id.etContactEmail).text.toString(),
+            phoneNumber = view.findViewById<EditText>(R.id.etContactPhone).text.toString(),
+            
+            status = "active",
+            createdAt = Timestamp.now()
         )
 
         firestore.collection("CastingCalls").document(castingId).set(castingCall)
@@ -288,8 +340,8 @@ class CreateCastingFragment : Fragment() {
                 parentFragmentManager.popBackStack()
             }
             .addOnFailureListener {
-                Toast.makeText(context, "Error: ${it.message}", Toast.LENGTH_SHORT).show()
-                view.findViewById<View>(R.id.btnPublish)?.isEnabled = true
+                Toast.makeText(context, "Error Publishing", Toast.LENGTH_SHORT).show()
+                view.findViewById<Button>(R.id.btnPublish).isEnabled = true
                 view.findViewById<Button>(R.id.btnPublish).text = "Publish Casting Call"
             }
     }
@@ -299,7 +351,7 @@ class CreateCastingFragment : Fragment() {
             val width = textView.paint.measureText(textView.text.toString())
             if (width > 0) {
                 val textShader: Shader = LinearGradient(0f, 0f, width, 0f,
-                    intArrayOf(Color.parseColor("#720056"), Color.parseColor("#4A0038")),
+                    intArrayOf(Color.parseColor("#B0006D"), Color.parseColor("#4A0038")),
                     null, Shader.TileMode.CLAMP)
                 textView.paint.shader = textShader
                 textView.invalidate()

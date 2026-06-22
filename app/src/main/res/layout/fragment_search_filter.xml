@@ -24,12 +24,12 @@
             android:id="@+id/tvCurrentQuery"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Finding: Actor"
+            android:text="Finding: All Talent"
             android:textColor="@color/black"
             android:layout_marginTop="4dp"
             android:textSize="16sp" />
 
-        <!-- Location Section -->
+        <!-- Location -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -45,14 +45,7 @@
             android:layout_marginTop="8dp"
             android:background="@drawable/search_bar_bg" />
 
-        <Spinner
-            android:id="@+id/spCity"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/search_bar_bg" />
-
-        <!-- Demographics -->
+        <!-- Gender -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -122,51 +115,54 @@
                 android:background="@drawable/search_bar_bg" />
         </LinearLayout>
 
-        <!-- Height Range -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Height (cm)"
-            android:textStyle="bold"
-            android:layout_marginTop="24dp"
-            android:textColor="@color/black"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="8dp">
-            <Spinner
-                android:id="@+id/spMinHeight"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:background="@drawable/search_bar_bg" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="to"
-                android:layout_marginHorizontal="12dp"
-                android:layout_gravity="center_vertical"/>
-            <Spinner
-                android:id="@+id/spMaxHeight"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:background="@drawable/search_bar_bg" />
-        </LinearLayout>
-
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnApplyFilters"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:layout_marginTop="48dp"
+            android:layout_marginTop="32dp"
             android:background="@drawable/button_rounded_magenta"
-            android:text="Find Talent"
+            android:text="Refresh Results"
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold" />
+
+        <!-- 🎯 LIVE RESULTS LIST -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="Best Matches"
+            android:textColor="@color/primary_magenta"
+            android:textStyle="bold" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+            
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvResults"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+            <ProgressBar
+                android:id="@+id/pbLoading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvEmptyState"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="40dp"
+                android:text="No talent found matching these criteria"
+                android:visibility="gone" />
+        </FrameLayout>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

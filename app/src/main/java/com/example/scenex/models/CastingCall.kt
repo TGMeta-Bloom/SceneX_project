@@ -2,6 +2,10 @@ package com.example.scenex.models
 
 import com.google.firebase.Timestamp
 
+/**
+ * Casting Call Data Model.
+ * Includes logic fields for status tracking and expiration.
+ */
 data class CastingCall(
     val id: String = "",
     val recruiterId: String = "",
@@ -16,32 +20,35 @@ data class CastingCall(
     val projectSynopsis: String = "",
     val productionLanguage: String = "",
     
-    // 2. Audition Information
+    // 2. Audition Hub
     val auditionType: String = "",
     val auditionDate: String = "",
     val startTime: String = "",
     val endTime: String = "",
     val auditionLocation: String = "",
     val submissionDeadline: String = "",
+    val expiryDate: Timestamp? = null,
     
-    // 3. Role Information
+    // 3. Talent Specs
     val characterName: String = "",
-    val minAge: Int = 15,
+    val minAge: Int = 0,
     val maxAge: Int = 100,
-    val genderRequirement: String = "",
+    val genderRequirement: String = "Any",
     val roleType: String = "",
     val requiredSkills: String = "",
     val experienceLevel: String = "",
     val characterBreakdown: String = "",
     
-    // 4. Compensation & Schedule
+    // 4. Logistics
     val compensation: String = "",
     val shootLocation: String = "",
     val firstDayOfShoot: String = "",
     
-    // 5. Recruiter Contact
+    // 5. Contact Info
     val contactEmail: String = "",
     val phoneNumber: String = "",
     
+    // 6. Metadata
+    val status: String = "active",
     val createdAt: Timestamp = Timestamp.now()
 )

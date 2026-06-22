@@ -120,8 +120,15 @@ class TalentDetailFragment : Fragment() {
         setupLink(tvDetailSocial, talent.socialMediaLinks)
 
         btnBack.setOnClickListener { parentFragmentManager.popBackStack() }
+        
+        // 🎯 REDIRECTION FIX: Navigate to Hire Request Form
         btnHireTalent.setOnClickListener {
-            Toast.makeText(requireContext(), "Initiating hire protocol...", Toast.LENGTH_SHORT).show()
+            val hireFragment = HireRequestFragment.newInstance(talent)
+            parentFragmentManager.beginTransaction()
+                .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.fade_out)
+                .replace(R.id.nav_host_fragment, hireFragment)
+                .addToBackStack(null)
+                .commit()
         }
     }
 

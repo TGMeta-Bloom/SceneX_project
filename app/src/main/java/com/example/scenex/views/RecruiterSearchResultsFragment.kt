@@ -1,6 +1,8 @@
 package com.example.scenex.views
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +13,6 @@ import android.widget.EditText
 import android.widget.RatingBar
 import android.widget.Spinner
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -22,15 +23,18 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.scenex.R
 import com.example.scenex.adapters.TalentMatchAdapter
+import com.example.scenex.models.UserProfile
 import com.example.scenex.viewmodels.SearchFilterViewModel
 import com.example.scenex.viewmodels.TalentResultsState
 import com.example.scenex.viewmodels.TalentResultsViewModel
 import com.google.android.material.chip.ChipGroup
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * ELITE DISCOVERY HUB: Integrated Side-Rail Filter System.
- * Optimized with high-precision structured dropdowns for Sri Lankan parameters.
+ * ELITE DISCOVERY HUB: Optimized for Sri Lankan parameters.
+ * Fixed: Redirection flow adjusted to Talent Detail -> Hire Request.
  */
 class RecruiterSearchResultsFragment : Fragment() {
 
@@ -43,11 +47,10 @@ class RecruiterSearchResultsFragment : Fragment() {
     private lateinit var rvResults: RecyclerView
     private lateinit var etSearch: EditText
     private lateinit var pbLoading: View
-    
-    private lateinit var filterPanes: Map<Int, View>
-    private lateinit var railItems: List<TextView>
+    private lateinit var tvEmptyState: TextView
 
-    // Dropdown Data
+    private var searchJob: Job? = null
+
     private val provinces = listOf("All", "Western Province", "Central Province", "Southern Province", "Northern Province", "Eastern Province", "North Western Province", "North Central Province", "Uva Province", "Sabaragamuwa Province")
     private val citiesMap = mapOf(
         "Western Province" to listOf("All Cities", "Colombo", "Dehiwala", "Moratuwa", "Negombo", "Panadura", "Kalutara"),
@@ -69,13 +72,10 @@ class RecruiterSearchResultsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
         initViews(view)
-        setupSideRail(view)
         setupFilterListeners(view)
         setupRecyclerView()
         observeData()
-
         etSearch.setText(sharedViewModel.criteria.value.query)
         refreshDiscovery()
     }
@@ -86,6 +86,7 @@ class RecruiterSearchResultsFragment : Fragment() {
         rvResults = view.findViewById(R.id.rvResults)
         etSearch = view.findViewById(R.id.etSearch)
         pbLoading = view.findViewById(R.id.pbLoading)
+        tvEmptyState = view.findViewById(R.id.tvEmptyState)
 
         btnFilterToggle.setOnClickListener {
             cvFilterPanel.visibility = if (cvFilterPanel.visibility == View.VISIBLE) View.GONE else View.VISIBLE
@@ -97,48 +98,35 @@ class RecruiterSearchResultsFragment : Fragment() {
             cvFilterPanel.visibility = View.GONE
         }
 
-        view.findViewById<View>(R.id.ivBack).setOnClickListener { parentFragmentManager.popBackStack() }
-    }
-
-    private fun setupSideRail(view: View) {
-        railItems = listOf(
-            view.findViewById(R.id.tvRailLocation),
-            view.findViewById(R.id.tvRailGender),
-            view.findViewById(R.id.tvRailAge),
-            view.findViewById(R.id.tvRailHeight),
-            view.findViewById(R.id.tvRailLanguage),
-            view.findViewById(R.id.tvRailRating)
-        )
-
-        filterPanes = mapOf(
-            0 to view.findViewById(R.id.layoutFilterLocation),
-            1 to view.findViewById(R.id.layoutFilterGender),
-            2 to view.findViewById(R.id.layoutFilterAge),
-            3 to view.findViewById(R.id.layoutFilterHeight),
-            4 to view.findViewById(R.id.layoutFilterLanguage),
-            5 to view.findViewById(R.id.layoutFilterRating)
-        )
-
-        railItems.forEachIndexed { index, textView ->
-            textView.setOnClickListener {
-                railItems.forEach { 
-                    it.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
-                    it.setTypeface(null, android.graphics.Typeface.NORMAL)
+        etSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                searchJob?.cancel()
+                searchJob = viewLifecycleOwner.lifecycleScope.launch {
+                    delay(300)
+                    sharedViewModel.updateQuery(s.toString())
+                    refreshDiscovery()
                 }
-                textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_magenta))
-                textView.setTypeface(null, android.graphics.Typeface.BOLD)
-
-                filterPanes.values.forEach { it.visibility = View.GONE }
-                filterPanes[index]?.visibility = View.VISIBLE
             }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
+        view.findViewById<View>(R.id.ivBack).setOnClickListener { parentFragmentManager.popBackStack() }
+        view.findViewById<View>(R.id.btnApplyFilter).setOnClickListener {
+            cvFilterPanel.visibility = View.GONE
+            refreshDiscovery()
         }
     }
 
     private fun setupFilterListeners(view: View) {
-        // --- 1. Structured Location ---
         val spProvince = view.findViewById<Spinner>(R.id.spFilterProvince)
         val spCity = view.findViewById<Spinner>(R.id.spFilterCity)
-        
+        val cgGender = view.findViewById<ChipGroup>(R.id.cgGender)
+        val spMinAge = view.findViewById<Spinner>(R.id.spMinAge)
+        val spMaxAge = view.findViewById<Spinner>(R.id.spMaxAge)
+        val spMinHeight = view.findViewById<Spinner>(R.id.spMinHeight)
+        val spMaxHeight = view.findViewById<Spinner>(R.id.spMaxHeight)
+
         spProvince.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, provinces)
         spProvince.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
@@ -150,6 +138,7 @@ class RecruiterSearchResultsFragment : Fragment() {
             }
             override fun onNothingSelected(p: AdapterView<*>?) {}
         }
+
         spCity.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
                 val province = if(spProvince.selectedItem.toString() == "All") "" else spProvince.selectedItem.toString()
@@ -160,8 +149,7 @@ class RecruiterSearchResultsFragment : Fragment() {
             override fun onNothingSelected(p: AdapterView<*>?) {}
         }
 
-        // --- 2. Gender Chips ---
-        view.findViewById<ChipGroup>(R.id.cgGender).setOnCheckedStateChangeListener { _, checkedIds ->
+        cgGender.setOnCheckedStateChangeListener { _, checkedIds ->
             val gender = when (checkedIds.firstOrNull()) {
                 R.id.chipMale -> "Male"
                 R.id.chipFemale -> "Female"
@@ -171,15 +159,14 @@ class RecruiterSearchResultsFragment : Fragment() {
             refreshDiscovery()
         }
 
-        // --- 3. Structured Age (Min/Max Spinners) ---
-        val spMinAge = view.findViewById<Spinner>(R.id.spMinAge)
-        val spMaxAge = view.findViewById<Spinner>(R.id.spMaxAge)
         spMinAge.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, ageList)
         spMaxAge.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, ageList)
         spMaxAge.setSelection(ageList.size - 1)
 
         val ageListener = object : AdapterView.OnItemSelectedListener {
+            private var isInitial = true
             override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
+                if (isInitial) { isInitial = false; return }
                 sharedViewModel.updateAgeRange(spMinAge.selectedItem.toString().toInt(), spMaxAge.selectedItem.toString().toInt())
                 refreshDiscovery()
             }
@@ -188,15 +175,14 @@ class RecruiterSearchResultsFragment : Fragment() {
         spMinAge.onItemSelectedListener = ageListener
         spMaxAge.onItemSelectedListener = ageListener
 
-        // --- 4. Structured Height (Min/Max Spinners) ---
-        val spMinHeight = view.findViewById<Spinner>(R.id.spMinHeight)
-        val spMaxHeight = view.findViewById<Spinner>(R.id.spMaxHeight)
         spMinHeight.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, heightList)
         spMaxHeight.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, heightList)
         spMaxHeight.setSelection(heightList.size - 1)
 
         val heightListener = object : AdapterView.OnItemSelectedListener {
+            private var isInitial = true
             override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
+                if (isInitial) { isInitial = false; return }
                 sharedViewModel.updateHeightRange(spMinHeight.selectedItem.toString().toInt(), spMaxHeight.selectedItem.toString().toInt())
                 refreshDiscovery()
             }
@@ -204,8 +190,7 @@ class RecruiterSearchResultsFragment : Fragment() {
         }
         spMinHeight.onItemSelectedListener = heightListener
         spMaxHeight.onItemSelectedListener = heightListener
-
-        // --- 5. Language Checklist ---
+        
         val langListener = View.OnClickListener {
             val selected = mutableListOf<String>()
             if (view.findViewById<CheckBox>(R.id.cbSinhala).isChecked) selected.add("Sinhala")
@@ -214,11 +199,10 @@ class RecruiterSearchResultsFragment : Fragment() {
             sharedViewModel.updateLanguages(selected)
             refreshDiscovery()
         }
-        view.findViewById<CheckBox>(R.id.cbSinhala).setOnClickListener(langListener)
-        view.findViewById<CheckBox>(R.id.cbEnglish).setOnClickListener(langListener)
-        view.findViewById<CheckBox>(R.id.cbTamil).setOnClickListener(langListener)
+        view.findViewById<View>(R.id.cbSinhala).setOnClickListener(langListener)
+        view.findViewById<View>(R.id.cbEnglish).setOnClickListener(langListener)
+        view.findViewById<View>(R.id.cbTamil).setOnClickListener(langListener)
 
-        // --- 6. Rating ---
         view.findViewById<RatingBar>(R.id.rbMinRating).setOnRatingBarChangeListener { _, rating, _ ->
             sharedViewModel.updateRating(rating)
             refreshDiscovery()
@@ -230,16 +214,27 @@ class RecruiterSearchResultsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        adapter = TalentMatchAdapter(emptyList()) { talent ->
-            val detailFragment = TalentDetailFragment.newInstance(talent)
-            parentFragmentManager.beginTransaction()
-                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                .replace(R.id.nav_host_fragment, detailFragment)
-                .addToBackStack(null)
-                .commit()
-        }
+        adapter = TalentMatchAdapter(
+            talents = emptyList(),
+            onProfileClick = { talent ->
+                navigateToDetail(talent)
+            },
+            onHireClick = { talent ->
+                // 🎯 FLOW FIX: Hire button on card now also leads to the Detail page first
+                navigateToDetail(talent)
+            }
+        )
         rvResults.layoutManager = LinearLayoutManager(requireContext())
         rvResults.adapter = adapter
+    }
+
+    private fun navigateToDetail(talent: UserProfile) {
+        val detailFragment = TalentDetailFragment.newInstance(talent)
+        parentFragmentManager.beginTransaction()
+            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+            .replace(R.id.nav_host_fragment, detailFragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun observeData() {
@@ -249,12 +244,22 @@ class RecruiterSearchResultsFragment : Fragment() {
                     when (state) {
                         is TalentResultsState.Success -> {
                             pbLoading.visibility = View.GONE
+                            tvEmptyState.visibility = View.GONE
+                            rvResults.visibility = View.VISIBLE
                             adapter.updateData(state.talents)
                         }
-                        is TalentResultsState.Loading -> pbLoading.visibility = View.VISIBLE
-                        else -> {
+                        is TalentResultsState.Loading -> { pbLoading.visibility = View.VISIBLE }
+                        is TalentResultsState.Empty -> {
                             pbLoading.visibility = View.GONE
+                            tvEmptyState.visibility = View.VISIBLE
+                            rvResults.visibility = View.GONE
                             adapter.updateData(emptyList())
+                        }
+                        is TalentResultsState.Error -> {
+                            pbLoading.visibility = View.GONE
+                            tvEmptyState.text = state.message
+                            tvEmptyState.visibility = View.VISIBLE
+                            rvResults.visibility = View.GONE
                         }
                     }
                 }

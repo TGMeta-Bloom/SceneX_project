@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.scenex.R
 import com.example.scenex.adapters.TalentMatchAdapter
+import com.example.scenex.models.UserProfile
 import com.example.scenex.viewmodels.SearchFilterViewModel
 import com.example.scenex.viewmodels.TalentResultsState
 import com.example.scenex.viewmodels.TalentResultsViewModel
@@ -66,15 +67,27 @@ class TalentResultsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        adapter = TalentMatchAdapter(emptyList()) { talent ->
-            val detailFragment = TalentDetailFragment.newInstance(talent)
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.nav_host_fragment, detailFragment)
-                .addToBackStack(null)
-                .commit()
-        }
+        adapter = TalentMatchAdapter(
+            talents = emptyList(),
+            onProfileClick = { talent ->
+                navigateToDetail(talent)
+            },
+            onHireClick = { talent ->
+                // 🎯 FLOW FIX: Hire button on card now also goes to Detail page
+                navigateToDetail(talent)
+            }
+        )
         rvResults.layoutManager = LinearLayoutManager(requireContext())
         rvResults.adapter = adapter
+    }
+
+    private fun navigateToDetail(talent: UserProfile) {
+        val detailFragment = TalentDetailFragment.newInstance(talent)
+        parentFragmentManager.beginTransaction()
+            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+            .replace(R.id.nav_host_fragment, detailFragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun observeState() {

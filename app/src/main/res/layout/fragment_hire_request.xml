@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:background="#FFF9FC">
 
+    <!-- Premium App Bar -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,19 +26,20 @@
                 android:orientation="horizontal">
 
                 <ImageView
+                    android:id="@+id/ivClapperboard"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
-                    android:src="@drawable/ic_clapperboard"
-                    app:tint="@color/primary_magenta" />
+                    android:src="@drawable/ic_clapperboard" />
 
                 <TextView
+                    android:id="@+id/tvHireTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
                     android:fontFamily="serif"
-                    android:text="Hire Talent Request"
+                    android:text="Hire Talent Invitation"
                     android:textColor="@color/black"
-                    android:textSize="22sp"
+                    android:textSize="20sp"
                     android:textStyle="bold" />
             </LinearLayout>
         </androidx.appcompat.widget.Toolbar>
@@ -54,7 +56,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:text="Send a formal invitation to the talent for your production."
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
 
             <!-- Card 1: Project Details -->
             <com.google.android.material.card.MaterialCardView
@@ -62,199 +72,169 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
                 app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="24dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="4dp"
-                app:strokeColor="@color/black"
+                app:strokeColor="@color/input_outline"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="24dp">
+                    android:padding="20dp">
 
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        android:fontFamily="serif"
                         android:text="Project Details"
                         android:textColor="@color/primary_magenta"
-                        android:textSize="18sp"
+                        android:textSize="15sp"
                         android:textStyle="bold" />
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Project Title" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Project Title *" android:textStyle="bold" android:textColor="@color/black" android:textSize="12sp" android:layout_marginBottom="4dp"/>
                     <EditText
                         android:id="@+id/etProjectTitle"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
+                        android:layout_height="54dp"
                         android:layout_marginBottom="16dp"
                         android:background="@drawable/edittext_outline"
-                        android:hint="Enter project title"
-                        android:paddingHorizontal="24dp"
+                        android:hint="Cinematic Commercial"
+                        android:paddingHorizontal="16dp"
+                        android:textColor="@color/black"
+                        android:textColorHint="#9E9E9E"
                         android:textSize="14sp" />
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Casting ID (Optional)" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Casting ID (Optional)" android:textStyle="bold" android:textColor="@color/black" android:textSize="12sp" android:layout_marginBottom="4dp"/>
                     <EditText
                         android:id="@+id/etCastingId"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
+                        android:layout_height="54dp"
                         android:layout_marginBottom="16dp"
                         android:background="@drawable/edittext_outline"
-                        android:hint="e.g. CAST-123"
-                        android:paddingHorizontal="24dp"
+                        android:hint="CAST-2024"
+                        android:paddingHorizontal="16dp"
+                        android:textColor="@color/black"
+                        android:textColorHint="#9E9E9E"
                         android:textSize="14sp" />
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Project Description" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Role Description *" android:textStyle="bold" android:textColor="@color/black" android:textSize="12sp" android:layout_marginBottom="4dp"/>
                     <EditText
                         android:id="@+id/etProjectDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/edittext_outline"
                         android:gravity="top"
-                        android:hint="Describe your project..."
+                        android:hint="Describe role and project details..."
                         android:inputType="textMultiLine"
                         android:minLines="3"
                         android:padding="16dp"
+                        android:textColor="@color/black"
+                        android:textColorHint="#9E9E9E"
                         android:textSize="14sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Card 2: Offer -->
+            <!-- Card 2: Financials & Logistics -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
                 app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="24dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="4dp"
-                app:strokeColor="@color/black"
+                app:strokeColor="@color/input_outline"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="24dp">
+                    android:padding="20dp">
 
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        android:fontFamily="serif"
-                        android:text="Payment Offer"
+                        android:text="Budget &amp; Venue"
                         android:textColor="@color/primary_magenta"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="16dp" />
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Payment Amount" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Proposed Payment (LKR) *" android:textStyle="bold" android:textColor="@color/black" android:textSize="12sp" android:layout_marginBottom="4dp"/>
                     <EditText
                         android:id="@+id/etPayment"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:background="@drawable/edittext_outline"
-                        android:hint="LKR 0.00"
-                        android:inputType="text"
-                        android:paddingHorizontal="24dp"
-                        android:textSize="14sp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Card 3: Logistics -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="4dp"
-                app:strokeColor="@color/black"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="24dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="54dp"
                         android:layout_marginBottom="16dp"
-                        android:fontFamily="serif"
-                        android:text="Logistics"
-                        android:textColor="@color/primary_magenta"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:background="@drawable/edittext_outline"
+                        android:hint="LKR amount"
+                        android:inputType="number"
+                        android:paddingHorizontal="16dp"
+                        android:textColor="@color/black"
+                        android:textColorHint="#9E9E9E"
+                        android:textSize="14sp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="8dp">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Start Date" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Start Date *" android:textStyle="bold" android:textColor="@color/black" android:textSize="11sp" android:layout_marginBottom="4dp"/>
                             <EditText
                                 android:id="@+id/etStartDate"
                                 android:layout_width="match_parent"
-                                android:layout_height="56dp"
+                                android:layout_height="54dp"
                                 android:background="@drawable/edittext_outline"
                                 android:focusable="false"
-                                android:hint="Pick date"
-                                android:paddingHorizontal="24dp"
+                                android:hint="Select"
+                                android:paddingHorizontal="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="#9E9E9E"
                                 android:textSize="14sp" />
                         </LinearLayout>
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="8dp">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="End Date" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Location *" android:textStyle="bold" android:textColor="@color/black" android:textSize="11sp" android:layout_marginBottom="4dp"/>
                             <EditText
-                                android:id="@+id/etEndDate"
+                                android:id="@+id/etLocation"
                                 android:layout_width="match_parent"
-                                android:layout_height="56dp"
+                                android:layout_height="54dp"
                                 android:background="@drawable/edittext_outline"
-                                android:focusable="false"
-                                android:hint="Optional"
-                                android:paddingHorizontal="24dp"
+                                android:hint="City"
+                                android:paddingHorizontal="12dp"
+                                android:textColor="@color/black"
+                                android:textColorHint="#9E9E9E"
                                 android:textSize="14sp" />
                         </LinearLayout>
                     </LinearLayout>
-
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="Location" android:textStyle="bold" android:layout_marginStart="8dp" android:layout_marginBottom="4dp" android:textSize="12sp"/>
-                    <EditText
-                        android:id="@+id/etLocation"
-                        android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:background="@drawable/edittext_outline"
-                        android:hint="Colombo"
-                        android:paddingHorizontal="24dp"
-                        android:textSize="14sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Card 4: Message -->
+            <!-- Card 3: Personal Message -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="32dp"
                 app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="24dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="4dp"
-                app:strokeColor="@color/black"
+                app:strokeColor="@color/input_outline"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="24dp">
+                    android:padding="20dp">
 
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        android:fontFamily="serif"
-                        android:text="Additional Message"
+                        android:text="Personal Message"
                         android:textColor="@color/primary_magenta"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp" />
 
                     <EditText
                         android:id="@+id/etMessage"
@@ -262,10 +242,12 @@
                         android:layout_height="wrap_content"
                         android:background="@drawable/edittext_outline"
                         android:gravity="top"
-                        android:hint="Your message to the talent..."
+                        android:hint="Add a personal touch to your invitation..."
                         android:inputType="textMultiLine"
                         android:minLines="3"
                         android:padding="16dp"
+                        android:textColor="@color/black"
+                        android:textColorHint="#9E9E9E"
                         android:textSize="14sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -275,8 +257,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:background="@drawable/button_rounded_magenta"
-                android:fontFamily="serif"
-                android:text="Send Hire Request"
+                android:text="Submit Invitation"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
                 android:textSize="16sp"
@@ -284,4 +265,8 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- Invisible holders to maintain logic compatibility -->
+    <EditText android:id="@+id/etEndDate" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

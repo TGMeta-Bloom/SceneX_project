@@ -51,7 +51,7 @@
             app:shapeAppearanceOverlay="@style/CircleImageView" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Greeting Section -->
+    <!-- Greeting -->
     <LinearLayout
         android:id="@+id/llHello"
         android:layout_width="wrap_content"
@@ -61,27 +61,11 @@
         android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/clHeader">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="serif"
-            android:text="Hello "
-            android:textColor="@color/primary_magenta"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvRecruiterName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="serif"
-            android:text="Recruiter"
-            android:textColor="@color/black"
-            android:textSize="20sp" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="serif" android:text="Hello " android:textColor="@color/primary_magenta" android:textSize="20sp" android:textStyle="bold" />
+        <TextView android:id="@+id/tvRecruiterName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="serif" android:text="Recruiter" android:textColor="@color/black" android:textSize="20sp" />
     </LinearLayout>
 
-    <!-- Search Input Area -->
+    <!-- Search Box -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clSearchInput"
         android:layout_width="0dp"
@@ -89,151 +73,25 @@
         android:layout_marginHorizontal="24dp"
         android:layout_marginTop="16dp"
         android:background="@drawable/search_bar_bg"
-        android:paddingEnd="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/llHello">
-
-        <ImageView
-            android:id="@+id/ivSearchIcon"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginStart="12dp"
-            android:src="@drawable/ic_search"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/primary_magenta" />
-
-        <EditText
-            android:id="@+id/etSearch"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="8dp"
-            android:background="@null"
-            android:hint=""
-            android:inputType="text"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toStartOf="@id/btnSearchAction"
-            app:layout_constraintStart_toEndOf="@id/ivSearchIcon" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnSearchAction"
-            android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:background="@drawable/bg_search_button_small"
-            android:paddingHorizontal="12dp"
-            android:text="Search"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView android:id="@+id/ivSearchIcon" android:layout_width="20dp" android:layout_height="20dp" android:layout_marginStart="12dp" android:src="@drawable/ic_search" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" app:tint="@color/primary_magenta" />
+        <EditText android:id="@+id/etSearch" android:layout_width="0dp" android:layout_height="match_parent" android:layout_marginStart="12dp" android:background="@null" android:hint="Search talent..." android:textSize="14sp" app:layout_constraintEnd_toStartOf="@id/btnSearchAction" app:layout_constraintStart_toEndOf="@id/ivSearchIcon" />
+        <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnSearchAction" android:layout_width="wrap_content" android:layout_height="32dp" android:layout_marginEnd="4dp" android:background="@drawable/bg_search_button_small" android:text="Search" android:textAllCaps="false" android:textColor="@color/white" android:textSize="12sp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Search History -->
-    <TextView
-        android:id="@+id/tvHistoryLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
-        android:fontFamily="serif"
-        android:text="Search History"
-        android:textColor="@color/black"
-        android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/clSearchInput" />
+    <!-- History -->
+    <TextView android:id="@+id/tvHistoryLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="24dp" android:layout_marginTop="24dp" android:text="Search History" android:textColor="@color/black" android:textStyle="bold" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/clSearchInput" />
+    <com.google.android.material.chip.ChipGroup android:id="@+id/cgHistory" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginHorizontal="24dp" android:layout_marginTop="8dp" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/tvHistoryLabel" />
 
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/cgHistory"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvHistoryLabel">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_tag_outline"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
-            android:text="Actor"
-            android:textColor="#9E9E9E"
-            android:textSize="13sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:background="@drawable/bg_tag_outline"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
-            android:text="Singer"
-            android:textColor="#9E9E9E"
-            android:textSize="13sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:background="@drawable/bg_tag_outline"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
-            android:text="News Anchor"
-            android:textColor="#9E9E9E"
-            android:textSize="13sp" />
-    </com.google.android.material.chip.ChipGroup>
-
-    <!-- Search Discovery -->
-    <TextView
-        android:id="@+id/tvDiscoveryLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
-        android:fontFamily="serif"
-        android:text="Search Discovery"
-        android:textColor="@color/black"
-        android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cgHistory" />
-
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/cgDiscovery"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvDiscoveryLabel">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_tag_outline"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
-            android:text="Singer"
-            android:textColor="#9E9E9E"
-            android:textSize="13sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:background="@drawable/bg_tag_outline"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
-            android:text="News Anchor"
-            android:textColor="#9E9E9E"
-            android:textSize="13sp" />
+    <!-- Discovery Hub -->
+    <TextView android:id="@+id/tvDiscoveryLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="24dp" android:layout_marginTop="24dp" android:text="Search Discovery" android:textColor="@color/black" android:textStyle="bold" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/cgHistory" />
+    <com.google.android.material.chip.ChipGroup android:id="@+id/cgDiscovery" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginHorizontal="24dp" android:layout_marginTop="8dp" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/tvDiscoveryLabel">
+        <TextView android:id="@+id/tagActor" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/bg_tag_outline" android:paddingHorizontal="16dp" android:paddingVertical="8dp" android:text="Actor" android:textColor="#9E9E9E" />
+        <TextView android:id="@+id/tagSinger" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/bg_tag_outline" android:paddingHorizontal="16dp" android:paddingVertical="8dp" android:text="Singer" android:textColor="#9E9E9E" />
+        <TextView android:id="@+id/tagDancer" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/bg_tag_outline" android:paddingHorizontal="16dp" android:paddingVertical="8dp" android:text="Dancer" android:textColor="#9E9E9E" />
+        <TextView android:id="@+id/tagOther" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/bg_tag_outline" android:paddingHorizontal="16dp" android:paddingVertical="8dp" android:text="Other" android:textColor="#9E9E9E" />
     </com.google.android.material.chip.ChipGroup>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

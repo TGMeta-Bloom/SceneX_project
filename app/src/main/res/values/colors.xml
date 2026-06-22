@@ -25,10 +25,6 @@
     <!-- Added for search suggestion bor recruiter Booking screen-->
     <color name="suggestion_pink_light">#FFF5F8</color>
 
-    <!-- Missing Gradient Colors -->
-    <color name="gradient_start">#B0006D</color>
-    <color name="gradient_end">#4A0038</color>
-
     <!-- Gothami's Styles -->
     <color name="scenex_primary">#720056</color>
     <color name="scenex_primary_light">#A3007C</color>
