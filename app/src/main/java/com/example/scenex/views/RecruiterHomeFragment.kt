@@ -1,5 +1,6 @@
 package com.example.scenex.views
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Shader
@@ -57,6 +58,12 @@ class RecruiterHomeFragment : Fragment() {
         fabCreateCasting = view.findViewById(R.id.fabCreateCasting)
 
         rvRecommendedTalent.layoutManager = LinearLayoutManager(requireContext())
+
+        // Setup Notification Click
+        ivNotification.setOnClickListener {
+            val intent = Intent(requireContext(), NotificationsActivity::class.java)
+            startActivity(intent)
+        }
 
         // Setup FAB Click
         fabCreateCasting.setOnClickListener {

@@ -36,6 +36,12 @@ class NotificationsActivity : AppCompatActivity() {
 
             // SMART NAVIGATION: Open correct screen based on notification type
             when (notif.type) {
+                "HIRE_REQUEST", "HIRE_RESPONSE" -> {
+                    // Open the Hire Request Details screen
+                    val intent = Intent(this, HireRequestDetailsActivity::class.java)
+                    intent.putExtra("HIRE_REQUEST_ID", notif.referenceId)
+                    startActivity(intent)
+                }
                 "BOOKING_REQUEST", "RESCHEDULE_APPROVED", "RESCHEDULE_REJECTED", "SCHEDULE_CONFIRMED" -> {
                     // These are for Talent
                     val intent = Intent(this, TalentBookingDetailsActivity::class.java)

@@ -5,7 +5,6 @@ import android.graphics.LinearGradient
 import android.graphics.Shader
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -18,20 +17,19 @@ import com.example.scenex.R
 import com.example.scenex.viewmodels.HireRequestEvent
 import com.example.scenex.viewmodels.HireRequestViewModel
 import com.google.android.material.imageview.ShapeableImageView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.collectLatest
 
-/**
- * Senior Architect Implementation: Hire Request Insight Screen.
- * Enhanced with brand-accurate gradients and high-visibility hierarchy.
- */
 class HireRequestDetailsActivity : AppCompatActivity() {
 
     private val viewModel: HireRequestViewModel by viewModels()
     private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
     private var requestId: String? = null
 
     private lateinit var tvRecruiterName: TextView
+    private lateinit var tvRecruiterCompany: TextView
     private lateinit var tvProjectTitle: TextView
     private lateinit var tvDescription: TextView
     private lateinit var tvPayment: TextView
@@ -70,6 +68,7 @@ class HireRequestDetailsActivity : AppCompatActivity() {
         toolbar.setNavigationOnClickListener { finish() }
 
         tvRecruiterName = findViewById(R.id.tvRecruiterName)
+        tvRecruiterCompany = findViewById(R.id.tvRecruiterCompany)
         tvProjectTitle = findViewById(R.id.tvProjectTitle)
         tvDescription = findViewById(R.id.tvDescription)
         tvPayment = findViewById(R.id.tvPayment)
@@ -119,16 +118,40 @@ class HireRequestDetailsActivity : AppCompatActivity() {
                 tvEndDate.text = if (it.endDate.isNullOrEmpty()) "Flexible" else it.endDate
                 tvMessage.text = it.message
 
-                if (it.status == "PENDING") {
+                val currentUserId = auth.currentUser?.uid
+                
+                // 1. Role-Based UI Logic
+                if (it.status == "PENDING" && currentUserId == it.talentId) {
                     layoutActions.visibility = View.VISIBLE
                     tvStatus.visibility = View.GONE
                 } else {
                     layoutActions.visibility = View.GONE
                     tvStatus.visibility = View.VISIBLE
                     tvStatus.text = "STATUS: ${it.status}"
+                    
+                    // Apply High-Visibility Status Styling
+                    when(it.status) {
+                        "ACCEPTED" -> {
+                            tvStatus.setTextColor(Color.parseColor("#2E7D32"))
+                            tvStatus.setBackgroundResource(R.drawable.bg_status_accepted)
+                        }
+                        "REJECTED" -> {
+                            tvStatus.setTextColor(Color.parseColor("#C62828"))
+                            tvStatus.setBackgroundResource(R.drawable.bg_status_rejected)
+                        }
+                    }
                 }
 
-                fetchRecruiterDetails(it.recruiterId)
+                // 2. Context-Aware Profile Loading (Show Talent to Recruiter, and vice-versa)
+                val isRecruiterViewing = currentUserId == it.recruiterId
+                val partnerId = if (isRecruiterViewing) it.talentId else it.recruiterId
+                
+                if (isRecruiterViewing) {
+                    tvHeaderTitle.text = "Hire Request Status"
+                    tvRecruiterCompany.text = "Prospective Talent"
+                }
+
+                fetchPartnerDetails(partnerId)
             }
         }
 
@@ -136,7 +159,7 @@ class HireRequestDetailsActivity : AppCompatActivity() {
             viewModel.events.collectLatest { event ->
                 when (event) {
                     is HireRequestEvent.StatusUpdated -> {
-                        Toast.makeText(this@HireRequestDetailsActivity, "Invitation ${event.status}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@HireRequestDetailsActivity, "Request ${event.status}", Toast.LENGTH_SHORT).show()
                         finish()
                     }
                     is HireRequestEvent.Error -> {
@@ -148,15 +171,19 @@ class HireRequestDetailsActivity : AppCompatActivity() {
         }
     }
 
-    private fun fetchRecruiterDetails(recruiterId: String) {
-        db.collection("profiles").document(recruiterId).get().addOnSuccessListener { snapshot ->
+    private fun fetchPartnerDetails(userId: String) {
+        db.collection("profiles").document(userId).get().addOnSuccessListener { snapshot ->
             if (snapshot.exists()) {
-                val name = snapshot.getString("fullName") ?: "Production Recruiter"
+                val name = snapshot.getString("fullName") ?: "User"
                 val imageUrl = snapshot.getString("profileImageUrl") ?: snapshot.getString("profileImage") ?: ""
 
                 tvRecruiterName.text = name
                 if (imageUrl.isNotEmpty()) {
-                    Glide.with(this).load(imageUrl).placeholder(R.drawable.ic_profile_placeholder).circleCrop().into(ivRecruiterProfile)
+                    Glide.with(this)
+                        .load(imageUrl)
+                        .placeholder(R.drawable.ic_profile_placeholder)
+                        .circleCrop()
+                        .into(ivRecruiterProfile)
                 }
             }
         }

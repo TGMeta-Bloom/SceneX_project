@@ -15,10 +15,12 @@
         <!-- 1. Header Section -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clHeader"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:paddingHorizontal="24dp"
             android:paddingTop="24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
@@ -62,11 +64,13 @@
         <!-- 2. Welcome Section -->
         <LinearLayout
             android:id="@+id/llWelcome"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginTop="32dp"
+            android:layout_marginEnd="24dp"
             android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/clHeader">
 
@@ -123,15 +127,17 @@
                 android:textSize="14sp" />
         </LinearLayout>
 
-        <!-- 4. Profile Strength & Intelligence Section (Member 1 Live Status) -->
+        <!-- 4. Profile Strength & Intelligence Section -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clProfileStrength"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="24dp"
             android:layout_marginTop="24dp"
             android:background="@drawable/talent_card_border"
             android:padding="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/searchBarContainer">
 
             <FrameLayout
@@ -219,11 +225,14 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvCastingFeed"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:minHeight="300dp"
             android:nestedScrollingEnabled="false"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvCastingFeedTitle" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -36,6 +37,7 @@ class TalentHomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val ivNotification = view.findViewById<ImageView>(R.id.ivNotification)
         val ivProfileHeader = view.findViewById<ShapeableImageView>(R.id.ivProfileHeader)
         val tvAppName = view.findViewById<TextView>(R.id.tvAppName)
         val tvUserName = view.findViewById<TextView>(R.id.tvUserName)
@@ -45,6 +47,12 @@ class TalentHomeFragment : Fragment() {
         val rvCastingFeed = view.findViewById<RecyclerView>(R.id.rvCastingFeed)
 
         applyTextGradient(tvAppName)
+
+        // Notification Click Listener
+        ivNotification.setOnClickListener {
+            val intent = Intent(requireContext(), NotificationsActivity::class.java)
+            startActivity(intent)
+        }
 
         // Setup RecyclerView with Click Listener
         castingAdapter = CastingCallAdapter(emptyList()) { castingCall ->

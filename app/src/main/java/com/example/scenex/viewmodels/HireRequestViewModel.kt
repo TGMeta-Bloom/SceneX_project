@@ -1,5 +1,6 @@
 package com.example.scenex.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -62,24 +63,59 @@ class HireRequestViewModel : ViewModel() {
             try {
                 val snapshot = db.collection("hire_requests").document(requestId).get().await()
                 val request = snapshot.toObject(HireRequest::class.java)
-                _hireRequest.value = request
+                _hireRequest.postValue(request)
             } catch (e: Exception) {
                 _events.emit(HireRequestEvent.Error("Failed to load request details"))
             }
         }
     }
 
+    // Inside updateRequestStatus in HireRequestViewModel.kt
     fun updateRequestStatus(requestId: String, newStatus: String) {
         viewModelScope.launch {
             try {
+                // 1. Fetch the LATEST data to get the Recruiter's ID
+                val snapshot = db.collection("hire_requests").document(requestId).get().await()
+                val request = snapshot.toObject(HireRequest::class.java)
+                    ?: throw Exception("Request document not found in Firestore")
+
+                Log.d("SceneX_Debug", "Updating status for Request: $requestId")
+                Log.d("SceneX_Debug", "Target Recruiter ID: ${request.recruiterId}")
+
+                // 2. Fetch Talent Name
+                val talentProfile = db.collection("profiles").document(request.talentId).get().await()
+                val talentName = talentProfile.getString("fullName") ?: "A talent"
+
+                // 3. Update the request status
                 db.collection("hire_requests").document(requestId)
-                    .update("status", newStatus)
-                    .await()
-                
+                    .update("status", newStatus).await()
+
+                // 4. Create the Notification for the Recruiter
+                val notificationRef = db.collection("notifications").document()
+                val statusText = if (newStatus == "ACCEPTED") "accepted" else "declined"
+
+                val notificationData = mapOf(
+                    "notificationId" to notificationRef.id,
+                    "senderId" to request.talentId,
+                    "senderName" to talentName,
+                    "receiverId" to request.recruiterId, // IMPORTANT: Ensure this isn't empty
+                    "title" to "Hire Request $newStatus",
+                    "message" to "$talentName has $statusText your hire request for '${request.projectTitle}'",
+                    "type" to "HIRE_RESPONSE",
+                    "referenceId" to requestId,
+                    "read" to false,
+                    "createdAt" to System.currentTimeMillis()
+                )
+
+                notificationRef.set(notificationData).await()
+                Log.d("SceneX_Debug", "Success! Notification created for Recruiter: ${request.recruiterId}")
+
                 _events.emit(HireRequestEvent.StatusUpdated(newStatus))
             } catch (e: Exception) {
-                _events.emit(HireRequestEvent.Error("Failed to update status"))
+                Log.e("SceneX_Debug", "FAILED to update status: ${e.message}")
+                _events.emit(HireRequestEvent.Error("Update failed: ${e.message}"))
             }
         }
     }
+
 }
