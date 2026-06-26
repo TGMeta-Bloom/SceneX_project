@@ -6,6 +6,7 @@
     <color name="yellow">#FFEDA509</color>
     <color name="gray">#2E2E2E</color>
     <color name="text_secondary">#FF424242</color>
+    <color name="red">#FFFF0000</color>
 
     <!-- Brand Gradients -->
     <color name="gradient_start">#B0006D</color>

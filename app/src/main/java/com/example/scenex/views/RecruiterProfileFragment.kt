@@ -26,7 +26,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * Senior Implementation: Recruiter Profile with Robust Date Filtering and Premium UI.
+ * Senior Implementation: Recruiter Profile with Unified Management Navigation.
  */
 class RecruiterProfileFragment : Fragment() {
 
@@ -120,7 +120,6 @@ class RecruiterProfileFragment : Fragment() {
         val tvNoCastings = view.findViewById<TextView>(R.id.tvNoCastings)
         llList?.removeAllViews()
 
-        // 🎯 Robust filtering for active castings
         val activeList = castings.filter { isCastingActive(it.submissionDeadline) }
 
         if (activeList.isEmpty()) {
@@ -134,9 +133,8 @@ class RecruiterProfileFragment : Fragment() {
                 tvStatus?.text = "Open"
                 tvStatus?.setTextColor(ContextCompat.getColor(requireContext(), R.color.calendar_green))
                 
-                // Formatted display matching your screenshot
                 itemView.findViewById<TextView>(R.id.tvCastingDetails)?.text =
-                    "${casting.characterName} - ${casting.roleType}\nDeadline: ${casting.submissionDeadline}\nLocation: ${casting.auditionLocation}"
+                    "${casting.characterName} - ${casting.roleType}\nDeadline: ${casting.submissionDeadline}"
 
                 itemView.setOnClickListener { showCastingDetails(casting) }
                 llList?.addView(itemView)
@@ -145,16 +143,73 @@ class RecruiterProfileFragment : Fragment() {
         setupTalentPlaceholders(view)
     }
 
+    private fun navigateToManagement(castingId: String) {
+        if (castingId.isBlank()) return
+        val intent = Intent(requireContext(), CastingManagementActivity::class.java)
+        intent.putExtra("CASTING_ID", castingId)
+        startActivity(intent)
+    }
+
+    /**
+     * Senior Implementation: Professional Casting Details Dialog.
+     * Reuses existing dialog_casting_details layout.
+     */
+    private fun showCastingDetails(casting: CastingCall) {
+        val dialogView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_casting_details, null)
+
+        val dialog = AlertDialog.Builder(requireContext(), R.style.CustomAlertDialog)
+            .setView(dialogView)
+            .create()
+
+        // 1. Bind Basic Fields
+        dialogView.findViewById<TextView>(R.id.tvDialogProjectTitle)?.text = casting.projectTitle
+        dialogView.findViewById<TextView>(R.id.tvDialogProductionType)?.text = 
+            "${casting.productionType} • Directed by ${casting.directorName}"
+        dialogView.findViewById<TextView>(R.id.tvDialogRoleInfo)?.text = 
+            "${casting.characterName} (${casting.roleType})"
+        dialogView.findViewById<TextView>(R.id.tvDialogSynopsis)?.text = casting.projectSynopsis
+        dialogView.findViewById<TextView>(R.id.tvDialogDeadline)?.text = casting.submissionDeadline
+        dialogView.findViewById<TextView>(R.id.tvDialogLocation)?.text = casting.auditionLocation
+        dialogView.findViewById<TextView>(R.id.tvDialogCompensation)?.text = casting.compensation
+        dialogView.findViewById<TextView>(R.id.tvDialogShootLocation)?.text = casting.shootLocation
+
+        // 2. Image Handling (Glide)
+        val ivPoster = dialogView.findViewById<ImageView>(R.id.ivDialogPoster)
+        if (ivPoster != null) {
+            if (casting.posterUrl.isNotBlank()) {
+                ivPoster.visibility = View.VISIBLE
+                Glide.with(this)
+                    .load(casting.posterUrl)
+                    .centerCrop()
+                    .into(ivPoster)
+            } else {
+                ivPoster.visibility = View.GONE
+            }
+        }
+
+        // 3. Action Buttons
+        dialogView.findViewById<View>(R.id.btnViewApplicants)?.setOnClickListener {
+            dialog.dismiss()
+            
+            // 🎯 RESTORED: Navigate back to the original CastingManagementActivity
+            navigateToManagement(casting.id)
+        }
+
+        dialogView.findViewById<View>(R.id.btnDialogClose)?.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
     private fun isCastingActive(deadline: String?): Boolean {
         if (deadline.isNullOrBlank()) return true
-        
         val today = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
         }.time
-
         val cleaned = deadline.trim().replace(".", "").replace(Regex("\\s+"), " ")
         val formats = listOf("dd MMM yyyy", "d MMM yyyy", "dd MMMM yyyy", "d MMMM yyyy", "yyyy-MM-dd", "dd/MM/yyyy", "MMM dd, yyyy")
-        
         for (format in formats) {
             try {
                 val sdf = SimpleDateFormat(format, Locale.US)
@@ -163,34 +218,7 @@ class RecruiterProfileFragment : Fragment() {
                 if (date != null) return !date.before(today)
             } catch (e: Exception) { continue }
         }
-        return false // If unparsable, we treat as inactive to keep the UI clean
-    }
-
-    private fun showCastingDetails(casting: CastingCall) {
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_casting_details, null)
-        val dialog = AlertDialog.Builder(requireContext(), R.style.CustomAlertDialog)
-            .setView(dialogView)
-            .create()
-
-        dialogView.findViewById<TextView>(R.id.tvDialogProjectTitle).text = casting.projectTitle
-        dialogView.findViewById<TextView>(R.id.tvDialogProductionType).text = "${casting.productionType} • Directed by ${casting.directorName}"
-        dialogView.findViewById<TextView>(R.id.tvDialogRoleInfo).text = "${casting.characterName} (${casting.roleType})"
-        dialogView.findViewById<TextView>(R.id.tvDialogSynopsis).text = casting.projectSynopsis
-        dialogView.findViewById<TextView>(R.id.tvDialogDeadline).text = casting.submissionDeadline
-        dialogView.findViewById<TextView>(R.id.tvDialogLocation).text = casting.auditionLocation
-        dialogView.findViewById<TextView>(R.id.tvDialogCompensation)?.text = casting.compensation.ifBlank { "TBD" }
-        dialogView.findViewById<TextView>(R.id.tvDialogShootLocation)?.text = casting.shootLocation.ifBlank { "Not Specified" }
-
-        val ivPoster = dialogView.findViewById<ImageView>(R.id.ivDialogPoster)
-        if (casting.posterUrl.isNotBlank()) {
-            ivPoster.visibility = View.VISIBLE
-            Glide.with(this).load(casting.posterUrl).centerCrop().into(ivPoster)
-        } else {
-            ivPoster.visibility = View.GONE
-        }
-
-        dialogView.findViewById<View>(R.id.btnDialogClose).setOnClickListener { dialog.dismiss() }
-        dialog.show()
+        return false
     }
 
     private fun setupTalentPlaceholders(view: View) {

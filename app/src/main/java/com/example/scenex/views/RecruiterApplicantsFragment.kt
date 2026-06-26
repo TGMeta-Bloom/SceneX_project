@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -74,7 +75,6 @@ class RecruiterApplicantsFragment : Fragment() {
     }
 
     private fun setupToolbar() {
-        // FIXED: Use popBackStack on activity to return to Dashboard correctly
         binding.btnBack.setOnClickListener { 
             requireActivity().supportFragmentManager.popBackStack()
         }
@@ -87,21 +87,31 @@ class RecruiterApplicantsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        adapter = ApplicantTalentAdapter { applicant ->
-            val createBookingFragment = RecruiterCreateBookingFragment.newInstance(
-                talentId = applicant.talentId,
-                talentName = applicant.fullName,
-                spotlightCategory = applicant.spotlightCategory,
-                castingCallId = castingCallId ?: "",
-                castingTitle = projectTitle ?: ""
-            )
-            
-            requireActivity().supportFragmentManager.beginTransaction()
-                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out)
-                .replace(R.id.nav_host_fragment, createBookingFragment)
-                .addToBackStack(null)
-                .commit()
-        }
+        adapter = ApplicantTalentAdapter(
+            onShortlist = { applicant ->
+                // Placeholder for shortlist action in this view
+                Toast.makeText(context, "Shortlisted ${applicant.fullName}", Toast.LENGTH_SHORT).show()
+            },
+            onReject = { applicant ->
+                // Placeholder for reject action in this view
+                Toast.makeText(context, "Rejected ${applicant.fullName}", Toast.LENGTH_SHORT).show()
+            },
+            onProfileClick = { applicant ->
+                val createBookingFragment = RecruiterCreateBookingFragment.newInstance(
+                    talentId = applicant.talentId,
+                    talentName = applicant.fullName,
+                    spotlightCategory = applicant.spotlightCategory,
+                    castingCallId = castingCallId ?: "",
+                    castingTitle = projectTitle ?: ""
+                )
+                
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out)
+                    .replace(R.id.nav_host_fragment, createBookingFragment)
+                    .addToBackStack(null)
+                    .commit()
+            }
+        )
         binding.rvApplicants.layoutManager = LinearLayoutManager(context)
         binding.rvApplicants.adapter = adapter
     }

@@ -25,14 +25,22 @@ class WaitingRoomActivity : AppCompatActivity() {
 
     /**
      * Senior Engineer Implementation: Real-Time Handshake with Web Admin Dashboard.
-     * Listens for the "status" change from 'pending_review' to 'verified'.
+     * Listens for both "status" and "verificationStatus" for secure approval.
      */
     private fun startRealTimeVerificationSync() {
         val userId = repository.getCurrentUserId() ?: return
 
-        statusListener = repository.listenToProfileStatus(userId) { status ->
-            if (status == "verified") {
-                Toast.makeText(this, "Profile Verified! Welcome to SceneX.", Toast.LENGTH_LONG).show()
+        statusListener = repository.listenToProfileStatus(userId) { status, vStatus ->
+            val normalizedStatus = status?.lowercase()?.trim()
+            val normalizedVStatus = vStatus?.lowercase()?.trim()
+
+            android.util.Log.d("WaitingRoom", "Sync Update: Status=$normalizedStatus | VStatus=$normalizedVStatus")
+
+            // 🛡️ PERMISSIVE APPROVAL LOGIC (Matches SplashActivity & LoginActivity)
+            val isApproved = normalizedStatus == "verified" || normalizedStatus == "active" || normalizedVStatus == "verified"
+
+            if (isApproved) {
+                Toast.makeText(this, "Profile Verified! Welcome back to SceneX.", Toast.LENGTH_LONG).show()
                 navigateToMain()
             }
         }

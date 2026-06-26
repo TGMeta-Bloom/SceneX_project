@@ -12,6 +12,8 @@ data class HireRequest(
     val endDate: String = "",
     val location: String = "",
     val message: String = "",
-    val status: String = "PENDING",
+    val status: String = "PENDING", // PENDING, ACCEPTED, REJECTED, RESCHEDULED, BOOKED
+    val proposedDate: String? = null,
+    val proposedTime: String? = null,
     val createdAt: Long = System.currentTimeMillis()
 )

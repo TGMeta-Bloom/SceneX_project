@@ -58,23 +58,23 @@ class SplashActivity : AppCompatActivity() {
      */
     private fun routeUser(role: String?, status: String?, vStatus: String?) {
         val normalizedRole = role?.uppercase()?.trim()
-        val normalizedStatus = status?.lowercase()?.trim()
+        val normalizedStatus = status?.lowercase()?.trim() ?: "draft"
         val normalizedVStatus = vStatus?.lowercase()?.trim()
 
-        // approved only if status and verificationStatus are both verified/active
-        val isApproved = (normalizedStatus == "verified" || normalizedStatus == "active") && 
-                         (normalizedVStatus == "verified" || normalizedVStatus == "active")
+        Log.d(TAG, "Routing Logic: Status=$normalizedStatus | VStatus=$normalizedVStatus")
+
+        // 🛡️ PERMISSIVE APPROVAL LOGIC:
+        // Access is granted if either the primary status or the verificationStatus is 'verified' or 'active'.
+        val isApproved = normalizedStatus == "verified" || normalizedStatus == "active" || normalizedVStatus == "verified"
         
-        val isPending = normalizedStatus == "pending_review" || normalizedVStatus == "pending"
-        val isDraft = normalizedStatus == "draft" || normalizedStatus == null
+        val isPending = !isApproved && (normalizedStatus == "pending_review" || normalizedVStatus == "pending")
 
         val intent = when {
             normalizedRole == "TALENT" || normalizedRole == "RECRUITER" -> {
                 when {
                     isApproved -> Intent(this, MainActivity::class.java)
                     isPending -> Intent(this, WaitingRoomActivity::class.java)
-                    isDraft -> Intent(this, SignupActivity::class.java).apply { putExtra("USER_ROLE", normalizedRole) }
-                    else -> Intent(this, WaitingRoomActivity::class.java)
+                    else -> Intent(this, SignupActivity::class.java).apply { putExtra("USER_ROLE", normalizedRole) }
                 }
             }
             else -> {

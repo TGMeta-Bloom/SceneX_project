@@ -10,8 +10,8 @@ data class Booking(
     val recruiterId: String = "",
     val recruiterName: String = "",
     val talentId: String = "",
-    val name: String = "", // talent name
-    val role: String = "", // spotlight category/role
+    val name: String = "", 
+    val role: String = "", 
     val projectImageUrl: String = "",
     val date: Long = 0L,
     val startTime: String = "",
@@ -25,7 +25,9 @@ data class Booking(
     val isRescheduleSeen: Boolean = true,
     val lastMessage: String = "",
     val lastMessageSenderId: String = "",
-    val isLastMessageSeen: Boolean = true
+    val isLastMessageSeen: Boolean = true,
+    val type: String = "REGULAR"
 ) {
-    constructor() : this("", "", "", "", "", "", "", "", "", 0L, "", "", "", "PENDING", "", false, System.currentTimeMillis(), System.currentTimeMillis(), true, "", "", true)
+    // Required empty constructor for Firestore
+    constructor() : this("", "", "", "", "", "", "", "", "", 0L, "", "", "", "PENDING", "", false, System.currentTimeMillis(), System.currentTimeMillis(), true, "", "", true, "REGULAR")
 }

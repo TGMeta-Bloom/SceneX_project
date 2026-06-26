@@ -168,6 +168,28 @@ class SignupViewModel : ViewModel() {
 
     private fun syncProfileLifecycle(isFinalSubmit: Boolean = false) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        
+        // 🛡️ FIX: Fetch current status first to prevent overwriting 'verified' status
+        FirebaseFirestore.getInstance().collection("profiles").document(userId).get()
+            .addOnSuccessListener { snapshot ->
+                val existingStatus = snapshot.getString("status")?.lowercase()
+                if (existingStatus == "verified" || existingStatus == "active") {
+                    // Do not downgrade status during a simple media/profile sync
+                    performSync(userId, existingStatus, isFinalSubmit)
+                } else {
+                    val completion = calculateWeightedCompletion()
+                    val currentStatus = when {
+                        isFinalSubmit && completion >= 70 -> "pending_review" 
+                        completion >= 70 -> "eligible_for_review"
+                        completion >= 40 -> "active"
+                        else -> "draft"
+                    }
+                    performSync(userId, currentStatus, isFinalSubmit)
+                }
+            }
+    }
+
+    private fun performSync(userId: String, currentStatus: String, isFinalSubmit: Boolean) {
         val completion = calculateWeightedCompletion()
         val rankingDecimal = calculateRankingScore(completion)
 
@@ -178,13 +200,6 @@ class SignupViewModel : ViewModel() {
             rankingDecimal >= featuredThreshold -> "FEATURED"
             rankingDecimal >= normalThreshold -> "NORMAL"
             else -> "BASIC"
-        }
-
-        val currentStatus = when {
-            isFinalSubmit && completion >= 70 -> "pending_review" 
-            completion >= 70 -> "eligible_for_review"
-            completion >= 40 -> "active"
-            else -> "draft"
         }
 
         val accountProfilePicture = _profileImageUrl.value ?: ""
@@ -204,9 +219,13 @@ class SignupViewModel : ViewModel() {
             "city" to city,
             "userRole" to userRole,
             "rankingVersion" to (calibrationWeights?.get("rankingVersion") ?: 1),
-            "verificationStatus" to if (currentStatus == "pending_review") "pending" else "unverified",
             "updatedAt" to Timestamp.now()
         )
+
+        // Only update verificationStatus if we are NOT already verified
+        if (currentStatus != "verified" && currentStatus != "active") {
+            profilePayload["verificationStatus"] = if (currentStatus == "pending_review") "pending" else "unverified"
+        }
 
         if (accountProfilePicture.isNotEmpty()) {
             profilePayload["profileImage"] = accountProfilePicture
@@ -226,7 +245,7 @@ class SignupViewModel : ViewModel() {
 
         FirebaseFirestore.getInstance().collection("profiles").document(userId)
             .set(profilePayload, SetOptions.merge())
-            .addOnSuccessListener { Log.d("SceneX_Engine", "✅ Profile Sync successful") }
+            .addOnSuccessListener { Log.d("SceneX_Engine", "✅ Profile Sync successful: Status=$currentStatus") }
     }
 
     /**

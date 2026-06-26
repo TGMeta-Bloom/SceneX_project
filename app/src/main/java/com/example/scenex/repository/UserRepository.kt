@@ -74,11 +74,13 @@ class UserRepository {
     }
 
     /** RESTORED: Required by WaitingRoomActivity */
-    fun listenToProfileStatus(userId: String, onStatusChange: (String?) -> Unit): ListenerRegistration {
+    fun listenToProfileStatus(userId: String, onStatusUpdate: (String?, String?) -> Unit): ListenerRegistration {
         return db.collection("profiles").document(userId)
             .addSnapshotListener { snapshot, _ ->
                 if (snapshot != null && snapshot.exists()) {
-                    onStatusChange(snapshot.getString("status"))
+                    val status = snapshot.getString("status")
+                    val vStatus = snapshot.getString("verificationStatus")
+                    onStatusUpdate(status, vStatus)
                 }
             }
     }

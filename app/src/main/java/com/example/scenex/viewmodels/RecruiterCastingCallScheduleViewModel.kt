@@ -20,7 +20,6 @@ class RecruiterCastingCallScheduleViewModel : ViewModel() {
     private val _castingCalls = MutableLiveData<List<RecruiterCastingCallSchedule>>()
     val castingCalls: LiveData<List<RecruiterCastingCallSchedule>> = _castingCalls
 
-    // LIVE DATA FOR TIMELINE ONLY
     private val _timelineSchedules = MutableLiveData<List<Schedule>>()
     val timelineSchedules: LiveData<List<Schedule>> = _timelineSchedules
 
@@ -32,16 +31,9 @@ class RecruiterCastingCallScheduleViewModel : ViewModel() {
 
     private val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
 
-    // UNTOUCHED: Existing casting call logic
     fun fetchCastingCalls(status: String? = "ACTIVE") {
-        val currentUserId = auth.currentUser?.uid
-        if (currentUserId == null) {
-            _error.value = "User not logged in"
-            return
-        }
-
+        val currentUserId = auth.currentUser?.uid ?: return
         _isLoading.value = true
-        _error.value = null
 
         db.collection("CastingCalls")
             .whereEqualTo("recruiterId", currentUserId)
@@ -57,106 +49,63 @@ class RecruiterCastingCallScheduleViewModel : ViewModel() {
                 }
 
                 for (document in result) {
-                    try {
-                        val statusInDb = document.getString("status") ?: "ACTIVE"
+                    val statusInDb = document.getString("status") ?: "ACTIVE"
+                    if (status != null && !statusInDb.equals(status, ignoreCase = true)) continue
 
-                        if (status != null && !statusInDb.equals(status, ignoreCase = true)) {
-                            continue
+                    val countTask = db.collection("applications")
+                        .whereEqualTo("castingCallId", document.id)
+                        .get()
+                        .addOnSuccessListener { snapshot ->
+                            val uniqueTalentIds = snapshot.documents.mapNotNull { it.getString("talentId") }.toSet()
+                            list.add(RecruiterCastingCallSchedule(
+                                id = document.id,
+                                recruiterId = currentUserId,
+                                title = document.getString("projectTitle") ?: "Untitled",
+                                description = document.getString("projectSynopsis") ?: "",
+                                location = document.getString("shootLocation") ?: "Unknown",
+                                date = document.getString("auditionDate") ?: "",
+                                startTime = document.getString("startTime") ?: "",
+                                endTime = document.getString("endTime") ?: "",
+                                directorName = document.getString("directorName") ?: "",
+                                deadlineDate = document.getString("submissionDeadline") ?: "",
+                                status = statusInDb,
+                                appliedCount = uniqueTalentIds.size
+                            ))
                         }
-
-                        val countTask = db.collection("applications")
-                            .whereEqualTo("castingCallId", document.id)
-                            .get()
-                            .addOnSuccessListener { snapshot ->
-                                val uniqueTalentIds = snapshot.documents.mapNotNull { it.getString("talentId") }.toSet()
-                                val appliedCount = uniqueTalentIds.size
-
-                                val castingCall = RecruiterCastingCallSchedule(
-                                    id = document.id,
-                                    recruiterId = document.getString("recruiterId") ?: "",
-                                    title = document.getString("projectTitle") ?: "Untitled",
-                                    description = document.getString("projectSynopsis") ?: "",
-                                    location = document.getString("shootLocation") ?: "Unknown",
-                                    date = document.getString("auditionDate") ?: "",
-                                    startTime = document.getString("startTime") ?: "",
-                                    endTime = document.getString("endTime") ?: "",
-                                    directorName = document.getString("directorName") ?: "",
-                                    deadlineDate = document.getString("submissionDeadline") ?: "",
-                                    status = statusInDb,
-                                    appliedCount = appliedCount
-                                )
-                                synchronized(list) {
-                                    list.add(castingCall)
-                                }
-                            }
-                        countTasks.add(countTask)
-                    } catch (e: Exception) {
-                        Log.e("CastingCallVM", "Error processing document ${document.id}: ${e.message}")
-                    }
+                    countTasks.add(countTask)
                 }
 
-                if (countTasks.isEmpty()) {
-                    _castingCalls.value = emptyList()
+                Tasks.whenAllComplete(countTasks).addOnCompleteListener {
+                    _castingCalls.value = list.sortedBy { it.date }
                     _isLoading.value = false
-                } else {
-                    Tasks.whenAllComplete(countTasks).addOnCompleteListener {
-                        val sortedList = list.sortedBy { call ->
-                            try {
-                                if (call.date.isNotEmpty()) dateFormat.parse(call.date)?.time else Long.MAX_VALUE
-                            } catch (e: Exception) {
-                                Long.MAX_VALUE
-                            }
-                        }
-                        _castingCalls.value = sortedList
-                        _isLoading.value = false
-                    }
                 }
-            }
-            .addOnFailureListener { exception ->
-                _error.value = exception.message
-                _isLoading.value = false
             }
     }
 
-    // NEW: Logic for 'Timeline View'
+    /**
+     * Optimized Timeline Logic: Listens directly to the recruiter's personal schedule sub-collection.
+     */
     fun fetchTimelineSchedules() {
         val currentUserId = auth.currentUser?.uid ?: return
         _isLoading.value = true
 
         val todayStart = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
         }.timeInMillis
 
-        // Fetch schedules where user is recruiter OR creator
-        val task1 = db.collection("schedules").whereEqualTo("recruiterId", currentUserId).get()
-        val task2 = db.collection("schedules").whereEqualTo("userId", currentUserId).get()
-
-        Tasks.whenAllComplete(task1, task2).addOnCompleteListener {
-            val combined = mutableListOf<Schedule>()
-            
-            if (task1.isSuccessful) {
-                task1.result?.toObjects(Schedule::class.java)?.let { combined.addAll(it) }
+        // Directly query the optimized sub-collection created in the HireRequest handshake
+        db.collection("profiles").document(currentUserId)
+            .collection("schedules")
+            .whereGreaterThanOrEqualTo("date", todayStart)
+            .get()
+            .addOnSuccessListener { result ->
+                val list = result.toObjects(Schedule::class.java)
+                _timelineSchedules.value = list.sortedWith(compareBy<Schedule> { it.date }.thenBy { it.startTime })
+                _isLoading.value = false
             }
-            if (task2.isSuccessful) {
-                task2.result?.toObjects(Schedule::class.java)?.let { combined.addAll(it) }
+            .addOnFailureListener { e ->
+                _error.value = e.message
+                _isLoading.value = false
             }
-
-            // Filter expired and sort (Ascending: nearest upcoming first)
-            val sortedList = combined.distinctBy { it.id }
-                .filter { it.date >= todayStart }
-                .sortedWith(compareBy<Schedule> { it.date }.thenBy { parseTimeToMinutes(it.startTime) })
-
-            _timelineSchedules.value = sortedList
-            _isLoading.value = false
-        }
-    }
-
-    private fun parseTimeToMinutes(timeStr: String): Int {
-        return try {
-            val date = SimpleDateFormat("hh:mm a", Locale.US).parse(timeStr.trim().uppercase())
-            val cal = Calendar.getInstance().apply { time = date!! }
-            cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE)
-        } catch (e: Exception) { 0 }
     }
 }

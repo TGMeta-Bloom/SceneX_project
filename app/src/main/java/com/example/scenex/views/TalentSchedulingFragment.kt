@@ -7,16 +7,23 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.scenex.databinding.FragmentTalentSchedulingBinding
+import com.example.scenex.models.Booking
+import com.example.scenex.models.HireRequest
 import com.example.scenex.viewmodels.TalentScheduleViewModel
 import com.example.scenex.views.adapter.BookingAdapter
 import com.example.scenex.views.adapter.TimelineAdapter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
+/**
+ * Apex Implementation: Unified Scheduling Handshake.
+ * Combines Bookings, Direct Hires, and Active Applications into a single reactive timeline.
+ */
 class TalentSchedulingFragment : Fragment() {
 
     private var _binding: FragmentTalentSchedulingBinding? = null
@@ -69,9 +76,23 @@ class TalentSchedulingFragment : Fragment() {
 
     private fun setupRecyclerViews() {
         bookingAdapter = BookingAdapter { booking ->
-            val intent = Intent(requireContext(), TalentBookingDetailsActivity::class.java)
-            intent.putExtra("BOOKING_ID", booking.id)
-            startActivity(intent)
+            // APEX SMART NAVIGATION: Handles three distinct data sources automatically
+            when {
+                booking.type == "DIRECT_HIRE" || booking.id.startsWith("hire_") -> {
+                    val intent = Intent(requireContext(), HireRequestDetailsActivity::class.java)
+                    intent.putExtra("HIRE_REQUEST_ID", booking.id)
+                    startActivity(intent)
+                }
+                booking.type == "APPLICATION" -> {
+                    // Feedback for active casting call applications (Shortlisted/Pending)
+                    Toast.makeText(requireContext(), "Status for ${booking.castingTitle}: ${booking.status}", Toast.LENGTH_SHORT).show()
+                }
+                else -> {
+                    val intent = Intent(requireContext(), TalentBookingDetailsActivity::class.java)
+                    intent.putExtra("BOOKING_ID", booking.id)
+                    startActivity(intent)
+                }
+            }
         }
         binding.rvRecruiterBookings.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
@@ -79,7 +100,6 @@ class TalentSchedulingFragment : Fragment() {
             isNestedScrollingEnabled = false
         }
 
-        // IMPORTANT: Passing isRecruiterView = false for Talent Dashboard
         timelineAdapter = TimelineAdapter(isRecruiterView = false)
         binding.rvTimeline.apply {
             layoutManager = LinearLayoutManager(context)
@@ -89,7 +109,6 @@ class TalentSchedulingFragment : Fragment() {
     }
 
     private fun setupStatusFilter() {
-        // Added "Requested Reschedule" to the statuses array
         val statuses = arrayOf("All Status", "Pending", "Confirmed", "Cancelled", "Requested Reschedule")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, statuses)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -113,22 +132,48 @@ class TalentSchedulingFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.schedules.observe(viewLifecycleOwner) { list ->
-            timelineAdapter.submitList(list)
+            timelineAdapter.submitList(list ?: emptyList())
         }
 
-        viewModel.bookings.observe(viewLifecycleOwner) { list ->
-            bookingAdapter.submitList(list)
-            if (list.isNullOrEmpty()) {
-                binding.rvRecruiterBookings.visibility = View.GONE
-                binding.layoutEmptyBookings.visibility = View.VISIBLE
-            } else {
-                binding.layoutEmptyBookings.visibility = View.GONE
-                binding.rvRecruiterBookings.visibility = View.VISIBLE
-            }
-        }
+        // TRIPLE HANDSHAKE OBSERVER: Regular Bookings + Direct Hires + Applications
+        viewModel.bookings.observe(viewLifecycleOwner) { updateUnifiedListWrapper() }
+        viewModel.hireRequests.observe(viewLifecycleOwner) { updateUnifiedListWrapper() }
+        viewModel.applicationsAsBookings.observe(viewLifecycleOwner) { updateUnifiedListWrapper() }
         
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            binding.pbLoading.visibility = if (isLoading) View.VISIBLE else View.GONE
+            binding.pbLoading.visibility = if (isLoading == true) View.VISIBLE else View.GONE
+        }
+    }
+
+    private fun updateUnifiedListWrapper() {
+        val bookings = viewModel.bookings.value ?: emptyList()
+        val hireRequests = viewModel.hireRequests.value ?: emptyList()
+        val applications = viewModel.applicationsAsBookings.value ?: emptyList()
+        updateUnifiedList(bookings, hireRequests, applications)
+    }
+
+    private fun updateUnifiedList(bookings: List<Booking>, hires: List<HireRequest>, applications: List<Booking>) {
+        // Map HireRequests to Booking model format
+        val mappedHires = hires.map { hire ->
+            Booking(
+                id = hire.requestId,
+                castingTitle = hire.projectTitle,
+                status = hire.status,
+                date = hire.createdAt,
+                type = "DIRECT_HIRE" 
+            )
+        }
+        
+        // Combine all 3 sources into a single sorted high-performance list
+        val unifiedList = (bookings + mappedHires + applications).sortedByDescending { it.date }
+        bookingAdapter.submitList(unifiedList)
+        
+        if (unifiedList.isEmpty()) {
+            binding.rvRecruiterBookings.visibility = View.GONE
+            binding.layoutEmptyBookings.visibility = View.VISIBLE
+        } else {
+            binding.layoutEmptyBookings.visibility = View.GONE
+            binding.rvRecruiterBookings.visibility = View.VISIBLE
         }
     }
 

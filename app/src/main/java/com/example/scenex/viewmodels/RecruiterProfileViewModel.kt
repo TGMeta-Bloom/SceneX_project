@@ -55,7 +55,12 @@ class RecruiterProfileViewModel : ViewModel() {
             .whereEqualTo("recruiterId", userId)
             .addSnapshotListener { snapshots, e ->
                 if (e != null) return@addSnapshotListener
-                val castings = snapshots?.toObjects(CastingCall::class.java) ?: emptyList()
+                
+                // 🎯 FIX: Manually map document ID to CastingCall object
+                val castings = snapshots?.documents?.mapNotNull { doc ->
+                    doc.toObject(CastingCall::class.java)?.copy(id = doc.id)
+                } ?: emptyList()
+
                 _castingCalls.value = castings.sortedByDescending { it.createdAt }
             }
     }

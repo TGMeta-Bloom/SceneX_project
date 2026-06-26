@@ -30,7 +30,10 @@ class CastingRepository {
                 }
 
                 try {
-                    val allCalls = snapshot.toObjects(CastingCall::class.java)
+                    // 🎯 FIX: Manually map document ID to CastingCall object
+                    val allCalls = snapshot.documents.mapNotNull { doc ->
+                        doc.toObject(CastingCall::class.java)?.copy(id = doc.id)
+                    }
                     
                     // 🎯 In-Memory Processing: Filter by expiry and sort by creation date
                     val validCalls = allCalls.filter { call ->

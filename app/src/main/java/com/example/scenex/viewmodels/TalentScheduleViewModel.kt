@@ -1,10 +1,10 @@
 package com.example.scenex.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.scenex.models.Booking
+import com.example.scenex.models.HireRequest
 import com.example.scenex.models.Schedule
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -15,14 +15,24 @@ class TalentScheduleViewModel : ViewModel() {
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    
     private var scheduleListener: ListenerRegistration? = null
     private var bookingListener: ListenerRegistration? = null
+    private var hireRequestListener: ListenerRegistration? = null
+    private var applicationListener: ListenerRegistration? = null
 
     private val _schedules = MutableLiveData<List<Schedule>>()
     val schedules: LiveData<List<Schedule>> = _schedules
 
     private val _bookings = MutableLiveData<List<Booking>>()
     val bookings: LiveData<List<Booking>> = _bookings
+    
+    private val _hireRequests = MutableLiveData<List<HireRequest>>()
+    val hireRequests: LiveData<List<HireRequest>> = _hireRequests
+
+    // Layer C: Talent's own applications (The Handshake Bridge)
+    private val _applicationsAsBookings = MutableLiveData<List<Booking>>()
+    val applicationsAsBookings: LiveData<List<Booking>> = _applicationsAsBookings
 
     private val _totalPendingCount = MutableLiveData<Int>(0)
     val totalPendingCount: LiveData<Int> = _totalPendingCount
@@ -34,95 +44,82 @@ class TalentScheduleViewModel : ViewModel() {
 
     private var allSchedules = listOf<Schedule>()
     private var allBookings = listOf<Booking>()
+    private var allHireRequests = listOf<HireRequest>()
     private var currentStatusFilter = "ALL"
 
     fun startListening() {
         val userId = auth.currentUser?.uid ?: return
         _isLoading.value = true
 
-        // 1. Personal availability listener (Timeline View)
-        if (scheduleListener == null) {
-            scheduleListener = db.collection("schedules")
-                .whereEqualTo("userId", userId)
-                .addSnapshotListener { value, error ->
-                    if (error != null) return@addSnapshotListener
-                    allSchedules = value?.toObjects(Schedule::class.java) ?: emptyList()
-                    updateSchedules()
-                }
-        }
+        // 1. Finalized Schedule
+        scheduleListener = db.collection("profiles").document(userId)
+            .collection("schedules")
+            .addSnapshotListener { value, _ ->
+                allSchedules = value?.toObjects(Schedule::class.java) ?: emptyList()
+                updateSchedules()
+            }
 
-        // 2. Booking Requests listener
-        if (bookingListener == null) {
-            bookingListener = db.collection("bookings")
-                .whereEqualTo("talentId", userId)
-                .addSnapshotListener { value, error ->
-                    _isLoading.value = false
-                    if (error != null) {
-                        Log.e("TalentScheduleVM", "Firestore error: ${error.message}")
-                        return@addSnapshotListener
-                    }
-                    
-                    if (value != null) {
-                        val tempList = mutableListOf<Booking>()
-                        for (doc in value.documents) {
-                            try {
-                                val b = doc.toObject(Booking::class.java)
-                                if (b != null) tempList.add(b)
-                            } catch (e: Exception) {
-                                Log.e("TalentScheduleVM", "Error parsing booking: ${e.message}")
-                            }
-                        }
-                        allBookings = tempList
-                        
-                        // Calculate total pending count for the UI badge
-                        _totalPendingCount.value = tempList.count { it.status.trim().uppercase() == "PENDING" }
-                        
-                        updateBookings()
-                    }
-                }
-        }
+        // 2. Confirmed Bookings
+        bookingListener = db.collection("bookings")
+            .whereEqualTo("talentId", userId)
+            .addSnapshotListener { value, _ ->
+                allBookings = value?.toObjects(Booking::class.java) ?: emptyList()
+                calculatePendingCount()
+                updateBookings()
+            }
+
+        // 3. Direct Hire Requests
+        hireRequestListener = db.collection("hire_requests")
+            .whereEqualTo("talentId", userId)
+            .addSnapshotListener { value, _ ->
+                allHireRequests = value?.toObjects(HireRequest::class.java) ?: emptyList()
+                _hireRequests.value = allHireRequests
+                calculatePendingCount()
+                _isLoading.value = false
+            }
+
+        // 4. THE HANDSHAKE: Applications mapped to Booking UI
+        applicationListener = db.collection("applications")
+            .whereEqualTo("talentId", userId)
+            .addSnapshotListener { value, _ ->
+                val apps = value?.documents?.map { doc ->
+                    Booking(
+                        id = doc.id,
+                        castingCallId = doc.getString("castingCallId") ?: "",
+                        castingTitle = "Applied: ${doc.getString("projectTitle") ?: "Casting Call"}",
+                        status = doc.getString("status")?.uppercase() ?: "PENDING",
+                        date = doc.getTimestamp("appliedAt")?.toDate()?.time ?: 0L,
+                        type = "APPLICATION"
+                    )
+                } ?: emptyList()
+                _applicationsAsBookings.value = apps
+            }
+    }
+
+    private fun calculatePendingCount() {
+        val pendingBookings = allBookings.count { it.status.uppercase() == "PENDING" }
+        val pendingHires = allHireRequests.count { it.status.uppercase() == "PENDING" }
+        _totalPendingCount.value = pendingBookings + pendingHires
     }
 
     private fun updateSchedules() {
-        val startOfToday = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-        }.timeInMillis
-
-        // Timeline: Soonest upcoming first (Ascending)
+        val startOfToday = getStartOfToday()
         _schedules.value = allSchedules.filter { it.date >= startOfToday }.sortedBy { it.date }
     }
 
     private fun updateBookings() {
-        val startOfToday = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-        }.timeInMillis
-
+        val startOfToday = getStartOfToday()
         var filtered = allBookings
-        
-        // Filter by Status if selected
         if (currentStatusFilter != "ALL") {
-            if (currentStatusFilter == "CANCELLED") {
-                // "Cancelled" filter includes both CANCELLED and REJECTED statuses
-                filtered = filtered.filter { 
-                    val s = it.status.trim().uppercase()
-                    s == "CANCELLED" || s == "REJECTED"
-                }
-            } else {
-                filtered = filtered.filter { it.status.trim().uppercase() == currentStatusFilter.uppercase() }
-            }
+            filtered = filtered.filter { it.status.uppercase() == currentStatusFilter }
         }
-
-        // Logic: Show Upcoming bookings (Soonest first) at the top,
-        // then Past bookings (Most recent first) at the bottom.
-        val upcoming = filtered.filter { it.date >= startOfToday }.sortedBy { it.date }
-        val past = filtered.filter { it.date < startOfToday }.sortedByDescending { it.date }
-
-        _bookings.value = upcoming + past
-        
-        Log.d("TalentScheduleVM", "Bookings updated. Filter: $currentStatusFilter, Count: ${filtered.size}")
+        _bookings.value = filtered.sortedByDescending { it.date }
     }
+
+    private fun getStartOfToday() = Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+    }.timeInMillis
 
     fun setStatusFilter(status: String) {
         currentStatusFilter = status
@@ -133,9 +130,7 @@ class TalentScheduleViewModel : ViewModel() {
         super.onCleared()
         scheduleListener?.remove()
         bookingListener?.remove()
-    }
-
-    fun deleteSchedule(scheduleId: String) {
-        db.collection("schedules").document(scheduleId).delete()
+        hireRequestListener?.remove()
+        applicationListener?.remove()
     }
 }

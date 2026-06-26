@@ -85,8 +85,8 @@ class LoginActivity : AppCompatActivity() {
         val normalizedStatus = status?.lowercase()?.trim()
         val normalizedVStatus = vStatus?.lowercase()?.trim()
 
-        val isApproved = normalizedStatus == "verified" && normalizedVStatus == "verified"
-        val isPending = normalizedStatus == "pending_review" || normalizedVStatus == "pending"
+        val isApproved = normalizedStatus == "verified" || normalizedStatus == "active" || normalizedVStatus == "verified"
+        val isPending = !isApproved && (normalizedStatus == "pending_review" || normalizedVStatus == "pending")
         val isDraft = normalizedStatus == "draft" || normalizedStatus == null
 
         val intent = when {

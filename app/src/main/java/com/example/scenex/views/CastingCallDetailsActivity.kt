@@ -20,14 +20,13 @@ import com.google.firebase.firestore.FirebaseFirestore
 class CastingCallDetailsActivity : AppCompatActivity() {
 
     private lateinit var firestore: FirebaseFirestore
-    private lateinit var auth: FirebaseAuth
+    private val auth = FirebaseAuth.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_casting_call_details)
 
         firestore = FirebaseFirestore.getInstance()
-        auth = FirebaseAuth.getInstance()
 
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -58,41 +57,32 @@ class CastingCallDetailsActivity : AppCompatActivity() {
             tvTitle.text = projectTitle
             tvRole.text = "$characterName • $genderRequirement"
 
-            // Apply brand gradient to all primary labels
             applyTextGradient(tvTitle)
             applyTextGradient(tvRole)
             applyTextGradient(tvProdCompany)
-            applyTextGradient(tvExperience)
-            applyTextGradient(tvSkills)
 
-            // Highlights
             findViewById<TextView>(R.id.tvDeadline).text = "Deadline: $submissionDeadline"
             findViewById<TextView>(R.id.tvCategory).text = category
             findViewById<TextView>(R.id.tvCompDetail).text = compensation
             findViewById<TextView>(R.id.tvLangDetail).text = productionLanguage
 
-            // Project Section
             tvProdCompany.text = "Production: $productionCompany"
             findViewById<TextView>(R.id.tvDirector).text = "Director: $directorName"
             findViewById<TextView>(R.id.tvSynopsis).text = projectSynopsis
 
-            // Role Section
             findViewById<TextView>(R.id.tvAgeRange).text = "Age: $minAge - $maxAge Years"
             findViewById<TextView>(R.id.tvExperience).text = "Level: $experienceLevel"
             findViewById<TextView>(R.id.tvSkills).text = "Required: $requiredSkills"
             findViewById<TextView>(R.id.tvCharacterBreakdown).text = characterBreakdown
 
-            // Logistics Section
             findViewById<TextView>(R.id.tvAuditionInfo).text =
                 "Audition: $auditionDate ($startTime - $endTime) @ $auditionLocation"
             findViewById<TextView>(R.id.tvShootInfo).text =
                 "Shoot Starts: $firstDayOfShoot @ $shootLocation"
 
-            // Image
             Glide.with(this@CastingCallDetailsActivity)
                 .load(posterUrl)
                 .placeholder(R.drawable.ic_image_placeholder)
-                .error(R.drawable.ic_image_placeholder)
                 .centerCrop()
                 .into(findViewById<ShapeableImageView>(R.id.ivPosterDetail))
 
@@ -129,6 +119,8 @@ class CastingCallDetailsActivity : AppCompatActivity() {
         val application = hashMapOf(
             "castingCallId" to call.id,
             "talentId" to userId,
+            "projectTitle" to call.projectTitle,
+            "posterUrl" to call.posterUrl,
             "status" to "pending",
             "appliedAt" to com.google.firebase.Timestamp.now()
         )

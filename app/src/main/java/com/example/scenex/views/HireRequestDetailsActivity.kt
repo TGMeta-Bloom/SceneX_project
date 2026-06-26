@@ -1,5 +1,7 @@
 package com.example.scenex.views
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Shader
@@ -20,6 +22,7 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.collectLatest
+import java.util.*
 
 class HireRequestDetailsActivity : AppCompatActivity() {
 
@@ -39,10 +42,16 @@ class HireRequestDetailsActivity : AppCompatActivity() {
     private lateinit var tvMessage: TextView
     private lateinit var tvStatus: TextView
     private lateinit var tvHeaderTitle: TextView
+    private lateinit var tvProposedDateTime: TextView
     private lateinit var ivRecruiterProfile: ShapeableImageView
+    private lateinit var cvProposedSlot: View
     private lateinit var layoutActions: View
+    private lateinit var layoutRecruiterActions: View
     private lateinit var btnAccept: View
     private lateinit var btnReject: View
+    private lateinit var btnReschedule: View
+    private lateinit var btnConfirmBooking: View
+    private lateinit var btnCancelRequest: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,33 +87,34 @@ class HireRequestDetailsActivity : AppCompatActivity() {
         tvMessage = findViewById(R.id.tvMessage)
         tvStatus = findViewById(R.id.tvStatus)
         tvHeaderTitle = findViewById(R.id.tvHeaderTitle)
+        tvProposedDateTime = findViewById(R.id.tvProposedDateTime)
         ivRecruiterProfile = findViewById(R.id.ivRecruiterProfile)
+        cvProposedSlot = findViewById(R.id.cvProposedSlot)
         layoutActions = findViewById(R.id.layoutActions)
+        layoutRecruiterActions = findViewById(R.id.layoutRecruiterActions)
+        
         btnAccept = findViewById(R.id.btnAccept)
         btnReject = findViewById(R.id.btnReject)
+        btnReschedule = findViewById(R.id.btnReschedule)
+        btnConfirmBooking = findViewById(R.id.btnConfirmBooking)
+        btnCancelRequest = findViewById(R.id.btnCancelRequest)
 
-        btnAccept.setOnClickListener {
-            viewModel.updateRequestStatus(requestId!!, "ACCEPTED")
-        }
-
-        btnReject.setOnClickListener {
-            viewModel.updateRequestStatus(requestId!!, "REJECTED")
-        }
+        btnAccept.setOnClickListener { viewModel.updateRequestStatus(requestId!!, "ACCEPTED") }
+        btnReject.setOnClickListener { viewModel.updateRequestStatus(requestId!!, "REJECTED") }
+        btnReschedule.setOnClickListener { showRescheduleDialog() }
+        btnConfirmBooking.setOnClickListener { viewModel.confirmAndBook(requestId!!) }
+        btnCancelRequest.setOnClickListener { viewModel.updateRequestStatus(requestId!!, "REJECTED") }
     }
 
-    private fun applyTextGradients() {
-        tvHeaderTitle.post {
-            val width = tvHeaderTitle.paint.measureText(tvHeaderTitle.text.toString())
-            if (width > 0) {
-                val startColor = ContextCompat.getColor(this, R.color.gradient_start)
-                val endColor = ContextCompat.getColor(this, R.color.gradient_end)
-                val textShader: Shader = LinearGradient(0f, 0f, width, 0f,
-                    intArrayOf(startColor, endColor),
-                    null, Shader.TileMode.CLAMP)
-                tvHeaderTitle.paint.shader = textShader
-                tvHeaderTitle.invalidate()
-            }
-        }
+    private fun showRescheduleDialog() {
+        val calendar = Calendar.getInstance()
+        DatePickerDialog(this, { _, year, month, day ->
+            val date = String.format("%d-%02d-%02d", year, month + 1, day)
+            TimePickerDialog(this, { _, hour, minute ->
+                val time = String.format("%02d:%02d", hour, minute)
+                viewModel.proposeNewTime(requestId!!, date, time)
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
+        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
     }
 
     private fun observeViewModel() {
@@ -119,39 +129,75 @@ class HireRequestDetailsActivity : AppCompatActivity() {
                 tvMessage.text = it.message
 
                 val currentUserId = auth.currentUser?.uid
-                
-                // 1. Role-Based UI Logic
-                if (it.status == "PENDING" && currentUserId == it.talentId) {
-                    layoutActions.visibility = View.VISIBLE
-                    tvStatus.visibility = View.GONE
-                } else {
-                    layoutActions.visibility = View.GONE
+                val isRecruiter = currentUserId == it.recruiterId
+                val isTalent = currentUserId == it.talentId
+
+                // 1. Status UI Update
+                if (it.status != "PENDING") {
                     tvStatus.visibility = View.VISIBLE
                     tvStatus.text = "STATUS: ${it.status}"
-                    
-                    // Apply High-Visibility Status Styling
                     when(it.status) {
-                        "ACCEPTED" -> {
-                            tvStatus.setTextColor(Color.parseColor("#2E7D32"))
+                        "BOOKED", "ACCEPTED" -> {
                             tvStatus.setBackgroundResource(R.drawable.bg_status_accepted)
+                            tvStatus.setTextColor(Color.parseColor("#2E7D32"))
                         }
                         "REJECTED" -> {
-                            tvStatus.setTextColor(Color.parseColor("#C62828"))
                             tvStatus.setBackgroundResource(R.drawable.bg_status_rejected)
+                            tvStatus.setTextColor(Color.parseColor("#C62828"))
                         }
+                        "RESCHEDULED" -> {
+                            tvStatus.setBackgroundResource(R.drawable.bg_tag_outline)
+                            tvStatus.setTextColor(Color.BLACK)
+                        }
+                    }
+                } else {
+                    tvStatus.visibility = View.GONE
+                }
+
+                // 2. Proposed Slot UI
+                if (!it.proposedDate.isNullOrEmpty()) {
+                    cvProposedSlot.visibility = View.VISIBLE
+                    tvProposedDateTime.text = "${it.proposedDate} at ${it.proposedTime}"
+                } else {
+                    cvProposedSlot.visibility = View.GONE
+                }
+
+                // 3. Conditional Action Bars
+                when (it.status) {
+                    "RESCHEDULED" -> {
+                        if (isRecruiter) {
+                            layoutRecruiterActions.visibility = View.VISIBLE
+                            layoutActions.visibility = View.GONE
+                        } else {
+                            layoutRecruiterActions.visibility = View.GONE
+                            layoutActions.visibility = View.GONE 
+                        }
+                    }
+                    "PENDING" -> {
+                        if (isTalent) {
+                            layoutActions.visibility = View.VISIBLE
+                            layoutRecruiterActions.visibility = View.GONE
+                        } else {
+                            layoutActions.visibility = View.GONE
+                            layoutRecruiterActions.visibility = View.GONE
+                        }
+                    }
+                    else -> {
+                        layoutActions.visibility = View.GONE
+                        layoutRecruiterActions.visibility = View.GONE
                     }
                 }
 
-                // 2. Context-Aware Profile Loading (Show Talent to Recruiter, and vice-versa)
-                val isRecruiterViewing = currentUserId == it.recruiterId
-                val partnerId = if (isRecruiterViewing) it.talentId else it.recruiterId
-                
-                if (isRecruiterViewing) {
+                // 4. Role-based labels
+                if (isTalent) {
+                    tvHeaderTitle.text = "Hire Invitation"
+                    tvRecruiterCompany.text = "Production House"
+                    fetchPartnerDetails(it.recruiterId)
+                } else if (isRecruiter) {
                     tvHeaderTitle.text = "Hire Request Status"
                     tvRecruiterCompany.text = "Prospective Talent"
+                    fetchPartnerDetails(it.talentId)
                 }
-
-                fetchPartnerDetails(partnerId)
             }
         }
 
@@ -160,11 +206,8 @@ class HireRequestDetailsActivity : AppCompatActivity() {
                 when (event) {
                     is HireRequestEvent.StatusUpdated -> {
                         Toast.makeText(this@HireRequestDetailsActivity, "Request ${event.status}", Toast.LENGTH_SHORT).show()
-                        finish()
                     }
-                    is HireRequestEvent.Error -> {
-                        Toast.makeText(this@HireRequestDetailsActivity, event.message, Toast.LENGTH_SHORT).show()
-                    }
+                    is HireRequestEvent.Error -> Toast.makeText(this@HireRequestDetailsActivity, event.message, Toast.LENGTH_SHORT).show()
                     else -> {}
                 }
             }
@@ -174,17 +217,23 @@ class HireRequestDetailsActivity : AppCompatActivity() {
     private fun fetchPartnerDetails(userId: String) {
         db.collection("profiles").document(userId).get().addOnSuccessListener { snapshot ->
             if (snapshot.exists()) {
-                val name = snapshot.getString("fullName") ?: "User"
+                tvRecruiterName.text = snapshot.getString("fullName") ?: "SceneX User"
                 val imageUrl = snapshot.getString("profileImageUrl") ?: snapshot.getString("profileImage") ?: ""
-
-                tvRecruiterName.text = name
                 if (imageUrl.isNotEmpty()) {
-                    Glide.with(this)
-                        .load(imageUrl)
-                        .placeholder(R.drawable.ic_profile_placeholder)
-                        .circleCrop()
-                        .into(ivRecruiterProfile)
+                    Glide.with(this).load(imageUrl).placeholder(R.drawable.ic_profile_placeholder).circleCrop().into(ivRecruiterProfile)
                 }
+            }
+        }
+    }
+
+    private fun applyTextGradients() {
+        tvHeaderTitle.post {
+            val width = tvHeaderTitle.paint.measureText(tvHeaderTitle.text.toString())
+            if (width > 0) {
+                val startColor = ContextCompat.getColor(this, R.color.gradient_start)
+                val endColor = ContextCompat.getColor(this, R.color.gradient_end)
+                tvHeaderTitle.paint.shader = LinearGradient(0f, 0f, width, 0f, intArrayOf(startColor, endColor), null, Shader.TileMode.CLAMP)
+                tvHeaderTitle.invalidate()
             }
         }
     }
