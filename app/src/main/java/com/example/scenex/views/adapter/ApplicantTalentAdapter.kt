@@ -24,6 +24,9 @@ class ApplicantTalentAdapter(
             binding.tvTalentName.text = item.fullName
             binding.tvSpotlightCategory.text = item.spotlightCategory
             
+            // 🎯 NEW: Bind Calculated Score
+            binding.tvScore.text = "⚡ ${item.calculatedScore.toInt()}"
+            
             // Load Avatar
             Glide.with(binding.ivTalentAvatar.context)
                 .load(item.avatarUrl)

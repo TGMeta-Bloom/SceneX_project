@@ -9,7 +9,10 @@
     app:cardCornerRadius="20dp"
     app:cardElevation="3dp"
     app:strokeWidth="0dp"
-    app:cardBackgroundColor="@color/white">
+    app:cardBackgroundColor="@color/white"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -36,7 +39,7 @@
             android:layout_marginEnd="8dp"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="@+id/ivTalentAvatar"
-            app:layout_constraintEnd_toStartOf="@+id/tvStatusBadge"
+            app:layout_constraintEnd_toStartOf="@+id/tvScore"
             app:layout_constraintStart_toEndOf="@+id/ivTalentAvatar"
             app:layout_constraintTop_toTopOf="@+id/ivTalentAvatar">
 
@@ -76,6 +79,20 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="PENDING" />
+
+        <!-- Score Badge -->
+        <TextView
+            android:id="@+id/tvScore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:textColor="@color/primary_magenta"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/tvStatusBadge"
+            app:layout_constraintEnd_toStartOf="@+id/tvStatusBadge"
+            app:layout_constraintTop_toTopOf="@+id/tvStatusBadge"
+            tools:text="⚡ 85" />
 
         <!-- Divider -->
         <View

@@ -6,5 +6,6 @@ data class ApplicantTalent(
     val spotlightCategory: String = "",
     val applicationStatus: String = "",
     val appliedAt: Long = 0L,
-    val avatarUrl: String = ""
+    val avatarUrl: String = "",
+    val calculatedScore: Double = 0.0
 )
