@@ -11,9 +11,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.scenex.databinding.ActivityCastingManagementBinding
+import com.example.scenex.models.UserProfile
 import com.example.scenex.viewmodels.CastingManagementViewModel
 import com.example.scenex.views.adapter.ApplicantTalentAdapter
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class CastingManagementActivity : AppCompatActivity() {
 
@@ -54,11 +57,29 @@ class CastingManagementActivity : AppCompatActivity() {
                 Toast.makeText(this, "Application Rejected", Toast.LENGTH_SHORT).show()
             },
             onProfileClick = { applicant ->
-                // This would navigate to the detailed Talent Profile view
-                // val intent = Intent(this, TalentProfileActivity::class.java)
-                // intent.putExtra("TALENT_ID", applicant.talentId)
-                // startActivity(intent)
-                Toast.makeText(this, "Opening ${applicant.fullName}'s detailed profile...", Toast.LENGTH_SHORT).show()
+                // 🎯 Senior Implementation: Instant Profile Discovery
+                lifecycleScope.launch {
+                    try {
+                        val profileDoc = FirebaseFirestore.getInstance()
+                            .collection("profiles")
+                            .document(applicant.talentId)
+                            .get()
+                            .await()
+                        
+                        val userProfile = profileDoc.toObject(UserProfile::class.java)?.copy(userId = profileDoc.id)
+                        
+                        if (userProfile != null) {
+                            val detailFragment = TalentDetailFragment.newInstance(userProfile)
+                            supportFragmentManager.beginTransaction()
+                                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                                .replace(android.R.id.content, detailFragment) // Overlays full screen
+                                .addToBackStack(null)
+                                .commit()
+                        }
+                    } catch (e: Exception) {
+                        Toast.makeText(this@CastingManagementActivity, "Error loading profile", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         )
 

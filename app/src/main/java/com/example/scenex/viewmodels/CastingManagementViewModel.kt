@@ -76,15 +76,16 @@ class CastingManagementViewModel : ViewModel() {
                                     spotlightCategory = doc.getString("spotlightCategory") ?: "Talent",
                                     applicationStatus = appMap[tid]?.getString("status") ?: "pending",
                                     appliedAt = appMap[tid]?.getTimestamp("appliedAt")?.toDate()?.time ?: 0L,
-                                    avatarUrl = doc.getString("profileImageUrl") ?: doc.getString("avatarUrl") ?: ""
+                                    avatarUrl = doc.getString("profileImageUrl") ?: doc.getString("avatarUrl") ?: "",
+                                    calculatedScore = doc.getDouble("calculated_score") ?: 0.0
                                 )
                             )
                         }
                     }
                     Log.d("SceneX_Manage", "Final Applicant List Size: ${applicantList.size}")
-                    // 🎯 FIX: Apply filtering based on status
+                    // 🎯 FIX: Apply filtering based on status AND sort by calculatedScore
                     val filteredList = applicantList.filter { it.applicationStatus != "rejected" }
-                    _applicants.value = filteredList.sortedByDescending { it.appliedAt }
+                    _applicants.value = filteredList.sortedByDescending { it.calculatedScore }
                 } else {
                     Log.w("SceneX_Manage", "No applications found in DB for this castingId.")
                     _applicants.value = emptyList()
