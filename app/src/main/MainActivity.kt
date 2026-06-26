@@ -10,11 +10,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-/**
- * Senior Architect Implementation: MainActivity as a Dynamic Fragment Router.
- * Uses a "Bulletproof" Firestore Handshake to resolve the user experience.
- * Enhanced: Enforces Admin approval while supporting all active account states.
- */
 class MainActivity : AppCompatActivity() {
 
     private var userRole: String = "talent"
@@ -35,13 +30,12 @@ class MainActivity : AppCompatActivity() {
                         val vStatus = document.getString("verificationStatus")?.lowercase() ?: "pending"
                         val status = document.getString("status")?.lowercase() ?: "pending_review"
                         
-                        // 🛡️ UNIFIED SECURITY GATE: Allows all approved account states
-                        val isApproved = (status == "verified" || status == "active" || 
-                                         status == "available" || status == "unavailable") && 
+                        // 🛡️ UNIFIED SECURITY GATE: Allows both 'verified' and 'active'
+                        val isApproved = (status == "verified" || status == "active") && 
                                          (vStatus == "verified" || vStatus == "active")
 
                         if (!isApproved) {
-                            Log.w("SceneX_Security", "Access Blocked: Pending Approval. Redirecting to Waiting Room.")
+                            Log.w("SceneX_Security", "Access Blocked: Redirecting to Waiting Room.")
                             redirectToWaitingRoom()
                             return@addOnSuccessListener
                         }
@@ -49,14 +43,12 @@ class MainActivity : AppCompatActivity() {
                         val dbRole = document.getString("userRole") ?: document.getString("role")
                         userRole = dbRole?.lowercase() ?: "talent"
                         
-                        Log.d("SceneX_Main", "User Role Confirmed: $userRole")
                         loadAppropriateHomeFragment()
                     } else {
                         startSplash()
                     }
                 }
                 .addOnFailureListener {
-                    Log.e("SceneX_Main", "Firestore sync failed")
                     startSplash()
                 }
         } else {
@@ -97,8 +89,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.nav_host_fragment, fragment)
-            .commit()
+        supportFragmentManager.beginTransaction().replace(R.id.nav_host_fragment, fragment).commit()
     }
 }

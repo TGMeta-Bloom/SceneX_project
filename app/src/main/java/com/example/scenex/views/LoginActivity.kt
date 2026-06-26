@@ -47,12 +47,12 @@ class LoginActivity : AppCompatActivity() {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener { result ->
                     val userId = result.user?.uid ?: ""
-                    
-                    // 🛡️ SECURITY HANDSHAKE: Updated to match 4-parameter signature
+
+                    // 🛡️ SECURITY HANDSHAKE
                     repository.getUserRoutingData(userId) { role, status, vStatus, error ->
                         progressBar.visibility = View.GONE
                         btnLogin.isEnabled = true
-                        
+
                         if (error == null) {
                             Log.d(TAG, "Login Handshake: Role=$role | Status=$status | VStatus=$vStatus")
                             SessionManager.establishSession(this, userId, role, status)
@@ -78,14 +78,19 @@ class LoginActivity : AppCompatActivity() {
 
     /**
      * 🛡️ SECURE ROUTING ENGINE:
-     * Enforces Admin Approval status before allowing access to app features.
+     * Unified with SplashActivity to accept both 'verified' and 'active' (including availability states) as approved.
+     * Prevents incorrect WaitingRoom redirects for approved users who have set their availability.
      */
     private fun routeUser(role: String?, status: String?, vStatus: String?) {
         val normalizedRole = role?.uppercase()?.trim()
         val normalizedStatus = status?.lowercase()?.trim()
         val normalizedVStatus = vStatus?.lowercase()?.trim()
 
-        val isApproved = normalizedStatus == "verified" && normalizedVStatus == "verified"
+        // 🎯 FIXED: Support 'available' and 'unavailable' as approved account states
+        val isApproved = (normalizedStatus == "verified" || normalizedStatus == "active" || 
+                          normalizedStatus == "available" || normalizedStatus == "unavailable") && 
+                         (normalizedVStatus == "verified" || normalizedVStatus == "active")
+        
         val isPending = normalizedStatus == "pending_review" || normalizedVStatus == "pending"
         val isDraft = normalizedStatus == "draft" || normalizedStatus == null
 
@@ -103,7 +108,7 @@ class LoginActivity : AppCompatActivity() {
                 Intent(this, RoleSelectActivity::class.java)
             }
         }
-        
+
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()

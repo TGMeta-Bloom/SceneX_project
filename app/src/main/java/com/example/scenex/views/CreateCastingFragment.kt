@@ -14,13 +14,17 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.scenex.R
+import com.example.scenex.models.AvailabilityResult
 import com.example.scenex.models.CastingCall
 import com.example.scenex.models.ImgBBResponse
 import com.example.scenex.network.ImgBBService
-import com.google.firebase.Timestamp
+import com.example.scenex.repository.AvailabilityRepository
+import com.example.scenex.utils.AvailabilityEngine
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -39,6 +43,11 @@ class CreateCastingFragment : Fragment() {
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private val calendar = Calendar.getInstance()
+
+    // Engine and Repository for Conflict Checking
+    private val repository = AvailabilityRepository()
+    private val engine = AvailabilityEngine()
+
     private val dateFormatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
     private val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
 
@@ -77,7 +86,7 @@ class CreateCastingFragment : Fragment() {
         setupCategoryToggle(view)
         setupDropdowns(view)
         setupPickers(view)
-        
+
         view.findViewById<View>(R.id.cardPoster)?.setOnClickListener {
             pickImageLauncher.launch("image/*")
         }
@@ -88,7 +97,7 @@ class CreateCastingFragment : Fragment() {
     private fun setupCategoryToggle(view: View) {
         val tvActor = view.findViewById<TextView>(R.id.tvToggleActor)
         val tvDancer = view.findViewById<TextView>(R.id.tvToggleDancer)
-        
+
         val tvRoleTitleLabel = view.findViewById<TextView>(R.id.tvRoleTitleLabel)
         val etRoleTitle = view.findViewById<EditText>(R.id.etRoleTitle)
         val tvSkillsLabel = view.findViewById<TextView>(R.id.tvSkillsLabel)
@@ -121,8 +130,7 @@ class CreateCastingFragment : Fragment() {
 
         tvActor.setOnClickListener { updateUI("Actor") }
         tvDancer.setOnClickListener { updateUI("Dancer") }
-        
-        // Initial setup
+
         updateUI("Actor")
     }
 
@@ -155,7 +163,7 @@ class CreateCastingFragment : Fragment() {
         etAuditionDate?.setOnClickListener { showDatePicker { etAuditionDate.setText(it) } }
         etDeadline?.setOnClickListener { showDatePicker { etDeadline.setText(it) } }
         etShootDate?.setOnClickListener { showDatePicker { etShootDate.setText(it) } }
-        
+
         etStartTime?.setOnClickListener { showTimePicker { etStartTime.setText(it) } }
         etEndTime?.setOnClickListener { showTimePicker { etEndTime.setText(it) } }
     }
@@ -174,6 +182,7 @@ class CreateCastingFragment : Fragment() {
         }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
     }
 
+    // ---  Added Conflict Checking Logic (Thamasha) ---
     private fun prepareAndSubmit(view: View) {
         val title = view.findViewById<EditText>(R.id.etProjectTitle).text.toString().trim()
         if (title.isEmpty()) {
@@ -183,14 +192,73 @@ class CreateCastingFragment : Fragment() {
 
         val btnPublish = view.findViewById<Button>(R.id.btnPublish)
         btnPublish.isEnabled = false
-        btnPublish.text = "Publishing..."
+        btnPublish.text = "Checking Conflicts..."
 
+        val auditionDateStr = view.findViewById<EditText>(R.id.etAuditionDate)?.text.toString().trim()
+        val startTimeStr = view.findViewById<EditText>(R.id.etStartTime)?.text.toString().trim()
+        val endTimeStr = view.findViewById<EditText>(R.id.etEndTime)?.text.toString().trim()
+
+        val recruiterId = auth.currentUser?.uid ?: return
+
+        // Check if user provided time details to perform conflict check
+        if (auditionDateStr.isNotEmpty() && startTimeStr.isNotEmpty() && endTimeStr.isNotEmpty()) {
+            lifecycleScope.launch {
+                try {
+                    val timestamp = parseToUtcMidnight(auditionDateStr)
+                    val (bookings, schedules, castingCalls) = repository.getDailyEvents(recruiterId, timestamp)
+
+                    // Aggregate all events assigned to this recruiter
+                    val allEvents = bookings + schedules + castingCalls.filter {
+                        val rId = it.getString("recruiterId") ?: it.getString("recruiterid") ?: it.getString("userId") ?: ""
+                        rId == recruiterId
+                    }
+
+                    // Run the Engine
+                    val result = engine.checkSlotAvailability(allEvents, startTimeStr, endTimeStr)
+
+                    if (result == AvailabilityResult.BUSY) {
+                        Toast.makeText(context, "Conflict! You already have an event scheduled during this time.", Toast.LENGTH_LONG).show()
+                        btnPublish.isEnabled = true
+                        btnPublish.text = "Publish Casting Call"
+                    } else {
+                        proceedWithUpload(view)
+                    }
+                } catch (e: Exception) {
+                    Log.e("CreateCasting", "Conflict check failed", e)
+                    proceedWithUpload(view) // Fallback to publish if check fails
+                }
+            }
+        } else {
+            proceedWithUpload(view)
+        }
+    }
+
+    // Helper to safely convert the DatePicker string to a UTC Timestamp
+    private fun parseToUtcMidnight(dateStr: String): Long {
+        return try {
+            val parsedDate = dateFormatter.parse(dateStr)
+            val cal = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+                time = parsedDate!!
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            cal.timeInMillis
+        } catch (e: Exception) {
+            System.currentTimeMillis()
+        }
+    }
+
+    private fun proceedWithUpload(view: View) {
+        view.findViewById<Button>(R.id.btnPublish).text = "Publishing..."
         if (selectedImageUri != null) {
             uploadPosterAndSubmit(view)
         } else {
             validateAndSubmit(view, "")
         }
     }
+    // -------------------------------------------
 
     private fun uploadPosterAndSubmit(view: View) {
         val file = uriToFile(selectedImageUri!!) ?: run {
@@ -257,14 +325,14 @@ class CreateCastingFragment : Fragment() {
             directorName = view.findViewById<EditText>(R.id.etDirectorName)?.text.toString(),
             projectSynopsis = view.findViewById<EditText>(R.id.etSynopsis)?.text.toString(),
             productionLanguage = view.findViewById<AutoCompleteTextView>(R.id.dropdownLanguage)?.text.toString(),
-            
+
             auditionType = view.findViewById<AutoCompleteTextView>(R.id.dropdownAuditionType)?.text.toString(),
             auditionDate = view.findViewById<EditText>(R.id.etAuditionDate)?.text.toString(),
             startTime = view.findViewById<EditText>(R.id.etStartTime)?.text.toString(),
             endTime = view.findViewById<EditText>(R.id.etEndTime)?.text.toString(),
             auditionLocation = view.findViewById<EditText>(R.id.etAuditionLocation)?.text.toString(),
             submissionDeadline = view.findViewById<EditText>(R.id.etDeadline)?.text.toString(),
-            
+
             characterName = view.findViewById<EditText>(R.id.etRoleTitle)?.text.toString(),
             minAge = minAge,
             maxAge = maxAge,
@@ -273,11 +341,11 @@ class CreateCastingFragment : Fragment() {
             requiredSkills = view.findViewById<EditText>(R.id.etSkills)?.text.toString(),
             experienceLevel = view.findViewById<AutoCompleteTextView>(R.id.dropdownExperience)?.text.toString(),
             characterBreakdown = view.findViewById<EditText>(R.id.etRoleDescription)?.text.toString(),
-            
+
             compensation = view.findViewById<AutoCompleteTextView>(R.id.dropdownCompensation)?.text.toString(),
             shootLocation = view.findViewById<EditText>(R.id.etShootLocation)?.text.toString(),
             firstDayOfShoot = view.findViewById<EditText>(R.id.etShootDate)?.text.toString(),
-            
+
             contactEmail = view.findViewById<EditText>(R.id.etContactEmail)?.text.toString(),
             phoneNumber = view.findViewById<EditText>(R.id.etContactPhone)?.text.toString()
         )

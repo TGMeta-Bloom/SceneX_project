@@ -229,9 +229,6 @@ class SignupViewModel : ViewModel() {
             .addOnSuccessListener { Log.d("SceneX_Engine", "✅ Profile Sync successful") }
     }
 
-    /**
-     * UNIFIED FINALIZATION LOGIC: Fixes 'Unresolved reference finalizeRegistration'
-     */
     fun finalizeRegistration() {
         val score = calculateWeightedCompletion()
         
@@ -268,12 +265,31 @@ class SignupViewModel : ViewModel() {
         })
     }
 
+    /**
+     * 🧠 INTELLIGENCE ROUTING logic updated:
+     * Redirects all performance categories (Actors, Singers, Dancers, etc.) to the Specs screen.
+     * Technical crew (Editors, Sound, etc.) are routed directly to the Portfolio section.
+     */
     fun saveFoundationAndNavigate() {
-        val updates = hashMapOf<String, Any>("highest_qualification" to qualification, "languages" to languages, "experience_level" to experience, "portfolioLink" to portfolioLink, "socialMediaLinks" to socialMediaLinks)
+        val updates = hashMapOf<String, Any>(
+            "highest_qualification" to qualification, 
+            "languages" to languages, 
+            "experience_level" to experience, 
+            "portfolioLink" to portfolioLink, 
+            "socialMediaLinks" to socialMediaLinks
+        )
         repository.saveProfessionalProfile(updates) { 
             if (it) {
                 syncProfileLifecycle(false)
-                _navigateToNextStep.value = if (spotlightCategory == "Actor" || spotlightCategory == "Model") "ACTOR_SPECS" else "STEP5" 
+                
+                // Categorize based on whether they need physical specs (Performers) or just portfolio (Crew)
+                val performers = listOf("Actor", "Model", "Singer", "Dancer", "News Anchor", "Voice Artist", "Presenter")
+                
+                _navigateToNextStep.value = if (performers.contains(spotlightCategory)) {
+                    "ACTOR_SPECS" 
+                } else {
+                    "STEP5" 
+                }
             }
         }
     }
