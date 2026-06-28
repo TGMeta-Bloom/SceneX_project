@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white">
 
-    <!-- Header Section (Patterns removed for a clean final step) -->
+    <!-- Header Section -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/headerContainer"
         android:layout_width="match_parent"
-        android:layout_height="320dp"
+        android:layout_height="240dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <View
@@ -17,7 +18,6 @@
             android:layout_height="match_parent"
             android:background="@drawable/signup_header_bg" />
 
-        <!-- Progress Stepper - All 5 Active -->
         <LinearLayout
             android:id="@+id/stepperContainer"
             android:layout_width="match_parent"
@@ -35,24 +35,23 @@
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ivProfileImage"
-            android:layout_width="110dp"
-            android:layout_height="110dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_profile_placeholder"
             app:shapeAppearanceOverlay="@style/CircleImageView"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/stepperContainer"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginBottom="60dp" />
-            
+            android:layout_marginTop="20dp" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Main Content Card -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="-60dp"
+        android:layout_marginTop="-30dp"
         android:background="@drawable/white_card_top_rounded"
         android:padding="24dp"
         android:elevation="12dp"
@@ -63,14 +62,11 @@
             android:id="@+id/formTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Showcase Your\nBest Work"
+            android:text="Professional Credits"
             android:textColor="@color/black"
-            android:textSize="26sp"
+            android:textSize="24sp"
             android:textStyle="bold"
             android:fontFamily="serif"
-            android:gravity="center"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -78,65 +74,58 @@
             android:id="@+id/tvSubtitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:gravity="center"
-            android:text="Upload your best headshots and portfolio images to catch the eye of recruiters."
+            android:layout_marginTop="4dp"
+            android:text="Add movies, commercials, or stage plays you've participated in. You can skip this for now."
             android:textColor="@color/text_secondary"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/formTitle" />
 
-        <!-- Interactive Upload Area -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/uploadPlaceholder"
+        <!-- Credits List -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvPortfolioWorks"
             android:layout_width="match_parent"
-            android:layout_height="220dp"
-            android:layout_marginTop="32dp"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="0dp"
-            app:layout_constraintTop_toBottomOf="@id/tvSubtitle">
+            android:layout_height="0dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintTop_toBottomOf="@id/tvSubtitle"
+            app:layout_constraintBottom_toTopOf="@id/btnAddWork"
+            tools:listitem="@layout/item_portfolio_work_small" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/dashed_border">
+        <!-- Empty State -->
+        <TextView
+            android:id="@+id/tvEmptyState"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No credits added yet."
+            android:gravity="center"
+            android:textColor="#9E9E9E"
+            android:textSize="14sp"
+            android:fontStyle="italic"
+            app:layout_constraintTop_toTopOf="@id/rvPortfolioWorks"
+            app:layout_constraintBottom_toBottomOf="@id/rvPortfolioWorks"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-                <ImageView
-                    android:id="@+id/ivUploadIcon"
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:src="@drawable/ic_camera_white"
-                    app:tint="@color/primary_magenta"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toTopOf="@id/tvUploadHint"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintVertical_chainStyle="packed" />
-
-                <TextView
-                    android:id="@+id/tvUploadHint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="Tap to upload gallery images"
-                    android:textColor="@color/primary_magenta"
-                    android:textStyle="bold"
-                    app:layout_constraintTop_toBottomOf="@id/ivUploadIcon"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAddWork"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginBottom="24dp"
+            android:text="+ Add New Credit"
+            android:textColor="@color/primary_magenta"
+            app:strokeColor="@color/primary_magenta"
+            app:layout_constraintBottom_toTopOf="@id/btnFinish" />
 
         <!-- Final Button -->
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnFinish"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:layout_marginHorizontal="32dp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/button_rounded_magenta"
             android:text="Launch Profile"
             android:textAllCaps="false"
