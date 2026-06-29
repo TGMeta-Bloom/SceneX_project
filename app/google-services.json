@@ -12,7 +12,12 @@
           "package_name": "com.example.mytestapplication"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "987826703702-34b9p7p3j31a741r869mvbr2emr7p7rj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD9yeT-NASDL_hNmjua0k93TGrOFi92vtE"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "987826703702-34b9p7p3j31a741r869mvbr2emr7p7rj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     },
@@ -31,7 +41,20 @@
           "package_name": "com.example.scenex"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "987826703702-7h97cjgt9at73cv46loh4umi2virka7g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.scenex",
+            "certificate_hash": "a205e34cf81906f088296874ee7694f7d8745544"
+          }
+        },
+        {
+          "client_id": "987826703702-34b9p7p3j31a741r869mvbr2emr7p7rj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD9yeT-NASDL_hNmjua0k93TGrOFi92vtE"
@@ -39,7 +62,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "987826703702-34b9p7p3j31a741r869mvbr2emr7p7rj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
