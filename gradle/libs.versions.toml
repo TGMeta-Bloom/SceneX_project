@@ -18,6 +18,8 @@ okhttp = "4.12.0"
 glide = "4.16.0"
 composeBom = "2024.09.03"
 coil = "2.7.0"
+playServicesAuth = "21.2.0"
+facebookSdk = "18.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,6 +49,10 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth-ktx" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore-ktx" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage-ktx" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
+
+# Auth Providers
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
+facebook-login = { group = "com.facebook.android", name = "facebook-login", version.ref = "facebookSdk" }
 
 # Lifecycle
 lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
