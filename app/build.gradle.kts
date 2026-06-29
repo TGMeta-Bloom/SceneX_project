@@ -33,6 +33,7 @@ android {
     }
     buildFeatures {
         compose = true
+        viewBinding = true
     }
 }
 
@@ -59,6 +60,10 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
     implementation(libs.firebase.analytics)
+
+    // Auth Providers
+    implementation(libs.play.services.auth)
+    implementation(libs.facebook.login)
 
     // Lifecycle
     implementation(libs.lifecycle.viewmodel)
