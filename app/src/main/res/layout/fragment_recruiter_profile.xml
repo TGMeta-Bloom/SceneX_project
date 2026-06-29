@@ -1,357 +1,342 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/recruiterDrawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FBFBFB">
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/scrollView"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:fillViewport="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="match_parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scrollView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="40dp">
+            android:layout_height="match_parent"
+            android:fillViewport="true">
 
-            <FrameLayout
-                android:id="@+id/headerContainer"
-                android:layout_width="match_parent"
-                android:layout_height="220dp"
-                android:background="#D9D9D9"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <ImageView
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
-                    android:layout_gravity="top|start"
-                    android:layout_marginStart="-25dp"
-                    android:layout_marginTop="-20dp"
-                    android:alpha="0.15"
-                    android:src="@drawable/ic_header_film_reel"
-                    android:tint="#888888" />
-
-                <ImageView
-                    android:layout_width="85dp"
-                    android:layout_height="85dp"
-                    android:layout_gravity="top|end"
-                    android:layout_marginEnd="45dp"
-                    android:layout_marginTop="10dp"
-                    android:alpha="0.2"
-                    android:rotation="12"
-                    android:src="@drawable/ic_figma_film_strip"
-                    android:tint="#888888" />
-
-                <ImageView
-                    android:layout_width="75dp"
-                    android:layout_height="75dp"
-                    android:layout_gravity="bottom|end"
-                    android:layout_marginEnd="-15dp"
-                    android:layout_marginBottom="25dp"
-                    android:alpha="0.15"
-                    android:rotation="-15"
-                    android:src="@drawable/ic_header_movie_camera"
-                    android:tint="#888888" />
-
-                <ImageView
-                    android:id="@+id/ivNotification"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:layout_gravity="top|start"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginTop="20dp"
-                    android:src="@drawable/ic_notification"
-                    android:tint="#000000" />
-
-                <ImageView
-                    android:id="@+id/ivSettings"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:layout_gravity="top|end"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginTop="20dp"
-                    android:src="@android:drawable/ic_menu_manage"
-                    android:tint="#000000" />
-            </FrameLayout>
-
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/ivRecruiterAvatar"
-                android:layout_width="105dp"
-                android:layout_height="105dp"
-                android:layout_marginTop="165dp"
-                android:padding="4dp"
-                android:scaleType="centerCrop"
-                android:background="#FBFBFB"
-                android:src="@drawable/ic_profile_placeholder"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:shapeAppearanceOverlay="@style/CircleImageView"
-                app:strokeColor="#B0006D"
-                app:strokeWidth="3dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnQuickEdit"
-                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="4dp"
-                app:icon="@android:drawable/ic_menu_edit"
-                app:iconSize="16dp"
-                app:iconTint="#B0006D"
-                app:layout_constraintBottom_toBottomOf="@id/ivRecruiterAvatar"
-                app:layout_constraintEnd_toEndOf="@id/ivRecruiterAvatar"
-                android:layout_marginEnd="-2dp"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:id="@+id/tvRecruiterName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:textColor="#B0006D"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/ivRecruiterAvatar"
-                tools:text="Mihili De Silva" />
-
-            <LinearLayout
-                android:id="@+id/llRoleRow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvRecruiterName">
-
-                <TextView
-                    android:id="@+id/tvRole"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Director"
-                    android:textColor="#555555"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <ImageView
-                    android:id="@+id/ivVerifiedBadge"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_marginStart="6dp"
-                    android:layout_gravity="center_vertical"
-                    android:src="@drawable/ic_verified"
-                    app:tint="#B0006D" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/tvCompanyName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#333333"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/llRoleRow"
-                tools:text="Yuki Production" />
-
-            <FrameLayout
-                android:id="@+id/flStatsContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/white_card_top_rounded"
-                android:backgroundTint="#1AB0006D"
-                android:paddingHorizontal="24dp"
-                android:paddingVertical="4dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvCompanyName">
-                <TextView
-                    android:id="@+id/tvStats"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#B0006D"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    tools:text="Projects : 12  |  Hired : 28  |" />
-            </FrameLayout>
-
-            <TextView
-                android:id="@+id/tvCompanyBio"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="40dp"
-                android:layout_marginTop="16dp"
-                android:gravity="center"
-                android:textColor="#6D6C6C"
-                android:textSize="13sp"
-                app:layout_constraintTop_toBottomOf="@id/flStatsContainer"
-                tools:text="Agency portfolio summary goes here... Read more" />
+                android:paddingBottom="40dp">
 
-            <LinearLayout
-                android:id="@+id/llBadges"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginTop="20dp"
-                android:orientation="vertical"
-                app:layout_constraintTop_toBottomOf="@id/tvCompanyBio">
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cvStatus"
+                <FrameLayout
+                    android:id="@+id/headerContainer"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="2dp"
-                    app:cardBackgroundColor="#FFFFFF"
+                    android:layout_height="220dp"
+                    android:background="#D9D9D9"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ImageView
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
+                        android:layout_gravity="top|start"
+                        android:layout_marginStart="-25dp"
+                        android:layout_marginTop="-20dp"
+                        android:alpha="0.15"
+                        android:src="@drawable/ic_header_film_reel"
+                        android:tint="#888888" />
+
+                    <ImageView
+                        android:layout_width="85dp"
+                        android:layout_height="85dp"
+                        android:layout_gravity="top|end"
+                        android:layout_marginEnd="45dp"
+                        android:layout_marginTop="10dp"
+                        android:alpha="0.2"
+                        android:rotation="12"
+                        android:src="@drawable/ic_figma_film_strip"
+                        android:tint="#888888" />
+
+                    <ImageView
+                        android:layout_width="75dp"
+                        android:layout_height="75dp"
+                        android:layout_gravity="bottom|end"
+                        android:layout_marginEnd="-15dp"
+                        android:layout_marginBottom="25dp"
+                        android:alpha="0.15"
+                        android:rotation="-15"
+                        android:src="@drawable/ic_header_movie_camera"
+                        android:tint="#888888" />
+
+                    <ImageView
+                        android:id="@+id/ivNotification"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="top|start"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginTop="20dp"
+                        android:src="@drawable/ic_notification"
+                        android:tint="#000000" />
+
+                    <ImageView
+                        android:id="@+id/ivSettings"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="top|end"
+                        android:layout_marginEnd="20dp"
+                        android:layout_marginTop="20dp"
+                        android:src="@android:drawable/ic_menu_sort_by_size"
+                        android:tint="#000000" />
+                </FrameLayout>
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivRecruiterAvatar"
+                    android:layout_width="105dp"
+                    android:layout_height="105dp"
+                    android:layout_marginTop="165dp"
+                    android:padding="4dp"
+                    android:scaleType="centerCrop"
+                    android:background="#FBFBFB"
+                    android:src="@drawable/ic_profile_placeholder"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:shapeAppearanceOverlay="@style/CircleImageView"
                     app:strokeColor="#B0006D"
-                    app:strokeWidth="1dp">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:padding="12dp">
+                    app:strokeWidth="3dp" />
 
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:paddingStart="8dp"
-                            android:orientation="vertical">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Status :"
-                                android:textSize="12sp"
-                                android:textColor="#555555"
-                                android:textStyle="bold" />
-                            <TextView
-                                android:id="@+id/tvStatusValue"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Available"
-                                android:textSize="14sp"
-                                android:textStyle="bold"
-                                android:textColor="#333333" />
-                        </LinearLayout>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnEditRecruiterAvatar"
+                    style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:padding="4dp"
+                    app:icon="@android:drawable/ic_menu_camera"
+                    app:iconSize="16dp"
+                    app:iconTint="#B0006D"
+                    app:layout_constraintBottom_toBottomOf="@id/ivRecruiterAvatar"
+                    app:layout_constraintEnd_toEndOf="@id/ivRecruiterAvatar"
+                    android:layout_marginEnd="-2dp"
+                    android:layout_marginBottom="4dp" />
 
-                        <com.google.android.material.materialswitch.MaterialSwitch
-                            android:id="@+id/switchAvailability"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:scaleX="0.9"
-                            android:scaleY="0.9" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/lblMyCastings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="24dp"
-                android:text="My Castings :"
-                android:textColor="#000000"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/llBadges" />
-
-            <HorizontalScrollView
-                android:id="@+id/hsvMyCastings"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:scrollbars="none"
-                app:layout_constraintTop_toBottomOf="@id/lblMyCastings">
-                <LinearLayout
-                    android:id="@+id/llMyCastingsPosters"
+                <TextView
+                    android:id="@+id/tvRecruiterName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="24dp" />
-            </HorizontalScrollView>
+                    android:layout_marginTop="10dp"
+                    android:textColor="#B0006D"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/ivRecruiterAvatar"
+                    tools:text="Mihili De Silva" />
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cvActiveCastings"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginTop="24dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="#FFFFFF"
-                app:strokeColor="#B0006D"
-                app:strokeWidth="1dp"
-                app:layout_constraintTop_toBottomOf="@id/hsvMyCastings">
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:id="@+id/llRoleRow"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Active Castings :" android:textStyle="bold" android:textColor="@color/black" android:textSize="15sp"/>
-                    <LinearLayout
-                        android:id="@+id/llCastingList"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:orientation="vertical" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvRecruiterName">
+
                     <TextView
-                        android:id="@+id/tvNoCastings"
-                        android:layout_width="match_parent"
+                        android:id="@+id/tvRole"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="24dp"
-                        android:gravity="center"
-                        android:text="No active castings"
-                        android:textColor="#999999"
-                        android:visibility="gone" />
+                        android:text="Director"
+                        android:textColor="#555555"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:id="@+id/ivVerifiedBadge"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_gravity="center_vertical"
+                        android:src="@drawable/ic_verified"
+                        app:tint="#B0006D" />
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginTop="32dp"
-                android:orientation="vertical"
-                app:layout_constraintTop_toBottomOf="@id/cvActiveCastings">
+                <TextView
+                    android:id="@+id/tvCompanyName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#333333"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/llRoleRow"
+                    tools:text="Yuki Production" />
 
-                <Button
-                    android:id="@+id/btnRecruiterLogout"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="match_parent"
+                <FrameLayout
+                    android:id="@+id/flStatsContainer"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Sign Out Account"
-                    android:textColor="#FF4444" />
+                    android:background="@drawable/white_card_top_rounded"
+                    android:backgroundTint="#1AB0006D"
+                    android:paddingHorizontal="24dp"
+                    android:paddingVertical="4dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvCompanyName">
+                    <TextView
+                        android:id="@+id/tvStats"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#B0006D"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        tools:text="Projects : 12  |  Hired : 28  |" />
+                </FrameLayout>
 
                 <TextView
-                    android:id="@+id/tvDeleteAccount"
+                    android:id="@+id/tvCompanyBio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="40dp"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center"
+                    android:textColor="#6D6C6C"
+                    android:textSize="13sp"
+                    app:layout_constraintTop_toBottomOf="@id/flStatsContainer"
+                    tools:text="Agency portfolio summary goes here... Read more" />
+
+                <LinearLayout
+                    android:id="@+id/llBadges"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="24dp"
+                    android:layout_marginTop="20dp"
+                    android:orientation="vertical"
+                    app:layout_constraintTop_toBottomOf="@id/tvCompanyBio">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cvStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="2dp"
+                        app:cardBackgroundColor="#FFFFFF"
+                        app:strokeColor="#B0006D"
+                        app:strokeWidth="1dp">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:padding="12dp">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:paddingStart="8dp"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Status :"
+                                    android:textSize="12sp"
+                                    android:textColor="#555555"
+                                    android:textStyle="bold" />
+                                <TextView
+                                    android:id="@+id/tvStatusValue"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Available"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    android:textColor="#333333" />
+                            </LinearLayout>
+
+                            <com.google.android.material.materialswitch.MaterialSwitch
+                                android:id="@+id/switchAvailability"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="8dp"
+                                android:scaleX="0.9"
+                                android:scaleY="0.9" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/lblMyCastings"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="16dp"
-                    android:text="Permanently Delete Recruiter Profile"
-                    android:textColor="#FF0000"
-                    android:textSize="11sp"
-                    android:alpha="0.6"
-                    android:clickable="true"
-                    android:focusable="true" />
-            </LinearLayout>
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="24dp"
+                    android:text="My Castings :"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/llBadges" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.core.widget.NestedScrollView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+                <HorizontalScrollView
+                    android:id="@+id/hsvMyCastings"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:scrollbars="none"
+                    app:layout_constraintTop_toBottomOf="@id/lblMyCastings">
+                    <LinearLayout
+                        android:id="@+id/llMyCastingsPosters"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingStart="24dp"
+                        android:paddingEnd="24dp" />
+                </HorizontalScrollView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cvActiveCastings"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="24dp"
+                    android:layout_marginTop="24dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:strokeColor="#B0006D"
+                    app:strokeWidth="1dp"
+                    app:layout_constraintTop_toBottomOf="@id/hsvMyCastings">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Active Castings :" android:textStyle="bold" android:textColor="@color/black" android:textSize="15sp"/>
+                        <LinearLayout
+                            android:id="@+id/llCastingList"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:orientation="vertical" />
+                        <TextView
+                            android:id="@+id/tvNoCastings"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="24dp"
+                            android:gravity="center"
+                            android:text="No active castings"
+                            android:textColor="#999999"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/recruiterSettingsDrawer"
+        android:layout_width="280dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:background="@color/white"
+        app:headerLayout="@layout/nav_header_profile"
+        app:menu="@menu/menu_profile_settings"
+        app:itemIconTint="@color/primary_magenta"
+        app:itemTextColor="#333333" />
+
+</androidx.drawerlayout.widget.DrawerLayout>
