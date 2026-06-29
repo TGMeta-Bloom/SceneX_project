@@ -1,81 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white">
 
-    <androidx.core.widget.NestedScrollView
+    <!-- 1. Calendar Header (Hidden in List View) -->
+    <ImageView
+        android:id="@+id/ivHeaderCalendar"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/ic_projects"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/primary_magenta" />
+
+    <TextView
+        android:id="@+id/tvScheduleHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:fontFamily="serif"
+        android:text="@string/schedule_title"
+        android:textColor="@color/primary_dark"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/ivHeaderCalendar"
+        app:layout_constraintStart_toEndOf="@id/ivHeaderCalendar"
+        app:layout_constraintTop_toTopOf="@id/ivHeaderCalendar" />
+
+    <!-- 2. View Toggle -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/toggleContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:layout_height="50dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/button_secondary_outline"
+        android:padding="4dp"
+        app:layout_constraintTop_toBottomOf="@id/tvScheduleHeader">
+
+        <!-- Sliding background -->
+        <View
+            android:id="@+id/vToggleSelector"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/button_rounded_magenta"
+            app:layout_constraintWidth_percent="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <TextView
+            android:id="@+id/btnCalendarView"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/calendar_view"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:elevation="2dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnListView"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <TextView
+            android:id="@+id/btnListView"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/list_view"
+            android:textColor="@color/black"
+            android:elevation="2dp"
+            app:layout_constraintStart_toEndOf="@+id/btnCalendarView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- 3. Calendar Grid Group (Hidden in List View) -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/calendarScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toggleContainer">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="120dp">
 
-            <!-- 1. Header Section -->
-            <ImageView
-                android:id="@+id/ivHeaderCalendar"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="20dp"
-                android:src="@drawable/ic_projects"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/primary_magenta" />
-
-            <TextView
-                android:id="@+id/tvScheduleHeader"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:fontFamily="serif"
-                android:text="@string/schedule_title"
-                android:textColor="@color/primary_dark"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="@id/ivHeaderCalendar"
-                app:layout_constraintStart_toEndOf="@id/ivHeaderCalendar"
-                app:layout_constraintTop_toTopOf="@id/ivHeaderCalendar" />
-
-            <!-- 2. View Toggle -->
-            <LinearLayout
-                android:id="@+id/toggleContainer"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="24dp"
-                android:background="@drawable/button_secondary_outline"
-                android:orientation="horizontal"
-                android:padding="4dp"
-                app:layout_constraintTop_toBottomOf="@id/tvScheduleHeader">
-
-                <TextView
-                    android:id="@+id/btnCalendarView"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@drawable/button_rounded_magenta"
-                    android:gravity="center"
-                    android:text="@string/calendar_view"
-                    android:textColor="@color/white"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/btnListView"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="@string/list_view"
-                    android:textColor="@color/black" />
-            </LinearLayout>
-
-            <!-- 3. Calendar Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardCalendar"
                 android:layout_width="match_parent"
@@ -87,7 +108,7 @@
                 app:cardElevation="4dp"
                 app:strokeColor="@color/primary_magenta"
                 app:strokeWidth="1dp"
-                app:layout_constraintTop_toBottomOf="@id/toggleContainer">
+                app:layout_constraintTop_toTopOf="parent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -142,7 +163,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 4. Legend Section - FIXED to use calendar_dot -->
             <LinearLayout
                 android:id="@+id/legendContainer"
                 android:layout_width="wrap_content"
@@ -153,18 +173,30 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/cardCalendar">
-                
+
+                <View android:layout_width="8dp" android:layout_height="8dp" android:background="@drawable/calendar_dot" android:backgroundTint="@color/red" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Blocked" android:textColor="@color/black" android:textSize="10sp" android:layout_marginStart="4dp" android:layout_marginEnd="12dp" />
+
                 <View android:layout_width="8dp" android:layout_height="8dp" android:background="@drawable/calendar_dot" android:backgroundTint="@color/calendar_blue" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/legend_casting_calls" android:textColor="@color/black" android:textSize="12sp" android:layout_marginStart="6dp" android:layout_marginEnd="16dp" />
-                
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cast" android:textColor="@color/black" android:textSize="10sp" android:layout_marginStart="4dp" android:layout_marginEnd="12dp" />
+
                 <View android:layout_width="8dp" android:layout_height="8dp" android:background="@drawable/calendar_dot" android:backgroundTint="@color/calendar_orange" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/legend_bookings" android:textColor="@color/black" android:textSize="12sp" android:layout_marginStart="6dp" android:layout_marginEnd="16dp" />
-                
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Book" android:textColor="@color/black" android:textSize="10sp" android:layout_marginStart="4dp" android:layout_marginEnd="12dp" />
+
                 <View android:layout_width="8dp" android:layout_height="8dp" android:background="@drawable/calendar_dot" android:backgroundTint="@color/calendar_green" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/legend_pending" android:textColor="@color/black" android:textSize="12sp" android:layout_marginStart="6dp" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Wait" android:textColor="@color/black" android:textSize="10sp" android:layout_marginStart="4dp" />
             </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <!-- 4. Dashboard Host (Fullscreen Overlay for List View) -->
+    <FrameLayout
+        android:id="@+id/listViewContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:background="@color/white"
+        android:elevation="10dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
