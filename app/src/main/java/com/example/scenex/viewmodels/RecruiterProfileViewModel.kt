@@ -1,5 +1,6 @@
 package com.example.scenex.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.scenex.models.CastingCall
@@ -36,12 +37,12 @@ class RecruiterProfileViewModel : ViewModel() {
 
     fun loadProfile() {
         val userId = auth.currentUser?.uid ?: return
-        
+
         // Clear previous listeners if any
         profileListener?.remove()
         castingsListener?.remove()
 
-        // 🎯 REAL-TIME PROFILE LISTENER
+        //  REAL-TIME PROFILE LISTENER
         profileListener = db.collection("profiles").document(userId)
             .addSnapshotListener { snapshot, e ->
                 if (e != null) return@addSnapshotListener
@@ -50,12 +51,17 @@ class RecruiterProfileViewModel : ViewModel() {
                 }
             }
 
-        // 🎯 REAL-TIME CASTINGS LISTENER
+        //  REAL-TIME CASTINGS LISTENER
         castingsListener = db.collection("CastingCalls")
             .whereEqualTo("recruiterId", userId)
             .addSnapshotListener { snapshots, e ->
                 if (e != null) return@addSnapshotListener
-                val castings = snapshots?.toObjects(CastingCall::class.java) ?: emptyList()
+
+                //  Manually map document ID to CastingCall object
+                val castings = snapshots?.documents?.mapNotNull { doc ->
+                    doc.toObject(CastingCall::class.java)?.copy(id = doc.id)
+                } ?: emptyList()
+
                 _castingCalls.value = castings.sortedByDescending { it.createdAt }
             }
     }
@@ -64,7 +70,12 @@ class RecruiterProfileViewModel : ViewModel() {
         val userId = auth.currentUser?.uid ?: return
         viewModelScope.launch {
             try {
-                db.collection("profiles").document(userId).update("status", newStatus).await()
+                //  UNIFIED: Update both 'status' and 'manualAvailabilityStatus' to keep logic synced
+                val updates = mapOf(
+                    "status" to newStatus,
+                    "manualAvailabilityStatus" to newStatus.uppercase()
+                )
+                db.collection("profiles").document(userId).update(updates).await()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -81,20 +92,24 @@ class RecruiterProfileViewModel : ViewModel() {
         province: String,
         onComplete: (Boolean) -> Unit
     ) {
+        val updates = mutableMapOf<String, Any>(
+            "fullName" to name,
+            "companyName" to company,
+            "phoneNumber" to phone,
+            "experience" to experience,
+            "spotlightCategory" to role,
+            "city" to city,
+            "province" to province,
+            "updatedAt" to FieldValue.serverTimestamp()
+        )
+        updateProfileFields(updates, onComplete)
+    }
+
+    fun updateProfileFields(updates: Map<String, Any>, onComplete: (Boolean) -> Unit) {
         val userId = auth.currentUser?.uid ?: return
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val updates = mutableMapOf<String, Any>(
-                    "fullName" to name,
-                    "companyName" to company,
-                    "phoneNumber" to phone,
-                    "experience" to experience,
-                    "spotlightCategory" to role,
-                    "city" to city,
-                    "province" to province,
-                    "updatedAt" to FieldValue.serverTimestamp()
-                )
                 db.collection("profiles").document(userId).update(updates).await()
                 onComplete(true)
             } catch (e: Exception) {
@@ -131,6 +146,18 @@ class RecruiterProfileViewModel : ViewModel() {
     }
 
     fun logout() = auth.signOut()
+
+    fun deleteCastingCall(castingId: String) {
+        viewModelScope.launch {
+            try {
+                // Using correct PascalCase collection name "CastingCalls"
+                db.collection("CastingCalls").document(castingId).delete().await()
+                // The listener (castingsListener) will automatically update the UI list
+            } catch (e: Exception) {
+                Log.e("SceneX_Recruiter", "Delete failed: ${e.message}")
+            }
+        }
+    }
 
     override fun onCleared() {
         super.onCleared()

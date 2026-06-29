@@ -21,24 +21,15 @@ class RoleSelectActivity : AppCompatActivity() {
         val talentLabel = findViewById<TextView>(R.id.talentLabel)
         val recruiterLabel = findViewById<TextView>(R.id.recruiterLabel)
 
-        // Senior Fix: Apply Cinematic Brand Gradient to typography
         applyTextGradient(talentButton)
         applyTextGradient(recruiterButton)
         applyTextGradient(talentLabel)
         applyTextGradient(recruiterLabel)
 
-        talentButton.setOnClickListener {
-            navigateToSignup("TALENT")
-        }
-
-        recruiterButton.setOnClickListener {
-            navigateToSignup("RECRUITER")
-        }
+        talentButton.setOnClickListener { navigateToSignup("TALENT") }
+        recruiterButton.setOnClickListener { navigateToSignup("RECRUITER") }
     }
 
-    /**
-     * Applies the SceneX Brand Gradient (#B0006D to #4A0038) to a TextView or Button.
-     */
     private fun applyTextGradient(textView: TextView) {
         textView.post {
             val paint = textView.paint
@@ -59,7 +50,12 @@ class RoleSelectActivity : AppCompatActivity() {
     private fun navigateToSignup(role: String) {
         val intent = Intent(this, SignupActivity::class.java)
         intent.putExtra("USER_ROLE", role)
+
+        // Pass through pre-fill and social flag convenience data
+        intent.putExtra("PREFILL_NAME", getIntent().getStringExtra("PREFILL_NAME"))
+        intent.putExtra("PREFILL_EMAIL", getIntent().getStringExtra("PREFILL_EMAIL"))
+        intent.putExtra("IS_SOCIAL_AUTH", getIntent().getBooleanExtra("IS_SOCIAL_AUTH", false))
+
         startActivity(intent)
-        finish()
     }
 }

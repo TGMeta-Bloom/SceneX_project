@@ -1,5 +1,6 @@
 package com.example.scenex.views
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Shader
@@ -29,11 +30,11 @@ class RecruiterHomeFragment : Fragment() {
     private lateinit var tvRecruiterName: TextView
     private lateinit var tvAppName: TextView
     private lateinit var ivNotification: ImageView
-    
+
     private lateinit var rvRecommendedTalent: RecyclerView
     private lateinit var cvTalentExample: View
     private lateinit var fabCreateCasting: Button
-    
+
     private var talentFeedListener: ListenerRegistration? = null
     private var identityListener: ListenerRegistration? = null
 
@@ -51,12 +52,18 @@ class RecruiterHomeFragment : Fragment() {
         tvRecruiterName = view.findViewById(R.id.tvRecruiterName)
         tvAppName = view.findViewById(R.id.tvAppName)
         ivNotification = view.findViewById(R.id.ivNotification)
-        
+
         rvRecommendedTalent = view.findViewById(R.id.rvRecommendedTalent)
         cvTalentExample = view.findViewById(R.id.cvTalentExample)
         fabCreateCasting = view.findViewById(R.id.fabCreateCasting)
 
         rvRecommendedTalent.layoutManager = LinearLayoutManager(requireContext())
+
+        // Setup Notification Click
+        ivNotification.setOnClickListener {
+            val intent = Intent(requireContext(), NotificationsActivity::class.java)
+            startActivity(intent)
+        }
 
         // Setup FAB Click
         fabCreateCasting.setOnClickListener {
@@ -84,9 +91,10 @@ class RecruiterHomeFragment : Fragment() {
     }
 
     private fun startLiveDiscoveryEngine() {
+        // 🎯 FIX: Only display "Verified" (Admin Approved) talents to recruiters
         FirebaseFirestore.getInstance().collection("profiles")
             .whereEqualTo("userRole", "TALENT")
-            .whereIn("verificationStatus", listOf("verified", "pending"))
+            .whereEqualTo("verificationStatus", "verified")
             .orderBy("rankingScore", Query.Direction.DESCENDING)
             .limit(20)
             .addSnapshotListener { snapshots, error ->
@@ -98,6 +106,7 @@ class RecruiterHomeFragment : Fragment() {
     private fun loadFailSafeTalent() {
         FirebaseFirestore.getInstance().collection("profiles")
             .whereEqualTo("userRole", "TALENT")
+            .whereEqualTo("verificationStatus", "verified")
             .limit(30).get().addOnSuccessListener { snapshots ->
                 val list = snapshots.toObjects(UserProfile::class.java).sortedByDescending { it.rankingScore }
                 displayTalentList(list)

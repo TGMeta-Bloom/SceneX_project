@@ -80,29 +80,29 @@ class RecruiterSignupStep1Fragment : Fragment() {
         btnCreateAccount = view.findViewById(R.id.btnCreateAccount)
         val tvLogin = view.findViewById<TextView>(R.id.tvLogin)
 
+        // CONVENIENCE PRE-FILL: Populate fields from ViewModel (Social Auth data)
+        if (viewModel.fullName.isNotEmpty()) etFullName.setText(viewModel.fullName)
+        if (viewModel.email.isNotEmpty()) etEmail.setText(viewModel.email)
+
         btnUploadImage.setOnClickListener { showImagePickerDialog() }
 
-        // Observe Uploading State
         viewModel.isUploading.observe(viewLifecycleOwner) { isUploading ->
             pbImageUpload.visibility = if (isUploading == true) View.VISIBLE else View.GONE
             btnCreateAccount.isEnabled = isUploading != true
         }
 
-        // Observe Profile Image URL
         viewModel.profileImageUrl.observe(viewLifecycleOwner) { url ->
             if (!url.isNullOrEmpty()) {
                 Glide.with(this).load(url).circleCrop().into(ivProfileImage)
             }
         }
 
-        // Password Visibility Toggle
         ivTogglePassword.setOnClickListener {
             isPasswordVisible = !isPasswordVisible
             etPassword.transformationMethod = if (isPasswordVisible) HideReturnsTransformationMethod.getInstance() else PasswordTransformationMethod.getInstance()
             etPassword.setSelection(etPassword.text.length)
         }
 
-        // Login Link Handshake
         tvLogin.setOnClickListener {
             val intent = Intent(requireContext(), LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -110,7 +110,6 @@ class RecruiterSignupStep1Fragment : Fragment() {
             requireActivity().finish()
         }
 
-        // Senior Fix: Observe Errors to provide feedback and reset button state
         viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
             error?.let {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
@@ -118,7 +117,6 @@ class RecruiterSignupStep1Fragment : Fragment() {
             }
         }
 
-        // Navigation Observer for Recruiter Flow
         viewModel.navigateToNextStep.observe(viewLifecycleOwner) { destination ->
             if (destination == "RECRUITER_STEP2") {
                 parentFragmentManager.beginTransaction()
@@ -130,7 +128,6 @@ class RecruiterSignupStep1Fragment : Fragment() {
             }
         }
 
-        // Account Creation Handshake
         btnCreateAccount.setOnClickListener {
             val name = etFullName.text.toString().trim()
             val email = etEmail.text.toString().trim()
@@ -147,18 +144,15 @@ class RecruiterSignupStep1Fragment : Fragment() {
                 return@setOnClickListener
             }
 
-            // Disable button to prevent double-click
             btnCreateAccount.isEnabled = false
-            
-            // Sync Data with ViewModel
+
             viewModel.userRole = "RECRUITER"
             viewModel.fullName = name
             viewModel.email = email
             viewModel.phoneNumber = phone
             viewModel.password = pass
-            viewModel.userName = name 
-            
-            // Trigger Authentication Handshake
+            viewModel.userName = name
+
             viewModel.createAccount()
         }
     }

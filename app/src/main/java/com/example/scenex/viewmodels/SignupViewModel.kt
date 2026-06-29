@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.scenex.models.ImgBBResponse
 import com.example.scenex.models.UserProfile
+import com.example.scenex.models.PortfolioWork
 import com.example.scenex.network.ImgBBService
 import com.example.scenex.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -40,6 +41,9 @@ class SignupViewModel : ViewModel() {
     private val _navigateToNextStep = MutableLiveData<String?>()
     val navigateToNextStep: LiveData<String?> get() = _navigateToNextStep
 
+    // 🎯 Tracks if this registration is completing a Social Auth account
+    var isSocialAuth: Boolean = false
+
     // Media Statuses
     val headshotStatus = MutableLiveData<String>("Head-shot")
     val fullBodyStatus = MutableLiveData<String>("Full Body")
@@ -47,8 +51,18 @@ class SignupViewModel : ViewModel() {
 
     private val IMGBB_API_KEY = "113d28dab202d082d441249d7debf1f7"
 
+    private val okHttpClient = okhttp3.OkHttpClient.Builder()
+        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .writeTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+        .addInterceptor(okhttp3.logging.HttpLoggingInterceptor().apply {
+            level = okhttp3.logging.HttpLoggingInterceptor.Level.HEADERS
+        })
+        .build()
+
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://api.imgbb.com/")
+        .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -86,20 +100,20 @@ class SignupViewModel : ViewModel() {
     }
 
     // --- FORM DATA STATE ---
-    var userRole: String = "TALENT" 
+    var userRole: String = "TALENT"
     var fullName: String = ""
     var email: String = ""
     var phoneNumber: String = ""
     var userName: String = ""
     var password: String = ""
-    var age: Int = 0 
+    var age: Int = 0
     var gender: String = ""
     var province: String = ""
     var city: String = ""
     var relationshipStatus: String = ""
     var hobbies: String = ""
     var shortBio: String = ""
-    
+
     var spotlightCategory: String = ""
     var qualification: String = ""
     var languages: String = ""
@@ -122,23 +136,48 @@ class SignupViewModel : ViewModel() {
     var videoUrl: String = ""
     var audioUrl: String = ""
 
-    private val _portfolioImages = MutableLiveData<MutableList<String>>(mutableListOf())
-    val portfolioImages: LiveData<MutableList<String>> get() = _portfolioImages
+    //  NEW: STRUCTURED PORTFOLIO WORKS (Real-world credits system)
+    private val _portfolioWorks = MutableLiveData<MutableList<PortfolioWork>>(mutableListOf())
+    val portfolioWorks: LiveData<MutableList<PortfolioWork>> get() = _portfolioWorks
+
+    fun addPortfolioWork(work: PortfolioWork) {
+        val currentList = _portfolioWorks.value ?: mutableListOf()
+        currentList.add(work)
+        _portfolioWorks.value = currentList
+        syncProfileLifecycle(false)
+    }
 
     private fun calculateWeightedCompletion(): Int {
         var score = 0
         if (userRole == "TALENT") {
-            if (fullName.isNotBlank() && email.isNotBlank() && phoneNumber.isNotBlank()) score += 10
-            if (height.isNotBlank() && age > 0 && gender.isNotBlank()) score += 10
-            if (spotlightCategory.isNotBlank() && languages.isNotBlank() && experience.isNotBlank()) score += 20
-            if (headshotUrl.isNotBlank() && fullBodyUrl.isNotBlank()) score += 30
-            if (videoUrl.isNotBlank()) score += 30
+            // 1. Identity & Contact (15 pts)
+            if (fullName.isNotBlank() && email.isNotBlank() && phoneNumber.isNotBlank()) score += 15
+
+            // 2. Physical & Appearance (15 pts)
+            if (height.isNotBlank()) score += 5
+            if (age > 0 && gender.isNotBlank()) score += 10
+
+            // 3. Professional Foundation (20 pts)
+            if (spotlightCategory.isNotBlank()) score += 10
+            if (experience.isNotBlank() || qualification.isNotBlank()) score += 10
+
+            // 4. Visual Assets (25 pts)
+            val hasHeadshot = headshotUrl.isNotBlank()
+            val hasFullBody = fullBodyUrl.isNotBlank()
+            if (hasHeadshot) score += 15
+            if (hasFullBody) score += 10
+
+            // 5. Media & Credits (25 pts)
+            val hasVideo = videoUrl.isNotBlank() || audioUrl.isNotBlank()
+            val hasPortfolio = (_portfolioWorks.value?.isNotEmpty() ?: false) || portfolioLink.isNotBlank()
+            if (hasVideo) score += 15
+            if (hasPortfolio) score += 10
         } else {
-            if (fullName.isNotBlank() && email.isNotBlank()) score += 10 
-            if (spotlightCategory.isNotBlank()) score += 20 
-            if (companyName.isNotBlank()) score += 20 
-            if (industryProofLinks.isNotEmpty()) score += 30 
-            if (nicImageUrl.isNotBlank()) score += 20 
+            if (fullName.isNotBlank() && email.isNotBlank()) score += 10
+            if (spotlightCategory.isNotBlank()) score += 20
+            if (companyName.isNotBlank()) score += 20
+            if (industryProofLinks.isNotEmpty()) score += 30
+            if (nicImageUrl.isNotBlank()) score += 20
         }
         return score.coerceAtMost(100)
     }
@@ -156,9 +195,11 @@ class SignupViewModel : ViewModel() {
         val wP = (cw["portfolioWeight"] as? Number)?.toDouble() ?: 30.0
 
         val completenessYield = completeness.toDouble()
-        val skillsYield = Math.min(100.0, (accents.size + otherSkills.size) * 20.0) 
+        val skillsYield = Math.min(100.0, (accents.size + otherSkills.size) * 20.0)
         val experienceYield = if (experience.isNotBlank()) 100.0 else 0.0
-        val portfolioYield = Math.min(100.0, ((if (portfolioLink.isNotBlank()) 50 else 0) + (_portfolioImages.value?.size ?: 0) * 10).toDouble())
+
+        // Structured works yield bonus points
+        val portfolioYield = Math.min(100.0, ((if (portfolioLink.isNotBlank()) 50 else 0) + (_portfolioWorks.value?.size ?: 0) * 10).toDouble())
 
         val numerator = (portfolioYield * wP) + (skillsYield * wS) + (experienceYield * wE) + (completenessYield * wC)
         val denominator = wP + wS + wE + wC
@@ -181,7 +222,7 @@ class SignupViewModel : ViewModel() {
         }
 
         val currentStatus = when {
-            isFinalSubmit && completion >= 70 -> "pending_review" 
+            isFinalSubmit && completion >= 70 -> "pending_review"
             completion >= 70 -> "eligible_for_review"
             completion >= 40 -> "active"
             else -> "draft"
@@ -191,8 +232,8 @@ class SignupViewModel : ViewModel() {
 
         val profilePayload = mutableMapOf<String, Any>(
             "status" to currentStatus,
-            "completenessScore" to completion.toLong(),
-            "rankingScore" to rankingDecimal.toLong(),
+            "completenessScore" to completion.toDouble(),
+            "rankingScore" to rankingDecimal,
             "calculated_score" to rankingDecimal,
             "visibility_tier" to tier,
             "fullName" to fullName,
@@ -205,13 +246,14 @@ class SignupViewModel : ViewModel() {
             "userRole" to userRole,
             "rankingVersion" to (calibrationWeights?.get("rankingVersion") ?: 1),
             "verificationStatus" to if (currentStatus == "pending_review") "pending" else "unverified",
-            "updatedAt" to Timestamp.now()
+            "updatedAt" to Timestamp.now(),
+            "portfolioWorks" to (_portfolioWorks.value ?: mutableListOf<PortfolioWork>())
         )
 
         if (accountProfilePicture.isNotEmpty()) {
             profilePayload["profileImage"] = accountProfilePicture
         }
-        
+
         if (userRole == "RECRUITER") {
             profilePayload["companyName"] = companyName
             profilePayload["industryProofLinks"] = industryProofLinks
@@ -220,8 +262,8 @@ class SignupViewModel : ViewModel() {
             profilePayload["physicalSpecs"] = "Height: $height | Build: $bodyType | Gender: $gender"
             profilePayload["showreelUrl"] = videoUrl
             profilePayload["spotlightCategory"] = spotlightCategory
-            profilePayload["headshotUrl"] = headshotUrl 
-            profilePayload["fullBodyUrl"] = fullBodyUrl 
+            profilePayload["headshotUrl"] = headshotUrl
+            profilePayload["fullBodyUrl"] = fullBodyUrl
         }
 
         FirebaseFirestore.getInstance().collection("profiles").document(userId)
@@ -231,7 +273,7 @@ class SignupViewModel : ViewModel() {
 
     fun finalizeRegistration() {
         val score = calculateWeightedCompletion()
-        
+
         if (userRole == "RECRUITER") {
             if (score < 70) {
                 _errorMessage.value = "Recruiter profile strength: $score%. Minimum 70% required."
@@ -265,31 +307,19 @@ class SignupViewModel : ViewModel() {
         })
     }
 
-    /**
-     * 🧠 INTELLIGENCE ROUTING logic updated:
-     * Redirects all performance categories (Actors, Singers, Dancers, etc.) to the Specs screen.
-     * Technical crew (Editors, Sound, etc.) are routed directly to the Portfolio section.
-     */
     fun saveFoundationAndNavigate() {
         val updates = hashMapOf<String, Any>(
-            "highest_qualification" to qualification, 
-            "languages" to languages, 
-            "experience_level" to experience, 
-            "portfolioLink" to portfolioLink, 
+            "highest_qualification" to qualification,
+            "languages" to languages,
+            "experience_level" to experience,
+            "portfolioLink" to portfolioLink,
             "socialMediaLinks" to socialMediaLinks
         )
-        repository.saveProfessionalProfile(updates) { 
+        repository.saveProfessionalProfile(updates) {
             if (it) {
                 syncProfileLifecycle(false)
-                
-                // Categorize based on whether they need physical specs (Performers) or just portfolio (Crew)
                 val performers = listOf("Actor", "Model", "Singer", "Dancer", "News Anchor", "Voice Artist", "Presenter")
-                
-                _navigateToNextStep.value = if (performers.contains(spotlightCategory)) {
-                    "ACTOR_SPECS" 
-                } else {
-                    "STEP5" 
-                }
+                _navigateToNextStep.value = if (performers.contains(spotlightCategory)) "ACTOR_SPECS" else "STEP5"
             }
         }
     }
@@ -305,37 +335,33 @@ class SignupViewModel : ViewModel() {
             "videoUrl" to videoUrl,
             "audioUrl" to audioUrl
         )
-        repository.saveProfessionalProfile(updates) { 
+        repository.saveProfessionalProfile(updates) {
             if (it) {
                 syncProfileLifecycle(false)
-                _navigateToNextStep.value = "STEP5" 
+                _navigateToNextStep.value = "STEP5"
             }
         }
     }
 
-    fun addPortfolioImage(file: File) {
-        _isUploading.value = true
-        val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-        imgBBService.uploadImage(IMGBB_API_KEY, MultipartBody.Part.createFormData("image", file.name, requestFile)).enqueue(object : Callback<ImgBBResponse> {
-            override fun onResponse(call: Call<ImgBBResponse>, r: Response<ImgBBResponse>) {
-                _isUploading.value = false
-                if (r.isSuccessful && r.body()?.success == true) {
-                    r.body()?.data?.url?.let { url ->
-                        val list = _portfolioImages.value ?: mutableListOf()
-                        list.add(url)
-                        _portfolioImages.value = list
-                    }
-                }
-            }
-            override fun onFailure(call: Call<ImgBBResponse>, t: Throwable) { _isUploading.value = false }
-        })
-    }
-
     fun createAccount() {
         val profile = UserProfile(fullName = fullName, email = email, stageName = userName, role = userRole, userRole = userRole, phoneNumber = phoneNumber, age = age, gender = gender)
-        repository.signupUser(profile, password) { success, error ->
-            if (success) { syncProfileLifecycle(false); _navigateToNextStep.value = if (userRole == "RECRUITER") "RECRUITER_STEP2" else "STEP2" } 
-            else _errorMessage.value = error
+
+        if (isSocialAuth) {
+            repository.saveSocialProfile(profile) { success, error ->
+                if (success) {
+                    syncProfileLifecycle(false)
+                    _navigateToNextStep.value = if (userRole == "RECRUITER") "RECRUITER_STEP2" else "STEP2"
+                }
+                else _errorMessage.value = error
+            }
+        } else {
+            repository.signupUser(profile, password) { success, error ->
+                if (success) {
+                    syncProfileLifecycle(false)
+                    _navigateToNextStep.value = if (userRole == "RECRUITER") "RECRUITER_STEP2" else "STEP2"
+                }
+                else _errorMessage.value = error
+            }
         }
     }
 
@@ -347,8 +373,8 @@ class SignupViewModel : ViewModel() {
     fun saveRecruiterExperienceAndNavigate(company: String, proofLinks: List<String>, exp: String) {
         companyName = company; industryProofLinks = proofLinks; experience = exp
         if (proofLinks.isEmpty()) { _errorMessage.value = "Mandatory: Provide links"; return }
-        repository.saveProfessionalProfile(hashMapOf("companyName" to company, "industryProofLinks" to proofLinks, "experience" to exp)) { 
-            if (it) { syncProfileLifecycle(false); _navigateToNextStep.value = "RECRUITER_VERIFICATION" } 
+        repository.saveProfessionalProfile(hashMapOf("companyName" to company, "industryProofLinks" to proofLinks, "experience" to exp)) {
+            if (it) { syncProfileLifecycle(false); _navigateToNextStep.value = "RECRUITER_VERIFICATION" }
         }
     }
 
@@ -361,7 +387,7 @@ class SignupViewModel : ViewModel() {
                 _isUploading.value = false
                 if (r.isSuccessful && r.body()?.success == true) {
                     val url = r.body()?.data?.url ?: ""
-                    if (type == "HEADSHOT") { headshotUrl = url; headshotStatus.value = "Head-shot ✅" } 
+                    if (type == "HEADSHOT") { headshotUrl = url; headshotStatus.value = "Head-shot ✅" }
                     else { fullBodyUrl = url; fullBodyStatus.value = "Full Body ✅" }
                     syncProfileLifecycle(false)
                 } else status.value = "Failed ❌"
@@ -388,6 +414,31 @@ class SignupViewModel : ViewModel() {
             override fun onFailure(call: Call<ImgBBResponse>, t: Throwable) {
                 _isUploading.value = false
                 verificationDocStatus.value = "Error ❌"
+            }
+        })
+    }
+
+    fun uploadWorkImage(file: File, callback: (String?) -> Unit) {
+        _isUploading.value = true
+        Log.d("SignupViewModel", "Starting upload for file: ${file.name}, size: ${file.length()} bytes")
+
+        val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+        imgBBService.uploadImage(IMGBB_API_KEY, MultipartBody.Part.createFormData("image", file.name, requestFile)).enqueue(object : Callback<ImgBBResponse> {
+            override fun onResponse(call: Call<ImgBBResponse>, response: Response<ImgBBResponse>) {
+                _isUploading.value = false
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val url = response.body()?.data?.url
+                    Log.d("SignupViewModel", "Upload success: $url")
+                    callback(url)
+                } else {
+                    Log.e("SignupViewModel", "Upload failed: ${response.code()} - ${response.errorBody()?.string()}")
+                    callback(null)
+                }
+            }
+            override fun onFailure(call: Call<ImgBBResponse>, t: Throwable) {
+                _isUploading.value = false
+                Log.e("SignupViewModel", "Upload error: ${t.message}", t)
+                callback(null)
             }
         })
     }

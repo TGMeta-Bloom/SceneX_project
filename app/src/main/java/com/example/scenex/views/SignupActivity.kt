@@ -14,9 +14,16 @@ class SignupActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_signup)
 
-        // Retrieve role from Intent and sync with ViewModel
+        //  CAPTURE PRE-FILL DATA (Convenience Feature)
         val role = intent.getStringExtra("USER_ROLE") ?: "TALENT"
+        val prefillName = intent.getStringExtra("PREFILL_NAME")
+        val prefillEmail = intent.getStringExtra("PREFILL_EMAIL")
+        val isSocialAuth = intent.getBooleanExtra("IS_SOCIAL_AUTH", false)
+
         viewModel.userRole = role
+        viewModel.isSocialAuth = isSocialAuth
+        prefillName?.let { viewModel.fullName = it }
+        prefillEmail?.let { viewModel.email = it }
 
         if (savedInstanceState == null) {
             val startFragment = if (role == "RECRUITER") {

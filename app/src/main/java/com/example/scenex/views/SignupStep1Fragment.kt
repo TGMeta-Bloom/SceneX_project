@@ -36,24 +36,11 @@ class SignupStep1Fragment : Fragment() {
     private lateinit var ivProfileImage: ShapeableImageView
     private lateinit var pbImageUpload: ProgressBar
 
-    private val requestCameraPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) launchCamera() else Toast.makeText(requireContext(), "Camera permission is required", Toast.LENGTH_SHORT).show()
-    }
-
     private val galleryLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            result.data?.data?.let { uri -> 
-                // STEP 1: Instant Local Preview
-                Glide.with(this)
-                    .load(uri)
-                    .placeholder(R.drawable.ic_profile_placeholder)
-                    .centerCrop()
-                    .into(ivProfileImage)
-                
-                // STEP 2: Background Upload
-                viewModel.uploadProfilePicture(uriToFile(uri)) 
+            result.data?.data?.let { uri ->
+                Glide.with(this).load(uri).placeholder(R.drawable.ic_profile_placeholder).centerCrop().into(ivProfileImage)
+                viewModel.uploadProfilePicture(uriToFile(uri))
             }
         }
     }
@@ -61,11 +48,8 @@ class SignupStep1Fragment : Fragment() {
     private val cameraLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             (result.data?.extras?.get("data") as? Bitmap)?.let { bitmap ->
-                // STEP 1: Instant Local Preview
                 ivProfileImage.setImageBitmap(bitmap)
-                
-                // STEP 2: Background Upload
-                viewModel.uploadProfilePicture(bitmapToFile(bitmap)) 
+                viewModel.uploadProfilePicture(bitmapToFile(bitmap))
             }
         }
     }
@@ -79,13 +63,15 @@ class SignupStep1Fragment : Fragment() {
 
         ivProfileImage = view.findViewById(R.id.ivProfileImage)
         pbImageUpload = view.findViewById(R.id.pbImageUpload)
-        val btnUploadImage = view.findViewById<View>(R.id.btnUploadImage)
-        val btnCreateAccount = view.findViewById<Button>(R.id.btnCreateAccount)
         val etFullName = view.findViewById<EditText>(R.id.etFullName)
         val etEmail = view.findViewById<EditText>(R.id.etEmail)
         val etUserName = view.findViewById<EditText>(R.id.etUserName)
         val etPassword = view.findViewById<EditText>(R.id.etPassword)
         val etConfirmPassword = view.findViewById<EditText>(R.id.etConfirmPassword)
+        val passwordContainer = view.findViewById<View>(R.id.passwordContainer)
+        val confirmPasswordContainer = view.findViewById<View>(R.id.confirmPasswordContainer)
+        val labelPassword = view.findViewById<View>(R.id.labelPassword)
+        val labelConfirmPassword = view.findViewById<View>(R.id.labelConfirmPassword)
         val ivTogglePassword = view.findViewById<ImageView>(R.id.ivTogglePassword)
         val ivToggleConfirmPassword = view.findViewById<ImageView>(R.id.ivToggleConfirmPassword)
         val etPhone = view.findViewById<EditText>(R.id.etPhone)
@@ -97,23 +83,32 @@ class SignupStep1Fragment : Fragment() {
         val etHobbies = view.findViewById<EditText>(R.id.etHobbies)
         val etBio = view.findViewById<EditText>(R.id.etBio)
         val tvLogin = view.findViewById<TextView>(R.id.tvLogin)
+        val btnCreateAccount = view.findViewById<Button>(R.id.btnCreateAccount)
 
-        btnUploadImage.setOnClickListener { showImagePickerDialog() }
+        // FIX: Hide password fields if Social Auth (Google/FB) is used
+        if (viewModel.isSocialAuth) {
+            passwordContainer.visibility = View.GONE
+            confirmPasswordContainer.visibility = View.GONE
+            labelPassword.visibility = View.GONE
+            labelConfirmPassword.visibility = View.GONE
+            // Pre-fill social data
+            if (viewModel.fullName.isNotEmpty()) etFullName.setText(viewModel.fullName)
+            if (viewModel.email.isNotEmpty()) etEmail.setText(viewModel.email)
+            etEmail.isEnabled = false // Manage email via provider
+        }
+
+        view.findViewById<View>(R.id.btnUploadImage).setOnClickListener { showImagePickerDialog() }
+
+        // FIX: Wire up the Login link
+        tvLogin.setOnClickListener {
+            val intent = Intent(requireContext(), LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            requireActivity().finish()
+        }
 
         viewModel.isUploading.observe(viewLifecycleOwner) { isUploading ->
             pbImageUpload.visibility = if (isUploading == true) View.VISIBLE else View.GONE
-        }
-
-        // Robust Remote Image Observer
-        viewModel.profileImageUrl.observe(viewLifecycleOwner) { url ->
-            if (!url.isNullOrEmpty()) {
-                Glide.with(this)
-                    .load(url)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .placeholder(R.drawable.ic_profile_placeholder)
-                    .centerCrop()
-                    .into(ivProfileImage)
-            }
         }
 
         ivTogglePassword.setOnClickListener {
@@ -130,23 +125,12 @@ class SignupStep1Fragment : Fragment() {
 
         setupLocationSpinners(spinnerProvince, spinnerCity)
 
-        tvLogin.setOnClickListener {
-            startActivity(Intent(requireContext(), LoginActivity::class.java))
-            requireActivity().finish()
-        }
-
         viewModel.navigateToNextStep.observe(viewLifecycleOwner) { destination ->
             if (destination == "STEP2") {
                 parentFragmentManager.beginTransaction()
-                    .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right)
                     .replace(R.id.signupFragmentContainer, SignupStep2Fragment())
-                    .addToBackStack(null)
-                    .commit()
+                    .addToBackStack(null).commit()
             }
-        }
-
-        viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
-            error?.let { Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show() }
         }
 
         btnCreateAccount.setOnClickListener {
@@ -156,66 +140,58 @@ class SignupStep1Fragment : Fragment() {
             val password = etPassword.text.toString()
             val confirmPassword = etConfirmPassword.text.toString()
 
-            if (fullName.isEmpty()) { etFullName.error = "Required"; return@setOnClickListener }
-            if (email.isEmpty()) { etEmail.error = "Required"; return@setOnClickListener }
-            if (userName.isEmpty()) { etUserName.error = "Required"; return@setOnClickListener }
-            if (password.isEmpty()) { etPassword.error = "Required"; return@setOnClickListener }
-            if (password != confirmPassword) { etConfirmPassword.error = "Passwords do not match"; return@setOnClickListener }
+            if (fullName.isEmpty() || email.isEmpty() || userName.isEmpty()) {
+                Toast.makeText(context, "Required fields missing", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (!viewModel.isSocialAuth) {
+                if (password.isEmpty() || password != confirmPassword) {
+                    Toast.makeText(context, "Passwords do not match", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                viewModel.password = password
+            }
 
             viewModel.fullName = fullName
             viewModel.email = email
             viewModel.userName = userName
-            viewModel.password = password
             viewModel.phoneNumber = etPhone.text.toString()
-            
-            // Fixed: Safely parse age as Int to match ViewModel and UserProfile
             viewModel.age = etAge.text.toString().toIntOrNull() ?: 0
-            
             val selectedGenderId = rgGender.checkedRadioButtonId
             viewModel.gender = if (selectedGenderId != -1) view.findViewById<RadioButton>(selectedGenderId).text.toString() else ""
-            
             viewModel.province = spinnerProvince.selectedItem?.toString() ?: ""
             viewModel.city = spinnerCity.selectedItem?.toString() ?: ""
-            
             val selectedRelId = rgRelationship.checkedRadioButtonId
             viewModel.relationshipStatus = if (selectedRelId != -1) view.findViewById<RadioButton>(selectedRelId).text.toString() else ""
-                
             viewModel.hobbies = etHobbies.text.toString()
             viewModel.shortBio = etBio.text.toString()
-            
+
             viewModel.createAccount()
         }
     }
 
     private fun showImagePickerDialog() {
         val options = arrayOf("Take Photo", "Choose from Gallery", "Cancel")
-        android.app.AlertDialog.Builder(requireContext())
-            .setTitle("Upload Profile Picture")
+        android.app.AlertDialog.Builder(requireContext()).setTitle("Upload Profile Picture")
             .setItems(options) { dialog, item ->
                 when (options[item]) {
-                    "Take Photo" -> checkCameraPermissionAndLaunch()
+                    "Take Photo" -> cameraLauncher.launch(Intent(MediaStore.ACTION_IMAGE_CAPTURE))
                     "Choose from Gallery" -> galleryLauncher.launch(Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI))
                     else -> dialog.dismiss()
                 }
             }.show()
     }
 
-    private fun checkCameraPermissionAndLaunch() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) launchCamera()
-        else requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-    }
-
-    private fun launchCamera() { cameraLauncher.launch(Intent(MediaStore.ACTION_IMAGE_CAPTURE)) }
-
     private fun uriToFile(uri: Uri): File {
         val inputStream = requireContext().contentResolver.openInputStream(uri)
-        val tempFile = File(requireContext().cacheDir, "temp_profile_image_${System.currentTimeMillis()}.jpg")
+        val tempFile = File(requireContext().cacheDir, "temp_profile_${System.currentTimeMillis()}.jpg")
         inputStream?.use { input -> tempFile.outputStream().use { output -> input.copyTo(output) } }
         return tempFile
     }
 
     private fun bitmapToFile(bitmap: Bitmap): File {
-        val tempFile = File(requireContext().cacheDir, "temp_camera_image_${System.currentTimeMillis()}.jpg")
+        val tempFile = File(requireContext().cacheDir, "temp_cam_${System.currentTimeMillis()}.jpg")
         tempFile.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it) }
         return tempFile
     }
@@ -225,19 +201,11 @@ class SignupStep1Fragment : Fragment() {
         val provinceAdapter = ArrayAdapter<String>(requireContext(), R.layout.custom_spinner_item, provincesList)
         provinceAdapter.setDropDownViewResource(R.layout.custom_spinner_dropdown_item)
         provinceSpinner.adapter = provinceAdapter
-
-        viewModel.availableCities.observe(viewLifecycleOwner, Observer { cities ->
-            val cityAdapter = ArrayAdapter<String>(requireContext(), R.layout.custom_spinner_item, cities ?: emptyList())
-            cityAdapter.setDropDownViewResource(R.layout.custom_spinner_dropdown_item)
-            citySpinner.adapter = cityAdapter
-        })
-
+        viewModel.availableCities.observe(viewLifecycleOwner) { cities ->
+            citySpinner.adapter = ArrayAdapter<String>(requireContext(), R.layout.custom_spinner_item, cities ?: emptyList()).apply { setDropDownViewResource(R.layout.custom_spinner_dropdown_item) }
+        }
         provinceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (position in provincesList.indices) {
-                    viewModel.onProvinceSelected(provincesList[position])
-                }
-            }
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) { viewModel.onProvinceSelected(provincesList[position]) }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
