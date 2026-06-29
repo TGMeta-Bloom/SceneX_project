@@ -11,7 +11,9 @@ import com.example.scenex.repository.UserRepository
 import com.example.scenex.utils.AvailabilityEngine
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -21,6 +23,7 @@ import java.util.*
  */
 class AvailabilityViewModel : ViewModel() {
 
+    private val db = FirebaseFirestore.getInstance()
     private val repository = AvailabilityRepository()
     private val userRepository = UserRepository()
     private val auth = FirebaseAuth.getInstance()
@@ -50,38 +53,38 @@ class AvailabilityViewModel : ViewModel() {
      * 1. MANUALLY_UNAVAILABLE (🔴 Unavailable)
      * 2. BUSY_NOW via Engine (🟠 Busy Now)
      * 3. AVAILABLE (🟢 Available Now)
+     *
+     * Refactored: Uses Snapshot Listeners for real-time accuracy.
      */
+    private var statusListener: com.google.firebase.firestore.ListenerRegistration? = null
+
     fun resolveCombinedStatus(userId: String) {
-        viewModelScope.launch {
-            try {
-                userRepository.getProfileData(userId) { profile ->
-                    val manual = profile?.get("manualAvailabilityStatus") as? String ?: "AVAILABLE"
-                    _manualStatusPreference.postValue(manual)
+        statusListener?.remove()
 
-                    if (manual == "UNAVAILABLE") {
-                        _calculatedStatus.postValue("🔴 Unavailable")
-                        return@getProfileData
-                    }
+        statusListener = userRepository.listenToProfileData(userId) { profile ->
+            // 🎯 ROBUST: Check both potential fields and use case-insensitive matching
+            val manual = (profile?.get("manualAvailabilityStatus") as? String
+                ?: profile?.get("status") as? String ?: "AVAILABLE").uppercase()
 
-                    // Priority 2: Check Calendar Busy status
-                    viewModelScope.launch {
-                        val today = Calendar.getInstance().apply {
-                            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
-                            set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-                        }.timeInMillis
+            _manualStatusPreference.postValue(manual)
 
-                        val (bookings, schedules, castings) = repository.getDailyEvents(userId, today)
-                        val allEvents = bookings + schedules + castings.filter {
-                            (it.getString("recruiterId") ?: it.getString("userId")) == userId
-                        }
+            if (manual == "UNAVAILABLE") {
+                _calculatedStatus.postValue("🔴 Unavailable")
+            } else {
+                // Priority 2: Check Calendar Busy status
+                viewModelScope.launch {
+                    val today = Calendar.getInstance().apply {
+                        set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+                    }.timeInMillis
 
-                        val calendarStatus = engine.calculateCurrentStatus(allEvents)
-                        val result = if (calendarStatus == AvailabilityStatus.BUSY_NOW) "🟠 Busy Now" else "🟢 Available Now"
-                        _calculatedStatus.postValue(result)
-                    }
+                    val (bookings, schedules, castings) = repository.getDailyEvents(userId, today)
+                    val allEvents = bookings + schedules + castings
+
+                    val calendarStatus = engine.calculateCurrentStatus(allEvents)
+                    val result = if (calendarStatus == AvailabilityStatus.BUSY_NOW) "🟠 Busy Now" else "🟢 Available Now"
+                    _calculatedStatus.postValue(result)
                 }
-            } catch (e: Exception) {
-                Log.e("SceneX_Intel", "Status resolve failed", e)
             }
         }
     }
@@ -177,6 +180,13 @@ class AvailabilityViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
+                // 🎯 FIX: Fetch latest Manual Status and check both potential fields (Talent/Recruiter)
+                val profile = db.collection("profiles").document(userId).get().await()
+                val manual = (profile.getString("manualAvailabilityStatus")
+                    ?: profile.getString("status") ?: "AVAILABLE").uppercase()
+
+                _manualStatusPreference.value = manual // Immediate update on Main thread
+
                 val cal = currentMonth.clone() as Calendar
                 cal.set(Calendar.DAY_OF_MONTH, 1)
                 val start = normalizeToMidnight(cal.timeInMillis)
@@ -323,10 +333,17 @@ class AvailabilityViewModel : ViewModel() {
         repeat(42) {
             val dStr = sdf.format(cal.time)
             val dayData = dataMap[dStr]
+
+            // 🎯 FIX: Merge Manual Unavailability with System Events (Case-Insensitive)
+            val statuses = (dayData?.first ?: emptySet<DayStatus>()).toMutableSet()
+            if (_manualStatusPreference.value?.uppercase() == "UNAVAILABLE") {
+                statuses.add(DayStatus.MANUAL_UNAVAILABLE)
+            }
+
             days.add(CalendarDay(
                 dateString = dStr,
                 dayOfMonth = cal.get(Calendar.DAY_OF_MONTH).toString(),
-                statuses = dayData?.first ?: emptySet<DayStatus>(),
+                statuses = statuses,
                 events = dayData?.second ?: emptyList<CalendarEvent>(),
                 isCurrentMonth = cal.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)
             ))
@@ -338,6 +355,16 @@ class AvailabilityViewModel : ViewModel() {
     fun checkAvailability(userId: String, date: Long, startTime: String, endTime: String, onResult: (AvailabilityResult) -> Unit) {
         viewModelScope.launch {
             try {
+                // 🎯 Priority 1: Check Manual Override first (Recruiter/Talent robust check)
+                val profile = db.collection("profiles").document(userId).get().await()
+                val manualStatus = (profile.getString("manualAvailabilityStatus")
+                    ?: profile.getString("status") ?: "AVAILABLE").uppercase()
+
+                if (manualStatus == "UNAVAILABLE") {
+                    onResult(AvailabilityResult.BUSY)
+                    return@launch
+                }
+
                 val timestamp = normalizeToMidnight(date)
                 val targetDateStr = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
                     timeZone = TimeZone.getTimeZone("UTC")
@@ -347,11 +374,8 @@ class AvailabilityViewModel : ViewModel() {
                 val hardBlocks = (bookings + schedules).filter {
                     val status = it.getString("status")?.uppercase() ?: "CONFIRMED"
                     getFormattedDate(it) == targetDateStr && (status == "CONFIRMED" || status == "ACCEPTED")
-                } + castingCalls.filter {
-                    val rId = it.getString("recruiterId") ?: it.getString("recruiterid") ?:
-                    it.getString("recruiter_id") ?: it.getString("userId") ?: ""
-                    rId == userId && getFormattedDate(it) == targetDateStr
-                }
+                } + castingCalls
+
                 onResult(engine.checkSlotAvailability(hardBlocks, startTime, endTime))
             } catch (e: Exception) { onResult(AvailabilityResult.BUSY) }
         }
