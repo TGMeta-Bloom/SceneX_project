@@ -9,6 +9,12 @@
     <string name="add_voice_clip_action">Add voice clip for 100%</string>
     <string name="casting_opportunities_feed_title">Casting opportunities feed</string>
 
+    <!-- Booking Details Formats -->
+    <string name="booking_ref_format">Booking Ref: #%1$s</string>
+    <string name="my_id_format">My ID: %1$s</string>
+    <string name="my_name_format">My name: %1$s</string>
+    <string name="time_range_format">%1$s - %2$s</string>
+
     <!-- Calendar & Availability (Member 1) -->
     <string name="schedule_title">Schedule</string>
     <string name="calendar_view">Calendar View</string>
@@ -34,17 +40,12 @@
     <string name="msg_sync_success">Availability Synced Successfully</string>
     <string name="msg_sync_error">Engine Sync: Network Error</string>
 
-<!--    <string-array name="fixed_time_slots">-->
-<!--        <item>08:00 - 09:00</item>-->
-<!--        <item>09:00 - 10:00</item>-->
-<!--        <item>10:00 - 11:00</item>-->
-<!--        <item>11:00 - 12:00</item>-->
-<!--        <item>12:00 - 13:00</item>-->
-<!--        <item>13:00 - 14:00</item>-->
-<!--        <item>14:00 - 15:00</item>-->
-<!--        <item>15:00 - 16:00</item>-->
-<!--        <item>16:00 - 17:00</item>-->
-<!--        <item>17:00 - 18:00</item>-->
-<!--        <item>18:00 - 19:00</item>-->
-<!--    </string-array>-->
+    <!-- Google Sign-In -->
+    <string name="default_web_client_id">987826703702-34b9p7p3j31a741r869mvbr2emr7p7rj.apps.googleusercontent.com</string>
+
+    <!-- Facebook Integration (Replace with your actual IDs) -->
+    <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
+    <string name="fb_login_protocol_scheme">fbYOUR_FACEBOOK_APP_ID</string>
+    <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+
 </resources>
