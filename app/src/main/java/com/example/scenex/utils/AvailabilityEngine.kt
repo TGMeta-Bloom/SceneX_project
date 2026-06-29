@@ -97,7 +97,7 @@ class AvailabilityEngine {
         val rs = timeToMinutes(reqStart)
         var re = timeToMinutes(reqEnd)
 
-        // 🎯 FIX: Handle numerical ambiguity (e.g. 10:00 to 01:00 interpreted as overnight/wrap-around)
+        //  Handle numerical ambiguity (e.g. 10:00 to 01:00 interpreted as overnight/wrap-around)
         if (de <= ds && de != 0) de += 1440
         if (re <= rs && re != 0) re += 1440
 
@@ -137,7 +137,7 @@ class AvailabilityEngine {
     }
 
     /**
-     * 🛡️ UNIVERSAL DATE NORMALIZER: Aligns any format to yyyy-MM-dd for precision matching.
+     * 🛡 UNIVERSAL DATE NORMALIZER: Aligns any format to yyyy-MM-dd for precision matching.
      */
     fun normalizeRawDate(rawDate: Any?): String {
         if (rawDate == null) return ""
