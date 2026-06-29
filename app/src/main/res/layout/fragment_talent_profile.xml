@@ -1,344 +1,516 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FBFBFB"
-    android:fillViewport="true">
+    tools:context=".views.TalentProfileFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="40dp">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <View
-            android:id="@+id/viewTalentHeaderBg"
-            android:layout_width="match_parent"
-            android:layout_height="180dp"
-            android:background="#D9D9D9"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/ivTalentAvatar"
-            android:layout_width="105dp"
-            android:layout_height="105dp"
-            android:layout_marginTop="125dp"
-            android:scaleType="centerCrop"
-            android:padding="4dp"
-            android:background="#FBFBFB"
-            android:src="@drawable/ic_profile_placeholder"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:shapeAppearanceOverlay="@style/CircleImageView"
-            app:strokeColor="#B0006D"
-            app:strokeWidth="3dp" />
-
-        <TextView
-            android:id="@+id/tvTalentFullName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:textColor="#B0006D"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ivTalentAvatar"
-            tools:text="Shanudri Priyasad" />
-
-        <TextView
-            android:id="@+id/tvStageName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#666666"
-            android:textSize="14sp"
-            android:textStyle="italic"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvTalentFullName"
-            tools:text="'Shanu'" />
-
-        <!-- 🎯 Availability Status Override Section -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cvAvailabilityStatus"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="#FFFFFF"
-            app:strokeColor="#B0006D"
-            app:strokeWidth="1dp"
-            app:layout_constraintTop_toBottomOf="@id/tvStageName">
+            android:paddingBottom="40dp">
 
-            <LinearLayout
+            <View
+                android:id="@+id/viewTalentHeaderBg"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="12dp">
+                android:layout_height="180dp"
+                android:background="#D9D9D9"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingStart="8dp"
-                    android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Availability Status"
-                        android:textSize="14sp"
-                        android:textColor="#333333"
-                        android:textStyle="bold" />
-                    <TextView
-                        android:id="@+id/tvAvailabilityBadge"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="🟢 Available Now"
-                        android:textSize="12sp"
-                        android:textColor="#555555" />
-                </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnOpenSettings"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                app:icon="@android:drawable/ic_menu_sort_by_size"
+                app:iconSize="28dp"
+                app:iconTint="@color/black"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switchAvailability"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:scaleX="0.9"
-                    android:scaleY="0.9" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivTalentAvatar"
+                android:layout_width="105dp"
+                android:layout_height="105dp"
+                android:layout_marginTop="125dp"
+                android:scaleType="centerCrop"
+                android:padding="4dp"
+                android:background="#FBFBFB"
+                android:src="@drawable/ic_profile_placeholder"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/CircleImageView"
+                app:strokeColor="#B0006D"
+                app:strokeWidth="3dp" />
 
-        <TextView
-            android:id="@+id/tvSpotlightCategory"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:textColor="#B0006D"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/cvAvailabilityStatus"
-            tools:text="Actor" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEditTalentAvatar"
+                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="4dp"
+                app:icon="@android:drawable/ic_menu_camera"
+                app:iconSize="16dp"
+                app:iconTint="#B0006D"
+                app:layout_constraintBottom_toBottomOf="@id/ivTalentAvatar"
+                app:layout_constraintEnd_toEndOf="@id/ivTalentAvatar"
+                android:layout_marginEnd="-2dp"
+                android:layout_marginBottom="4dp" />
 
-        <TextView
-            android:id="@+id/tvTalentRegion"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#888888"
-            android:textSize="13sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvSpotlightCategory"
-            tools:text="Colombo, Western Province" />
-
-        <TextView
-            android:id="@+id/tvPortfolioHeader"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="32dp"
-            android:text="Portfolio Assets"
-            android:textColor="#000000"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvTalentRegion" />
-
-        <HorizontalScrollView
-            android:id="@+id/hsvPortfolio"
-            android:layout_width="match_parent"
-            android:layout_height="160dp"
-            android:layout_marginTop="12dp"
-            android:scrollbars="none"
-            app:layout_constraintTop_toBottomOf="@id/tvPortfolioHeader">
-            <LinearLayout
-                android:id="@+id/llPortfolioImages"
+            <TextView
+                android:id="@+id/tvTalentFullName"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp">
-                <!-- Headshot and Full Body go here first -->
-                <ImageView
-                    android:id="@+id/ivHeadshotPhoto"
-                    android:layout_width="120dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="12dp"
-                    android:background="#EEEEEE"
-                    android:scaleType="centerCrop" />
-                <ImageView
-                    android:id="@+id/ivFullBodyPhoto"
-                    android:layout_width="120dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="12dp"
-                    android:background="#EEEEEE"
-                    android:scaleType="centerCrop" />
-            </LinearLayout>
-        </HorizontalScrollView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cvTalentSpecs"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="24dp"
-            app:cardBackgroundColor="#FFFFFF"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeColor="#F0F0F0"
-            app:strokeWidth="1dp"
-            app:layout_constraintTop_toBottomOf="@id/hsvPortfolio">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Physical Specs &amp; Bio"
-                    android:textColor="#000000"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvPhysicalSpecs"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:textColor="#555555"
-                    android:textSize="13sp"
-                    tools:text="Height: 141 cm | Build: Athletic" />
-
-                <TextView
-                    android:id="@+id/tvTalentAgeGender"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:textColor="#555555"
-                    android:textSize="13sp"
-                    tools:text="28 Yrs Old | Female" />
-
-                <TextView
-                    android:id="@+id/tvTalentStatusLanguages"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:textColor="#555555"
-                    android:textSize="13sp"
-                    tools:text="Languages: Sinhala, Mandarin, Spanish, English" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="12dp"
-                    android:background="#F0F0F0" />
-
-                <TextView
-                    android:id="@+id/tvTalentBio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="#666666"
-                    android:textSize="13sp"
-                    android:lineSpacingExtra="3dp"
-                    tools:text="Biography summary goes here..." />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cvMediaLinks"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="#FFFFFF"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeColor="#F0F0F0"
-            app:strokeWidth="1dp"
-            app:layout_constraintTop_toBottomOf="@id/cvTalentSpecs">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Media &amp; Professional Links"
-                    android:textColor="#000000"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvShowreelLink"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:textColor="#B0006D"
-                    android:textSize="13sp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    tools:text="Showreel: https://youtu.be/..." />
-
-                <TextView
-                    android:id="@+id/tvSocialLinks"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textColor="#555555"
-                    android:textSize="13sp"
-                    tools:text="Social: Facebook: ..." />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="32dp"
-            android:orientation="vertical"
-            app:layout_constraintTop_toBottomOf="@id/cvMediaLinks">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnTalentEditProfile"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:text="Edit Portfolio Details"
-                android:textAllCaps="false"
-                android:textSize="16sp"
-                app:cornerRadius="12dp"
-                app:backgroundTint="#B0006D" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnTalentLogout"
-                style="@style/Widget.Material3.Button.TextButton"
-                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="Sign Out Account"
-                android:textColor="#666666" />
+                android:textColor="#B0006D"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ivTalentAvatar"
+                tools:text="Shanudri Priyasad" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnDeleteAccount"
-                style="@style/Widget.Material3.Button.TextButton"
+            <TextView
+                android:id="@+id/tvStageName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#666666"
+                android:textSize="14sp"
+                android:textStyle="italic"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvTalentFullName"
+                tools:text="'Shanu'" />
+
+            <TextView
+                android:id="@+id/tvSpotlightCategory"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:textColor="#B0006D"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvStageName"
+                tools:text="Actor" />
+
+            <TextView
+                android:id="@+id/tvTalentRegion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#888888"
+                android:textSize="13sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvSpotlightCategory"
+                tools:text="Colombo, Western Province" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cvAvailabilityStatus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Permanently Delete Account"
-                android:textColor="#FF4444" />
-        </LinearLayout>
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:strokeColor="#B0006D"
+                app:strokeWidth="1dp"
+                app:layout_constraintTop_toBottomOf="@id/tvTalentRegion">
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.core.widget.NestedScrollView>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingStart="8dp"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Availability Status"
+                            android:textSize="14sp"
+                            android:textColor="#333333"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/tvAvailabilityBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🟢 Available Now"
+                            android:textSize="12sp"
+                            android:textColor="#555555" />
+                    </LinearLayout>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchAvailability"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:scaleX="0.9"
+                        android:scaleY="0.9" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:id="@+id/tvPortfolioHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="32dp"
+                android:text="Portfolio Assets"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cvAvailabilityStatus" />
+
+            <HorizontalScrollView
+                android:id="@+id/hsvPortfolio"
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:layout_marginTop="12dp"
+                android:scrollbars="none"
+                app:layout_constraintTop_toBottomOf="@id/tvPortfolioHeader">
+                <LinearLayout
+                    android:id="@+id/llPortfolioImages"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp">
+                    <ImageView
+                        android:id="@+id/ivHeadshotPhoto"
+                        android:layout_width="120dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="12dp"
+                        android:background="#EEEEEE"
+                        android:scaleType="centerCrop" />
+                    <ImageView
+                        android:id="@+id/ivFullBodyPhoto"
+                        android:layout_width="120dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="12dp"
+                        android:background="#EEEEEE"
+                        android:scaleType="centerCrop" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cvTalentSpecs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="24dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeColor="#F0F0F0"
+                app:strokeWidth="1dp"
+                app:layout_constraintTop_toBottomOf="@id/hsvPortfolio">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Appearance &amp; Bio"
+                        android:textColor="#000000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:id="@+id/tvTalentAgeGender"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="#B0006D"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            tools:text="28 Yrs | Female" />
+                        <TextView
+                            android:id="@+id/tvPhysicalSpecs"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="#555555"
+                            android:textSize="13sp"
+                            android:gravity="end"
+                            tools:text="141 cm | Athletic" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvHairEyeColor"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="#888888"
+                        android:textSize="12sp"
+                        tools:text="Hair: Black | Eyes: Brown" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="12dp"
+                        android:background="#F0F0F0" />
+
+                    <TextView
+                        android:id="@+id/tvTalentBio"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#666666"
+                        android:textSize="13sp"
+                        android:lineSpacingExtra="3dp"
+                        tools:text="Biography summary goes here..." />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cvProfessionalHighlights"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeColor="#F0F0F0"
+                app:strokeWidth="1dp"
+                app:layout_constraintTop_toBottomOf="@id/cvTalentSpecs">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Professional Background"
+                        android:textColor="#000000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvExperienceLevel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="Experience: Professional"
+                        android:textColor="#333333"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvQualification"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Qualification: Bachelor's Degree"
+                        android:textColor="#555555"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/tvTalentLanguages"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textColor="#B0006D"
+                        android:textSize="13sp"
+                        tools:text="Languages: Sinhala, English" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cvSkillsAccents"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeColor="#F0F0F0"
+                app:strokeWidth="1dp"
+                app:layout_constraintTop_toBottomOf="@id/cvProfessionalHighlights">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Skills &amp; Accents"
+                            android:textColor="#000000"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:layout_centerVertical="true"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnEditSkills"
+                            style="@style/Widget.Material3.Button.IconButton"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_alignParentEnd="true"
+                            app:icon="@android:drawable/ic_menu_edit"
+                            app:iconSize="18dp"
+                            app:iconTint="#B0006D" />
+                    </RelativeLayout>
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/cgSkillsAccents"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        app:chipSpacingHorizontal="8dp"
+                        app:chipSpacingVertical="4dp">
+                    </com.google.android.material.chip.ChipGroup>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cvMediaLinks"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeColor="#F0F0F0"
+                app:strokeWidth="1dp"
+                app:layout_constraintTop_toBottomOf="@id/cvSkillsAccents">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Media &amp; Professional Links"
+                        android:textColor="#000000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvShowreelLink"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:textColor="#B0006D"
+                        android:textSize="13sp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        tools:text="Showreel: https://youtu.be/..." />
+
+                    <TextView
+                        android:id="@+id/tvSocialLinks"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textColor="#555555"
+                        android:textSize="13sp"
+                        tools:text="Social: Facebook: ..." />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cvProfessionalCredits"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeColor="#F0F0F0"
+                app:strokeWidth="1dp"
+                app:layout_constraintTop_toBottomOf="@id/cvMediaLinks">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Best Works &amp; Credits"
+                        android:textColor="#000000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnProfileAddWork"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginTop="-36dp"
+                        android:text="+ Add New"
+                        android:textColor="#B0006D"
+                        android:textSize="13sp" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvProfessionalCredits"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:nestedScrollingEnabled="false"
+                        tools:listitem="@layout/item_portfolio_work_small" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/settingsDrawer"
+        android:layout_width="280dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:background="@color/white"
+        app:headerLayout="@layout/nav_header_profile"
+        app:menu="@menu/menu_profile_settings"
+        app:itemIconTint="@color/primary_magenta"
+        app:itemTextColor="#333333" />
+
+</androidx.drawerlayout.widget.DrawerLayout>
