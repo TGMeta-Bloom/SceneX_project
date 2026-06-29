@@ -59,9 +59,11 @@ class AvailabilityRepository {
                 .get().await()
         }
 
-        // 🎯 FIX: Fetch all to allow casing-resilient filtering in the ViewModel
+        // 🎯 OPTIMIZED: Query only relevant casting calls to prevent performance lag
         val castingCalls = async {
-            db.collection("CastingCalls").get().await()
+            db.collection("CastingCalls")
+                .whereEqualTo("recruiterId", userId)
+                .get().await()
         }
 
         val allBookings = asTalentB.await().documents + asRecruiterB.await().documents
